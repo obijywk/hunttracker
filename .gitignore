@@ -1,0 +1,7 @@
+/app.yaml
+/config.env
+/dist
+.gcloudignore
+/node_modules
+.vagrant
+/Vagrantfile

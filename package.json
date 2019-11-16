@@ -1,0 +1,32 @@
+{
+  "name": "hunttracker",
+  "version": "0.1.0",
+  "description": "Puzzle hunt status tracking Slack bot.",
+  "main": "server.ts",
+  "scripts": {
+    "start": "npm run serve",
+    "build": "npm run lint && npm run build-ts",
+    "serve": "node dist/server.js",
+    "build-ts": "tsc",
+    "lint": "eslint \"src/**/*.ts\" --quiet --fix"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@slack/bolt": "^1.4.1",
+    "@slack/web-api": "^5.5.0",
+    "@types/hbs": "^4.0.1",
+    "googleapis": "^45.0.0",
+    "hbs": "^4.0.6",
+    "moment": "^2.24.0",
+    "pg": "^7.12.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^7.11.2",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0",
+    "eslint": "^6.6.0",
+    "ts-node": "^8.5.0",
+    "typescript": "^3.7.2"
+  }
+}
