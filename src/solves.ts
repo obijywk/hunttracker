@@ -42,6 +42,14 @@ export function getIdleDuration(solve: Solve): moment.Duration {
   return moment.duration(moment().diff(latestTimestamp));
 }
 
+export function buildIdleStatus(solve: Solve): string {
+  const idleDuration = getIdleDuration(solve);
+  if (idleDuration.asMinutes() >= Number(process.env.MINIMUM_IDLE_MINUTES)) {
+    return `   :stopwatch: _idle for ${idleDuration.humanize()}_`;
+  }
+  return "";
+}
+
 function normalizeStringForChannelName(s: string): string {
   return s.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 }
@@ -59,11 +67,9 @@ function buildChannelName(puzzleName: string, instanceName?: string): string {
 }
 
 function buildStatusMessageBlocks(solve: Solve): any {
-  const idleDuration = getIdleDuration(solve);
-  let idleStatus = "";
+  const idleStatus = buildIdleStatus(solve);
   let manualPokeAccessory = undefined;
-  if (idleDuration.asMinutes() >= 1) {
-    idleStatus = `   :stopwatch: _idle for ${idleDuration.humanize()}_`;
+  if (idleStatus) {
     manualPokeAccessory = {
       "type": "button",
       "text": {

@@ -3,33 +3,116 @@ import * as puzzles from "./puzzles";
 import { getViewStateValues } from "./slack_util";
 import * as solves from "./solves";
 
-export async function publish(userId: string) {
-  await app.client.views.publish({
-    token: process.env.SLACK_BOT_TOKEN,
-    "user_id": userId,
-    view: {
-      type: "home" as any,
-      title: {
-        type: "plain_text",
-        text: "Home",
-      },
-      blocks: [
-        {
-          type: "actions",
-          elements: [
-            {
-              type: "button",
-              text: {
-                type: "plain_text",
-                text: ":new: Register Puzzle"
-              },
-              "action_id": "home_register_puzzle",
-            },
-          ],
-        },
-      ]
+const maxUsersToList = 5;
+const maxSolvesToList = 30;
+
+function buildSolveBlocks(solve: solves.Solve, userId: string) {
+  let text = "";
+  if (!solve.archived) {
+    text += ":memo:";
+  } else {
+    text += ":notebook:";
+  }
+  text += ` *${solve.puzzle.name}*${solves.buildIdleStatus(solve)}`;
+  if (solve.channelTopic) {
+    text += `\n:mag_right: ${solve.channelTopic}`;
+  }
+  if (solve.users && solve.users.length > 0) {
+    let users = solve.users.slice(0, maxUsersToList).map(u => u.name).join(", ");
+    if (solve.users.length > maxUsersToList) {
+      users += " \u{2026}";
     }
+    text += `\n:man-woman-girl-boy: (${solve.users.length}) ${users}`;
+  }
+
+  return [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text,
+      },
+      accessory: {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: "Open Channel",
+        },
+        "action_id": "home_open_channel",
+        url: `${process.env.SLACK_URL_PREFIX}${solve.id}`,
+      },
+    },
+  ];
+}
+
+app.action("home_open_channel", async ({ ack }) => {
+  ack();
+});
+
+async function buildHomeBlocks(userId: string) {
+  const allSolves = await solves.list();
+  allSolves.sort((a, b) => {
+    const joinedA = a.users.map(u => u.id).indexOf(userId) !== -1;
+    const joinedB = b.users.map(u => u.id).indexOf(userId) !== -1;
+    if (joinedA && !joinedB) {
+      return -1;
+    } else if (!joinedA && joinedB) {
+      return 1;
+    }
+    return solves.getIdleDuration(b).subtract(solves.getIdleDuration(a)).asMilliseconds();
   });
+  const blocks: Array<any> = [{
+    type: "actions",
+    elements: [
+      {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: ":sparkles: Register Puzzle"
+        },
+        "action_id": "home_register_puzzle",
+      },
+    ],
+  }];
+  for (const solve of allSolves.slice(0, maxSolvesToList)) {
+    blocks.push({
+      type: "divider"
+    });
+    blocks.push(...buildSolveBlocks(solve, userId));
+  }
+  blocks.push({
+    type: "divider"
+  });
+  if (allSolves.length > maxSolvesToList) {
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "There are too many puzzles to show here! Visit TODO add link to see more."
+      },
+    });
+  }
+  return blocks;
+}
+
+export async function publish(userId: string) {
+  try {
+    await app.client.views.publish({
+      token: process.env.SLACK_BOT_TOKEN,
+      "user_id": userId,
+      view: {
+        type: "home" as any,
+        title: {
+          type: "plain_text",
+          text: "Home",
+        },
+        blocks: await buildHomeBlocks(userId),
+      }
+    });
+  } catch (e) {
+    console.log(e.data.response_metadata.messages);
+    throw e;
+  }
 }
 
 app.action("home_register_puzzle", async ({ ack, body }) => {
