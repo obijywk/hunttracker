@@ -13,7 +13,8 @@ function buildSolveBlocks(solve: solves.Solve, userId: string) {
   } else {
     text += ":notebook:";
   }
-  text += ` *${solve.puzzle.name}*${solves.buildIdleStatus(solve)}`;
+  text += ` <${process.env.SLACK_URL_PREFIX}${solve.id}|${solve.puzzle.name}>`;
+  text += solves.buildIdleStatus(solve);
   if (solve.channelTopic) {
     text += `\n:mag_right: ${solve.channelTopic}`;
   }
@@ -32,22 +33,9 @@ function buildSolveBlocks(solve: solves.Solve, userId: string) {
         type: "mrkdwn",
         text,
       },
-      accessory: {
-        type: "button",
-        text: {
-          type: "plain_text",
-          text: "Open Channel",
-        },
-        "action_id": "home_open_channel",
-        url: `${process.env.SLACK_URL_PREFIX}${solve.id}`,
-      },
     },
   ];
 }
-
-app.action("home_open_channel", async ({ ack }) => {
-  ack();
-});
 
 async function buildHomeBlocks(userId: string) {
   const allSolves = await solves.list();
