@@ -148,12 +148,11 @@ function buildStatusMessageBlocks(solve: Solve): any {
     };
   }
 
-  let text = `*${solve.puzzle.name}*`;
+  let text = `:link: <${solve.puzzle.url}|${solve.puzzle.name}>`;
   if (idleStatus) {
     text += `\n${idleStatus}`;
   }
-  text += `\n:thinking_face: <${solve.puzzle.url}|Open puzzle>`;
-  text += `   :nerd_face: <${solve.sheetUrl}|Open spreadsheet>`;
+  text += `\n:bar_chart: <${solve.sheetUrl}|Open spreadsheet>`;
   if (!solve.channelTopic) {
     text += "\nHey! Consider *adding a channel topic* describing this puzzle for the benfit of your teammates.";
   }
