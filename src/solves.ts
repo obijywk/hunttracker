@@ -177,7 +177,7 @@ async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | nu
 async function refreshUsers(id: string, client: PoolClient) {
   const dbUsersResultPromise = client.query(
     "SELECT user_id FROM solve_user WHERE solve_id = $1", [id]);
-  
+
   const channelUsers: Set<string> = new Set();
   let cursor = undefined;
   do {
@@ -341,9 +341,9 @@ taskQueue.registerHandler("create_solve", async (client, payload) => {
       throw e;
     }
   }
-  
+
   const sheetUrl = await sheetUrlPromise;
-  
+
   const now = moment();
   const solve: Solve = {
     id,
@@ -421,7 +421,7 @@ taskQueue.registerHandler("refresh_solve", async (client, payload) => {
     dirty = true;
     solve.sheetModifiedTimestamp = sheetModifiedTimestamp;
   }
-  
+
   const updateStatusMessagePromise = updateStatusMessage(solve);
 
   if (dirty) {

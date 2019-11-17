@@ -34,11 +34,11 @@ export async function refreshAll() {
     members.push(...userListResult.members);
     cursor = userListResult.response_metadata.next_cursor;
   } while (cursor);
-  
+
   const client = await db.connect();
   try {
     await client.query("BEGIN");
-    
+
     const dbUsers = await client.query("SELECT id, name FROM users") as QueryResult<User>;
     const idToDbUser: { [key: string]: User } = {};
     for (const dbUser of dbUsers.rows) {
@@ -66,7 +66,7 @@ export async function refreshAll() {
         }
       }
     }
-    
+
     await client.query("COMMIT");
   } catch (e) {
     console.error("Failed to sync users", e);
