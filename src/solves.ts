@@ -234,15 +234,6 @@ export async function create(puzzleId: number, instanceName?: string) {
   });
 }
 
-export async function refreshAll() {
-  const result = await db.query("SELECT id FROM solves WHERE archived = FALSE");
-  for (const row of result.rows) {
-    await taskQueue.scheduleTask("refresh_solve", {
-      id: row.id
-    });
-  }
-}
-
 async function readFromDatabase(id?: string, client?: PoolClient): Promise<Array<Solve>> {
   let query = `
     SELECT
@@ -304,6 +295,30 @@ export async function get(id: string, client?: PoolClient): Promise<Solve> {
 
 export async function list(): Promise<Array<Solve>> {
   return await readFromDatabase();
+}
+
+export async function refreshAll() {
+  const result = await db.query("SELECT id FROM solves WHERE archived = FALSE");
+  for (const row of result.rows) {
+    await taskQueue.scheduleTask("refresh_solve", {
+      id: row.id
+    });
+  }
+}
+
+export async function refreshStale() {
+  const solves = await list();
+  for (const solve of solves) {
+    if (solve.archived) {
+      continue;
+    }
+    if (getIdleDuration(solve).asMinutes() < Number(process.env.MINIMUM_IDLE_MINUTES)) {
+      continue;
+    }
+    await taskQueue.scheduleTask("refresh_solve", {
+      id: solve.id
+    });
+  }
 }
 
 async function findChannelIdForChannelName(channelName: string): Promise<string | null> {

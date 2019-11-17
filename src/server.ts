@@ -1,6 +1,7 @@
 import { app } from "./app";
 import * as taskQueue from "./task_queue";
 
+require("./refresh_polling");
 require("./web");
 
 (async () => {
