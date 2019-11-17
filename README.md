@@ -36,9 +36,9 @@ Everything is configured using environment variables, and they need to be set fo
 - **MINIMUM_IDLE_MINUTES**: The number of minutes of inactivity on a solve for it to be
   considered idle.
 
-## Required Slack OAuth scopes
+## Required Slack configuration
 
-These need to be configured for the Slack app on the "OAuth & Permissions" page in the "Your Apps"
+The following scopes to be added to the Slack app on the "OAuth & Permissions" page in the "Your Apps"
 section of https://api.slack.com/.
 
 - bot
@@ -49,6 +49,11 @@ section of https://api.slack.com/.
 - chat:write:user
 - pins:write
 - users:read
+
+The following workspace events need to be added on the "Event Subscriptions" page in the "Your Apps"
+section of https://api.slack.com/.
+
+- message.channels
 
 ## Setup and run locally
 

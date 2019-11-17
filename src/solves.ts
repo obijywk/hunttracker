@@ -1,6 +1,6 @@
 import moment = require("moment");
 import { PoolClient } from "pg";
-import { ButtonAction } from "@slack/bolt";
+import { ButtonAction, MessageEvent } from "@slack/bolt";
 import { ErrorCode } from "@slack/web-api";
 
 import { app } from "./app";
@@ -401,6 +401,7 @@ taskQueue.registerHandler("refresh_solve", async (client, payload) => {
   }) as Promise<ChannelsInfoResult>;
 
   const solve = await get(id, client);
+
   const sheetModifiedTimestamp = await googleDrive.getSheetModifiedTimestamp(solve.sheetUrl);
   const latestMessageTimestamp = await latestMessageTimestampPromise;
   const channelInfoResult = await channelInfoResultPromise;
@@ -442,4 +443,19 @@ taskQueue.registerHandler("refresh_solve", async (client, payload) => {
 
   await updateStatusMessagePromise;
   await refreshUsersPromise;
+});
+
+const refreshSolveSubtypes = new Set([
+  "channel_join",
+  "channel_leave",
+  "channel_topic",
+]);
+
+app.event("message", async ({ event }) => {
+  const messageEvent = event as unknown as MessageEvent;
+  if (refreshSolveSubtypes.has(messageEvent.subtype)) {
+    await taskQueue.scheduleTask("refresh_solve", {
+      id: messageEvent.channel,
+    });
+  }
 });
