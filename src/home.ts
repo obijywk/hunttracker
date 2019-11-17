@@ -7,16 +7,10 @@ const maxUsersToList = 5;
 const maxSolvesToList = 30;
 
 function buildSolveBlocks(solve: solves.Solve, userId: string) {
-  let text = "";
-  if (!solve.archived) {
-    text += ":memo:";
-  } else {
-    text += ":notebook:";
-  }
-  text += ` <${process.env.SLACK_URL_PREFIX}${solve.id}|${solve.puzzle.name}>`;
+  let text = `:left_speech_bubble: <${process.env.SLACK_URL_PREFIX}${solve.id}|${solve.puzzle.name}>`;
   const idleStatus = solves.buildIdleStatus(solve);
   if (idleStatus) {
-    text += "   " + solves.buildIdleStatus(solve);
+    text += "   " + idleStatus;
   }
   if (solve.channelTopic) {
     text += `\n:mag_right: ${solve.channelTopic}`;

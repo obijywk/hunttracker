@@ -27,7 +27,6 @@ export interface Solve {
   channelTopic: string;
   users: Array<users.User>;
   sheetUrl: string;
-  archived: boolean;
   chatModifiedTimestamp: moment.Moment;
   sheetModifiedTimestamp: moment.Moment;
   manualPokeTimestamp: moment.Moment;
@@ -73,7 +72,6 @@ async function readFromDatabase(id?: string, client?: PoolClient): Promise<Array
         JOIN solve_user ON solve_user.user_id = users.id
         WHERE solve_user.solve_id = solves.id
       ) users,
-      archived,
       chat_modified_timestamp,
       sheet_modified_timestamp,
       manual_poke_timestamp,
@@ -95,7 +93,6 @@ async function readFromDatabase(id?: string, client?: PoolClient): Promise<Array
       channelTopic: row.channel_topic,
       users: row.users,
       sheetUrl: row.sheet_url,
-      archived: row.archived,
       chatModifiedTimestamp: moment(row.chat_modified_timestamp),
       sheetModifiedTimestamp: moment(row.sheet_modified_timestamp),
       manualPokeTimestamp: moment(row.manual_poke_timestamp),
@@ -333,6 +330,16 @@ app.view("solve_record_confirmed_answer_view", async ({ack, view, body}) => {
   }
 });
 
+app.action("solve_archive_channel", async ({ack, payload}) => {
+  ack();
+  const buttonAction = payload as ButtonAction;
+  const id = buttonAction.value;
+  await app.client.channels.archive({
+    token: process.env.SLACK_USER_TOKEN,
+    channel: id,
+  });
+});
+
 async function updateStatusMessage(solve: Solve) {
   const postStatusMessageResult = await app.client.chat.update({
     token: process.env.SLACK_BOT_TOKEN,
@@ -439,7 +446,7 @@ export async function create(puzzleId: number, instanceName?: string) {
 }
 
 export async function refreshAll() {
-  const result = await db.query("SELECT id FROM solves WHERE archived = FALSE");
+  const result = await db.query("SELECT id FROM solves");
   for (const row of result.rows) {
     await taskQueue.scheduleTask("refresh_solve", {
       id: row.id
@@ -450,7 +457,7 @@ export async function refreshAll() {
 export async function refreshStale() {
   const solves = await list();
   for (const solve of solves) {
-    if (solve.archived) {
+    if (solve.puzzle.solved) {
       continue;
     }
     if (getIdleDuration(solve).asMinutes() < Number(process.env.MINIMUM_IDLE_MINUTES)) {
@@ -517,7 +524,6 @@ taskQueue.registerHandler("create_solve", async (client, payload) => {
     channelTopic: "",
     users: [],
     sheetUrl,
-    archived: false,
     chatModifiedTimestamp: now,
     sheetModifiedTimestamp: now,
     manualPokeTimestamp: now

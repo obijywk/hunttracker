@@ -27,7 +27,6 @@ CREATE TABLE solves (
   channel_name text,
   channel_topic text,
   sheet_url text,
-  archived boolean DEFAULT FALSE,
   chat_modified_timestamp timestamp,
   sheet_modified_timestamp timestamp,
   manual_poke_timestamp timestamp,
