@@ -103,6 +103,10 @@ export async function publish(userId: string) {
   }
 }
 
+app.event("app_home_opened", async ({ event }) => {
+  await publish(event.user);
+});
+
 app.action("home_register_puzzle", async ({ ack, body }) => {
   ack();
   await app.client.views.open({

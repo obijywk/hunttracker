@@ -53,6 +53,7 @@ section of https://api.slack.com/.
 The following workspace events need to be added on the "Event Subscriptions" page in the "Your Apps"
 section of https://api.slack.com/.
 
+- app_home_opened
 - message.channels
 
 ## Setup and run locally
