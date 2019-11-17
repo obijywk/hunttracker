@@ -80,13 +80,18 @@ function buildStatusMessageBlocks(solve: Solve): any {
       "value": solve.id,
     };
   }
+  let text = `*${solve.puzzle.name}*${idleStatus}`;
+  text += `\n:thinking_face: <${solve.puzzle.url}|Open puzzle>`;
+  text += `   :nerd_face: <${solve.sheetUrl}|Open spreadsheet>`;
+  if (!solve.channelTopic) {
+    text += "\nHey! Consider *adding a channel topic* describing this puzzle for the benfit of your teammates.";
+  }
   return [
     {
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": `*${solve.puzzle.name}*${idleStatus}
-:thinking_face: <${solve.puzzle.url}|Open puzzle>   :nerd_face: <${solve.sheetUrl}|Open spreadsheet>`,
+        text,
       },
       "accessory": manualPokeAccessory,
     },
