@@ -15,6 +15,7 @@ import {
   ConversationsListResult,
   ConversationsMembersResult
 } from "./slack_results";
+import { getViewStateValues } from "./slack_util";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
 
@@ -34,6 +35,9 @@ export interface Solve {
 }
 
 export function getIdleDuration(solve: Solve): moment.Duration {
+  if (solve.puzzle.solved) {
+    return moment.duration(0);
+  }
   const latestTimestamp = moment.max(
     solve.chatModifiedTimestamp,
     solve.sheetModifiedTimestamp,
@@ -48,6 +52,69 @@ export function buildIdleStatus(solve: Solve): string {
     return `:stopwatch: _idle for ${idleDuration.humanize()}_`;
   }
   return "";
+}
+
+async function readFromDatabase(id?: string, client?: PoolClient): Promise<Array<Solve>> {
+  let query = `
+    SELECT
+      id,
+      (
+        SELECT row_to_json(puzzles)
+        FROM puzzles
+        WHERE puzzles.id = solves.puzzle_id
+      ) puzzle,
+      instance_name,
+      channel_name,
+      channel_topic,
+      sheet_url,
+      (
+        SELECT json_agg(row_to_json(users))
+        FROM users
+        JOIN solve_user ON solve_user.user_id = users.id
+        WHERE solve_user.solve_id = solves.id
+      ) users,
+      archived,
+      chat_modified_timestamp,
+      sheet_modified_timestamp,
+      manual_poke_timestamp,
+      status_message_ts
+    FROM solves`;
+  const params = [];
+  if (id) {
+    query += "\nWHERE id = $1";
+    params.push(id);
+  }
+  const result = await db.query(query, params, client);
+  const solves: Array<Solve> = [];
+  for (const row of result.rows) {
+    solves.push({
+      id: row.id,
+      puzzle: row.puzzle,
+      instanceName: row.instance_name,
+      channelName: row.channel_name,
+      channelTopic: row.channel_topic,
+      users: row.users,
+      sheetUrl: row.sheet_url,
+      archived: row.archived,
+      chatModifiedTimestamp: moment(row.chat_modified_timestamp),
+      sheetModifiedTimestamp: moment(row.sheet_modified_timestamp),
+      manualPokeTimestamp: moment(row.manual_poke_timestamp),
+      statusMessageTs: row.status_message_ts,
+    });
+  }
+  return solves;
+}
+
+export async function get(id: string, client?: PoolClient): Promise<Solve> {
+  const solves = await readFromDatabase(id, client);
+  if (solves.length !== 1) {
+    throw `Unexpected number of solves for get: ${solves.length}`;
+  }
+  return solves[0];
+}
+
+export async function list(): Promise<Array<Solve>> {
+  return await readFromDatabase();
 }
 
 function normalizeStringForChannelName(s: string): string {
@@ -80,6 +147,7 @@ function buildStatusMessageBlocks(solve: Solve): any {
       "value": solve.id,
     };
   }
+
   let text = `*${solve.puzzle.name}*`;
   if (idleStatus) {
     text += `\n${idleStatus}`;
@@ -89,6 +157,41 @@ function buildStatusMessageBlocks(solve: Solve): any {
   if (!solve.channelTopic) {
     text += "\nHey! Consider *adding a channel topic* describing this puzzle for the benfit of your teammates.";
   }
+
+  const actionButtons = [];
+  if (!solve.puzzle.answer) {
+    actionButtons.push({
+      "type": "button",
+      "text": {
+        "type": "plain_text",
+        "text": ":pencil: Record Confirmed Answer"
+      },
+      "action_id": "solve_record_confirmed_answer",
+      "value": solve.id,
+    });
+  } else {
+    actionButtons.push({
+      "type": "button",
+      "text": {
+        "type": "plain_text",
+        "text": `:pencil: Answer: ${solve.puzzle.answer}`,
+      },
+      "action_id": "solve_record_confirmed_answer",
+      "value": solve.id,
+    });
+  }
+  if (solve.puzzle.solved) {
+    actionButtons.push({
+      "type": "button",
+      "text": {
+        "type": "plain_text",
+        "text": ":file_cabinet: Archive Channel",
+      },
+      "action_id": "solve_archive_channel",
+      "value": solve.id,
+    });
+  }
+
   return [
     {
       "type": "section",
@@ -100,18 +203,7 @@ function buildStatusMessageBlocks(solve: Solve): any {
     },
     {
       "type": "actions",
-      "elements": [
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"text": ":pencil: Record Confirmed Answer"
-					},
-          "style": "danger",
-          "action_id": "solve_record_confirmed_answer",
-          "value": solve.id,
-        },
-      ],
+      "elements": actionButtons,
     },
   ];
 }
@@ -127,6 +219,119 @@ app.action("solve_manual_poke", async ({ack, payload}) => {
     WHERE id = $1`,
     [id]);
   await taskQueue.scheduleTask("refresh_solve", {id});
+});
+
+app.action("solve_record_confirmed_answer", async ({ ack, body, payload }) => {
+  ack();
+  const id = (payload as ButtonAction).value;
+  const solve = await get(id);
+
+  await app.client.views.open({
+    token: process.env.SLACK_BOT_TOKEN,
+    "trigger_id": (body as any).trigger_id,
+    view: {
+      type: "modal",
+      "callback_id": "solve_record_confirmed_answer_view",
+      "private_metadata": JSON.stringify({puzzleId: solve.puzzle.id}),
+      title: {
+        type: "plain_text",
+        text: "Record Confirmed Answer"
+      },
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `Enter the *HQ-confirmed* answer for the puzzle *${solve.puzzle.name}* below.` +
+              " Prefer to use only capital letters and spaces, unless there's a good reason not to.",
+          },
+        },
+        {
+          type: "input",
+          "block_id": "puzzle_answer_input",
+          optional: true,
+          label: {
+            type: "plain_text",
+            text: "Puzzle answer",
+          },
+          element: {
+            type: "plain_text_input",
+            placeholder: {
+              type: "plain_text",
+              text: "Enter answer here",
+            },
+            "initial_value": solve.puzzle.answer || "",
+          }
+        },
+        {
+          type: "input",
+          "block_id": "puzzle_solved_input",
+          label: {
+            type: "plain_text",
+            text: "Is it solved?",
+          },
+          element: {
+            type: "static_select",
+            "initial_option": {
+              text: {
+                type: "plain_text",
+                text: "Mark puzzle solved",
+              },
+              value: "true",
+            },
+            options: [
+              {
+                text: {
+                  type: "plain_text",
+                  text: "Mark puzzle solved",
+                },
+                value: "true",
+              },
+              {
+                text: {
+                  type: "plain_text",
+                  text: "Keep puzzle unsolved (this is unusual)",
+                },
+                value: "false",
+              },
+            ],
+          },
+        }
+      ],
+      submit: {
+        type: "plain_text",
+        text: "Submit",
+      },
+    }
+  });
+});
+
+app.view("solve_record_confirmed_answer_view", async ({ack, view, body}) => {
+  ack();
+
+  const puzzleId = JSON.parse(body.view.private_metadata)["puzzleId"] as number;
+  const values = getViewStateValues(view);
+  const answer: string = values["puzzle_answer_input"];
+  const solved: boolean = values["puzzle_solved_input"] === "true";
+
+  await puzzles.update(puzzleId, answer, solved);
+
+  const solveIdResults = await db.query(
+    "SELECT id FROM solves WHERE puzzle_id = $1", [puzzleId]);
+  for (const row of solveIdResults.rows) {
+    await taskQueue.scheduleTask("refresh_solve", {
+      id: row.id,
+    });
+  }
+
+  if (solved && process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
+    const puzzle = await puzzles.get(puzzleId);
+    await app.client.chat.postMessage({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
+      text: `<${puzzle.url}|${puzzle.name}> was solved with answer *${puzzle.answer}*.`,
+    });
+  }
 });
 
 async function updateStatusMessage(solve: Solve) {
@@ -232,69 +437,6 @@ export async function create(puzzleId: number, instanceName?: string) {
     puzzleId,
     instanceName
   });
-}
-
-async function readFromDatabase(id?: string, client?: PoolClient): Promise<Array<Solve>> {
-  let query = `
-    SELECT
-      id,
-      (
-        SELECT row_to_json(puzzles)
-        FROM puzzles
-        WHERE puzzles.id = solves.puzzle_id
-      ) puzzle,
-      instance_name,
-      channel_name,
-      channel_topic,
-      sheet_url,
-      (
-        SELECT json_agg(row_to_json(users))
-        FROM users
-        JOIN solve_user ON solve_user.user_id = users.id
-        WHERE solve_user.solve_id = solves.id
-      ) users,
-      archived,
-      chat_modified_timestamp,
-      sheet_modified_timestamp,
-      manual_poke_timestamp,
-      status_message_ts
-    FROM solves`;
-  const params = [];
-  if (id) {
-    query += "\nWHERE id = $1";
-    params.push(id);
-  }
-  const result = await db.query(query, params, client);
-  const solves: Array<Solve> = [];
-  for (const row of result.rows) {
-    solves.push({
-      id: row.id,
-      puzzle: row.puzzle,
-      instanceName: row.instance_name,
-      channelName: row.channel_name,
-      channelTopic: row.channel_topic,
-      users: row.users,
-      sheetUrl: row.sheet_url,
-      archived: row.archived,
-      chatModifiedTimestamp: moment(row.chat_modified_timestamp),
-      sheetModifiedTimestamp: moment(row.sheet_modified_timestamp),
-      manualPokeTimestamp: moment(row.manual_poke_timestamp),
-      statusMessageTs: row.status_message_ts,
-    });
-  }
-  return solves;
-}
-
-export async function get(id: string, client?: PoolClient): Promise<Solve> {
-  const solves = await readFromDatabase(id, client);
-  if (solves.length !== 1) {
-    throw `Unexpected number of solves for get: ${solves.length}`;
-  }
-  return solves[0];
-}
-
-export async function list(): Promise<Array<Solve>> {
-  return await readFromDatabase();
 }
 
 export async function refreshAll() {

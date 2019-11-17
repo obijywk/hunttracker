@@ -16,17 +16,10 @@ export async function create(name: string, url: string): Promise<number> {
   return result.rows[0].id;
 }
 
-export async function setAnswer(id: number, answer: string) {
+export async function update(id: number, answer: string, solved: boolean) {
   await db.query(
-    "UPDATE puzzles SET answer = $2 WHERE id = $1",
-    [id, answer]
-  );
-}
-
-export async function setSolved(id: number, solved: boolean) {
-  await db.query(
-    "UPDATE puzzles SET solved = $2 WHERE id = $1",
-    [id, solved]
+    "UPDATE puzzles SET answer = $2, solved = $3 WHERE id = $1",
+    [id, answer, solved]
   );
 }
 

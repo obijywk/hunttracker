@@ -5,7 +5,14 @@ export function getViewStateValues(view: ViewOutput) {
   const values: any = {};
   for (const inputId of Object.keys(stateValues)) {
     for (const input of Object.values(stateValues[inputId])) {
-      values[inputId] = (input as any).value;
+      switch ((input as any).type) {
+        case "plain_text_input":
+          values[inputId] = (input as any).value;
+          break;
+        case "static_select":
+          values[inputId] = (input as any)["selected_option"].value;
+          break;
+      }
     }
   }
   return values;
