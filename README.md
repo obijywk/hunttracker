@@ -29,6 +29,10 @@ Everything is configured using environment variables, and they need to be set fo
   "https://app.slack.com/client/T0E2CSZ8F/". This is used for building deep links into Slack.
 - **SLACK_ACTIVITY_LOG_CHANNEL_NAME**: A Slack channel name (without the leading #) where
   puzzle creations etc. will be announced.
+- **SLACK_IGNORED_USER_IDS**: A comma-separated list of Slack user IDs to be ignored for the
+  purposes of tracking channel membership. Useful for ignoring the "bot" user (who cannot be
+  detected automatically, because they're not _really_ a bot, because they need to be able to
+  create channels).
 - **HUNT_PREFIX**: A string that will be prepended to all generated puzzle channel names.
 - **PUZZLE_SHEET_TEMPLATE_URL**: A link to a Google Sheet that will be copied to create
   per-puzzle spreadsheets. It should be in a folder editable by the Google Cloud Platform

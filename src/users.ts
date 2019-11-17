@@ -9,8 +9,10 @@ export interface User {
   name: string;
 }
 
+const ignoredUserIds = new Set(process.env.SLACK_IGNORED_USER_IDS.split(","));
+
 function shouldAcceptMember(member: UsersListResultMember): boolean {
-  return !member.deleted && !member.is_bot;
+  return !member.deleted && !member.is_bot && !ignoredUserIds.has(member.id);
 }
 
 function getMemberName(member: UsersListResultMember): string {
