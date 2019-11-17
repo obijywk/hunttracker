@@ -154,7 +154,7 @@ function buildStatusMessageBlocks(solve: Solve): any {
   }
   text += `\n:bar_chart: <${solve.sheetUrl}|Open spreadsheet>`;
   if (!solve.channelTopic) {
-    text += "\nHey! Consider *adding a channel topic* describing this puzzle for the benfit of your teammates.";
+    text += "\nHey! Consider *adding a channel topic* describing this puzzle for the benefit of your teammates.";
   }
 
   const actionButtons = [];
