@@ -14,7 +14,10 @@ function buildSolveBlocks(solve: solves.Solve, userId: string) {
     text += ":notebook:";
   }
   text += ` <${process.env.SLACK_URL_PREFIX}${solve.id}|${solve.puzzle.name}>`;
-  text += solves.buildIdleStatus(solve);
+  const idleStatus = solves.buildIdleStatus(solve);
+  if (idleStatus) {
+    text += "   " + solves.buildIdleStatus(solve);
+  }
   if (solve.channelTopic) {
     text += `\n:mag_right: ${solve.channelTopic}`;
   }

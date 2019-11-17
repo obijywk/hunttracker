@@ -45,7 +45,7 @@ export function getIdleDuration(solve: Solve): moment.Duration {
 export function buildIdleStatus(solve: Solve): string {
   const idleDuration = getIdleDuration(solve);
   if (idleDuration.asMinutes() >= Number(process.env.MINIMUM_IDLE_MINUTES)) {
-    return `   :stopwatch: _idle for ${idleDuration.humanize()}_`;
+    return `:stopwatch: _idle for ${idleDuration.humanize()}_`;
   }
   return "";
 }
@@ -80,7 +80,10 @@ function buildStatusMessageBlocks(solve: Solve): any {
       "value": solve.id,
     };
   }
-  let text = `*${solve.puzzle.name}*${idleStatus}`;
+  let text = `*${solve.puzzle.name}*`;
+  if (idleStatus) {
+    text += `\n${idleStatus}`;
+  }
   text += `\n:thinking_face: <${solve.puzzle.url}|Open puzzle>`;
   text += `   :nerd_face: <${solve.sheetUrl}|Open spreadsheet>`;
   if (!solve.channelTopic) {
