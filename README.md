@@ -39,8 +39,9 @@ Everything is configured using environment variables, and they need to be set fo
   service account, and this folder is where the spreadsheets will be created as well.
 - **MINIMUM_IDLE_MINUTES**: The number of minutes of inactivity on a solve for it to be
   considered idle.
-- **REFRESH_POLLING_MINUTES**: The frequency with which to poll for changes that aren't
-  detected using events (e.g. spreadsheet edits).
+- **REFRESH_POLLING_MINUTES**: The frequency with which to internally poll for changes that
+  aren't detected using events (e.g. spreadsheet edits). Alternatively, you can set up an
+  external process to periodically GET /refresh.
 
 ## Required Slack configuration
 

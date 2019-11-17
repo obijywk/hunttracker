@@ -2,6 +2,7 @@ import { receiver } from "./app";
 import * as db from "./db";
 import * as home from "./home";
 import * as puzzles from "./puzzles";
+import * as refreshPolling from "./refresh_polling";
 import * as solves from "./solves";
 import * as users from "./users";
 
@@ -15,6 +16,11 @@ receiver.app.get("/solves", async (req, res) => {
     solves: await solvesPromise,
     slackUrlPrefix: process.env.SLACK_URL_PREFIX
   });
+});
+
+receiver.app.get("/refresh", async (req, res) => {
+  await refreshPolling.refresh();
+  return res.status(200).send("ok");
 });
 
 receiver.app.post("/resetdatabase", async (req, res) => {

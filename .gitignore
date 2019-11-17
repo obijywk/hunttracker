@@ -1,5 +1,6 @@
 /app.yaml
 /config.env
+/cron.yaml
 /dist
 .gcloudignore
 /node_modules
