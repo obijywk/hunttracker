@@ -35,7 +35,7 @@ function buildSolveBlocks(solve: solves.Solve, userId: string) {
 }
 
 async function buildHomeBlocks(userId: string) {
-  const allSolves = await solves.list();
+  const allSolves = await solves.list({ excludeSolved: true });
   allSolves.sort((a, b) => {
     const joinedA = a.users.map(u => u.id).indexOf(userId) !== -1;
     const joinedB = b.users.map(u => u.id).indexOf(userId) !== -1;
@@ -81,23 +81,18 @@ async function buildHomeBlocks(userId: string) {
 }
 
 export async function publish(userId: string) {
-  try {
-    await app.client.views.publish({
-      token: process.env.SLACK_BOT_TOKEN,
-      "user_id": userId,
-      view: {
-        type: "home" as any,
-        title: {
-          type: "plain_text",
-          text: "Home",
-        },
-        blocks: await buildHomeBlocks(userId),
-      }
-    });
-  } catch (e) {
-    console.log(e.data.response_metadata.messages);
-    throw e;
-  }
+  await app.client.views.publish({
+    token: process.env.SLACK_BOT_TOKEN,
+    "user_id": userId,
+    view: {
+      type: "home" as any,
+      title: {
+        type: "plain_text",
+        text: "Home",
+      },
+      blocks: await buildHomeBlocks(userId),
+    }
+  });
 }
 
 app.event("app_home_opened", async ({ event }) => {

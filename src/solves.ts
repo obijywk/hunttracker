@@ -53,10 +53,16 @@ export function buildIdleStatus(solve: Solve): string {
   return "";
 }
 
-async function readFromDatabase(id?: string, client?: PoolClient): Promise<Array<Solve>> {
+interface ReadFromDatabaseOptions {
+  id?: string;
+  client?: PoolClient;
+  excludeSolved?: boolean;
+}
+
+async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array<Solve>> {
   let query = `
     SELECT
-      id,
+      solves.id id,
       (
         SELECT row_to_json(puzzles)
         FROM puzzles
@@ -77,12 +83,22 @@ async function readFromDatabase(id?: string, client?: PoolClient): Promise<Array
       manual_poke_timestamp,
       status_message_ts
     FROM solves`;
-  const params = [];
-  if (id) {
-    query += "\nWHERE id = $1";
-    params.push(id);
+  if (options.excludeSolved) {
+    query += "\nJOIN puzzles ON puzzles.id = solves.puzzle_id";
   }
-  const result = await db.query(query, params, client);
+  const whereConditions = [];
+  const params = [];
+  if (options.id) {
+    params.push(options.id);
+    whereConditions.push(`solves.id = $${params.length}`);
+  }
+  if (options.excludeSolved) {
+    whereConditions.push("puzzles.solved = FALSE");
+  }
+  if (whereConditions.length > 0) {
+    query += "\nWHERE " + whereConditions.join(" AND ");
+  }
+  const result = await db.query(query, params, options.client);
   const solves: Array<Solve> = [];
   for (const row of result.rows) {
     solves.push({
@@ -103,15 +119,24 @@ async function readFromDatabase(id?: string, client?: PoolClient): Promise<Array
 }
 
 export async function get(id: string, client?: PoolClient): Promise<Solve> {
-  const solves = await readFromDatabase(id, client);
+  const solves = await readFromDatabase({
+    id,
+    client,
+  });
   if (solves.length !== 1) {
     throw `Unexpected number of solves for get: ${solves.length}`;
   }
   return solves[0];
 }
 
-export async function list(): Promise<Array<Solve>> {
-  return await readFromDatabase();
+export interface ListOptions {
+  excludeSolved?: boolean;
+}
+
+export async function list(options: ListOptions = {}): Promise<Array<Solve>> {
+  return await readFromDatabase({
+    excludeSolved: options.excludeSolved,
+  });
 }
 
 function normalizeStringForChannelName(s: string): string {
