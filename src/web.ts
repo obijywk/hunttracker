@@ -29,6 +29,11 @@ receiver.app.post("/resetdatabase", async (req, res) => {
   return res.redirect("/");
 });
 
+receiver.app.post("/refreshusers", async (req, res) => {
+  await users.refreshAll();
+  return res.redirect("/");
+});
+
 receiver.app.post("/createdemosolves", async (req, res) => {
   const puzzleId1 = await puzzles.create(
     "First You Visit Burkina Faso",

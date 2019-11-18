@@ -42,7 +42,7 @@ export interface ConversationsMembersResult extends WebAPICallResult {
   members: Array<string>;
 }
 
-export interface UsersListResultMember {
+export interface UserResult {
   id: string;
   name: string;
   deleted: boolean;
@@ -54,5 +54,5 @@ export interface UsersListResultMember {
 }
 
 export interface UsersListResult extends WebAPICallResult {
-  members: [UsersListResultMember];
+  members: [UserResult];
 }

@@ -1,8 +1,9 @@
-import { PoolClient, QueryResult } from "pg";
+import { QueryResult } from "pg";
+import { UserChangeEvent } from "@slack/bolt";
 
 import { app } from "./app";
 import * as db from "./db";
-import { UsersListResult, UsersListResultMember } from "./slack_results";
+import { UsersListResult, UserResult } from "./slack_results";
 
 export interface User {
   id: string;
@@ -11,11 +12,11 @@ export interface User {
 
 const ignoredUserIds = new Set(process.env.SLACK_IGNORED_USER_IDS.split(","));
 
-function shouldAcceptMember(member: UsersListResultMember): boolean {
+function shouldAcceptMember(member: UserResult): boolean {
   return !member.deleted && !member.is_bot && !ignoredUserIds.has(member.id);
 }
 
-function getMemberName(member: UsersListResultMember): string {
+function getMemberName(member: UserResult): string {
   if (member.profile.display_name_normalized) {
     return member.profile.display_name_normalized;
   }
@@ -26,7 +27,7 @@ function getMemberName(member: UsersListResultMember): string {
 }
 
 export async function refreshAll() {
-  const members: Array<UsersListResultMember> = [];
+  const members: Array<UserResult> = [];
   let cursor = undefined;
   do {
     const userListResult = await app.client.users.list({
@@ -78,3 +79,25 @@ export async function refreshAll() {
     client.release();
   }
 }
+
+app.event("user_change", async ({ event }) => {
+  const userChangeEvent = event as UserChangeEvent;
+  const member = userChangeEvent.user as UserResult;
+  if (!shouldAcceptMember(member)) {
+    return;
+  }
+  const memberName = getMemberName(member);
+  const dbUserResult = await db.query("SELECT id, name FROM users WHERE id = $1", [member.id]);
+  if (dbUserResult.rowCount === 0) {
+    await db.query(
+      "INSERT INTO users(id, name) VALUES ($1, $2)",
+      [member.id, memberName]);
+  } else {
+    const dbUser = dbUserResult.rows[0] as User;
+    if (dbUser.name != memberName) {
+      await db.query(
+        "UPDATE users SET name = $2 WHERE id = $1",
+        [dbUser.id, memberName]);
+    }
+  }
+});

@@ -62,6 +62,7 @@ section of https://api.slack.com/.
 
 - app_home_opened
 - message.channels
+- user_change
 
 ## Setup and run locally
 
