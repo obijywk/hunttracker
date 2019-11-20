@@ -64,6 +64,15 @@ async function buildHomeBlocks(userId: string) {
         },
         "action_id": "home_register_puzzle",
       },
+      {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: ":link: See All Puzzles",
+        },
+        "action_id": "home_see_all_puzzles",
+        url: process.env.WEB_SERVER_URL + "puzzles",
+      },
     ],
   }];
   for (const puzzle of allPuzzles.slice(0, maxPuzzlesToList)) {
@@ -80,7 +89,7 @@ async function buildHomeBlocks(userId: string) {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: "There are too many puzzles to show here! Visit TODO add link to see more."
+        text: `There are too many open puzzles to show here! Visit <${process.env.WEB_SERVER_URL}puzzles> to see more.`,
       },
     });
   }
@@ -160,4 +169,8 @@ app.view("home_register_puzzle_view", async ({ack, view}) => {
   ack();
   const values = getViewStateValues(view);
   await puzzles.create(values["puzzle_name_input"], values["puzzle_url_input"]);
+});
+
+app.action("home_see_all_puzzles", async ({ ack }) => {
+  ack();
 });

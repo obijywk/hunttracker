@@ -5,6 +5,8 @@ This is a puzzle hunt status tracking Slack bot.
 Everything is configured using environment variables, and they need to be set for anything to work.
 
 - **PORT**: The server HTTP port. The default is 3000.
+- **WEB_SERVER_URL**: The publicly accessible URL for this server, with trailing slash.
+  Used to build links.
 - **SLACK_SIGNING_SECRET**: This is the "Signing Secret" you can get from the
   "Basic Information" page in the "Your Apps" section of https://api.slack.com/.
 - **SLACK_BOT_TOKEN**: This is the "Bot User OAUth Access Token" you can get from the
