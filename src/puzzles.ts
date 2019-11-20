@@ -182,7 +182,15 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
     text += "\nHey! Consider *adding a channel topic* describing this puzzle for the benefit of your teammates.";
   }
 
-  const actionButtons = [];
+  const actionButtons = [{
+    "type": "button",
+    "text": {
+      "type": "plain_text",
+      "text": ":mag_right: Update Topic",
+    },
+    "action_id": "puzzle_update_topic",
+    "value": puzzle.id,
+  }];
   if (!puzzle.answer) {
     actionButtons.push({
       "type": "button",
@@ -242,6 +250,86 @@ app.action("puzzle_manual_poke", async ({ack, payload}) => {
       manual_poke_timestamp = NOW()
     WHERE id = $1`,
     [id]);
+  await taskQueue.scheduleTask("refresh_puzzle", {id});
+});
+
+app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
+  ack();
+  const id = (payload as ButtonAction).value;
+  const puzzlePromise = get(id);
+
+  const channelInfoResult = await app.client.conversations.info({
+    token: process.env.SLACK_BOT_TOKEN,
+    channel: id
+  }) as ChannelsInfoResult;
+
+  const puzzle = await puzzlePromise;
+
+  let topic = "";
+  if (channelInfoResult.channel.topic) {
+    topic = channelInfoResult.channel.topic.value;
+  }
+
+  await app.client.views.open({
+    token: process.env.SLACK_BOT_TOKEN,
+    "trigger_id": (body as any).trigger_id,
+    view: {
+      type: "modal",
+      "callback_id": "puzzle_update_topic_view",
+      "private_metadata": JSON.stringify({id}),
+      title: {
+        type: "plain_text",
+        text: "Update Topic"
+      },
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `Enter a topic for the puzzle *${buildPuzzleNameMrkdwn(puzzle)}* below.` +
+              " Consider including a summary of the puzzle content, whether or how you're stuck, and" +
+              " how other team members might be able to help."
+          },
+        },
+        {
+          type: "input",
+          "block_id": "puzzle_topic_input",
+          optional: true,
+          label: {
+            type: "plain_text",
+            text: "Topic",
+          },
+          element: {
+            type: "plain_text_input",
+            placeholder: {
+              type: "plain_text",
+              text: "Enter topic here",
+            },
+            "initial_value": topic,
+            multiline: true,
+          },
+        },
+      ],
+      submit: {
+        type: "plain_text",
+        text: "Submit",
+      },
+    }
+  });
+});
+
+app.view("puzzle_update_topic_view", async ({ack, view, body}) => {
+  ack();
+
+  const id = JSON.parse(body.view.private_metadata)["id"] as string;
+  const values = getViewStateValues(view);
+  const topic: string = values["puzzle_topic_input"];
+
+  await app.client.channels.setTopic({
+    token: process.env.SLACK_USER_TOKEN,
+    channel: id,
+    topic,
+  });
   await taskQueue.scheduleTask("refresh_puzzle", {id});
 });
 
