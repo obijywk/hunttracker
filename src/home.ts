@@ -6,7 +6,7 @@ const maxUsersToList = 5;
 const maxPuzzlesToList = 30;
 
 function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
-  let text = `:left_speech_bubble: <${process.env.SLACK_URL_PREFIX}${puzzle.id}|${puzzle.name}>`;
+  let text = `:eye-in-speech-bubble: <${process.env.SLACK_URL_PREFIX}${puzzle.id}|${puzzle.name}>`;
   const idleStatus = puzzles.buildIdleStatus(puzzle);
   if (idleStatus) {
     text += "   " + idleStatus;
@@ -48,6 +48,14 @@ async function buildHomeBlocks(userId: string) {
   const blocks: Array<any> = [{
     type: "actions",
     elements: [
+      {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: ":repeat: Refresh",
+        },
+        "action_id": "home_refresh",
+      },
       {
         type: "button",
         text: {
@@ -96,6 +104,11 @@ export async function publish(userId: string) {
 
 app.event("app_home_opened", async ({ event }) => {
   await publish(event.user);
+});
+
+app.action("home_refresh", async ({ ack, body }) => {
+  ack();
+  await publish(body.user.id);
 });
 
 app.action("home_register_puzzle", async ({ ack, body }) => {
