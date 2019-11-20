@@ -4,10 +4,10 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
   </head>
   <body>
-    {{#each solves}}
+    {{#each puzzles}}
       <hr>
       <div>
-        <p><a href="{{puzzle.url}}">{{puzzle.name}}</a></p>
+        <p><a href="{{url}}">{{name}}</a></p>
         <p><a href="{{../slackUrlPrefix}}{{id}}">#{{channelName}}</a></p>
         <p><a href="{{sheetUrl}}">Spreadsheet</a></p>
         <ul>

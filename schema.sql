@@ -4,26 +4,18 @@ DROP TABLE IF EXISTS task_queue;
 DROP TYPE IF EXISTS task_type;
 
 DROP TABLE IF EXISTS puzzle_tag;
-DROP TABLE IF EXISTS solve_user;
-
-DROP TABLE IF EXISTS solves;
+DROP TABLE IF EXISTS puzzle_user;
 
 DROP TABLE IF EXISTS puzzles;
 DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE puzzles (
-  id SERIAL PRIMARY KEY,
+  id text PRIMARY KEY,  -- Slack channel ID
   name text,
   url text,
-  solved boolean DEFAULT FALSE,
-  answer text
-);
-
-CREATE TABLE solves (
-  id text PRIMARY KEY,  -- Slack channel ID
-  puzzle_id SERIAL REFERENCES puzzles(id),
-  instance_name text,
+  complete boolean,
+  answer text,
   channel_name text,
   channel_topic text,
   sheet_url text,
@@ -44,20 +36,20 @@ CREATE TABLE users (
 );
 
 CREATE TABLE puzzle_tag (
-  puzzle_id SERIAL REFERENCES puzzles(id),
+  puzzle_id text REFERENCES puzzles(id),
   tag_id SERIAL REFERENCES tags(id),
   PRIMARY KEY (puzzle_id, tag_id)
 );
 
-CREATE TABLE solve_user (
-  solve_id text REFERENCES solves(id),
+CREATE TABLE puzzle_user (
+  puzzle_id text REFERENCES puzzles(id),
   user_id text REFERENCES users(id),
-  PRIMARY KEY (solve_id, user_id)
+  PRIMARY KEY (puzzle_id, user_id)
 );
 
 CREATE TYPE task_type AS ENUM (
-  'create_solve',
-  'refresh_solve'
+  'create_puzzle',
+  'refresh_puzzle'
 );
 
 CREATE TABLE task_queue (

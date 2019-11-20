@@ -1,26 +1,25 @@
 import { app } from "./app";
 import * as puzzles from "./puzzles";
 import { getViewStateValues } from "./slack_util";
-import * as solves from "./solves";
 
 const maxUsersToList = 5;
-const maxSolvesToList = 30;
+const maxPuzzlesToList = 30;
 
-function buildSolveBlocks(solve: solves.Solve, userId: string) {
-  let text = `:left_speech_bubble: <${process.env.SLACK_URL_PREFIX}${solve.id}|${solve.puzzle.name}>`;
-  const idleStatus = solves.buildIdleStatus(solve);
+function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
+  let text = `:left_speech_bubble: <${process.env.SLACK_URL_PREFIX}${puzzle.id}|${puzzle.name}>`;
+  const idleStatus = puzzles.buildIdleStatus(puzzle);
   if (idleStatus) {
     text += "   " + idleStatus;
   }
-  if (solve.channelTopic) {
-    text += `\n:mag_right: ${solve.channelTopic}`;
+  if (puzzle.channelTopic) {
+    text += `\n:mag_right: ${puzzle.channelTopic}`;
   }
-  if (solve.users && solve.users.length > 0) {
-    let users = solve.users.slice(0, maxUsersToList).map(u => u.name).join(", ");
-    if (solve.users.length > maxUsersToList) {
+  if (puzzle.users && puzzle.users.length > 0) {
+    let users = puzzle.users.slice(0, maxUsersToList).map(u => u.name).join(", ");
+    if (puzzle.users.length > maxUsersToList) {
       users += " \u{2026}";
     }
-    text += `\n:man-woman-girl-boy: (${solve.users.length}) ${users}`;
+    text += `\n:man-woman-girl-boy: (${puzzle.users.length}) ${users}`;
   }
 
   return [
@@ -35,8 +34,8 @@ function buildSolveBlocks(solve: solves.Solve, userId: string) {
 }
 
 async function buildHomeBlocks(userId: string) {
-  const allSolves = await solves.list({ excludeSolved: true });
-  allSolves.sort((a, b) => {
+  const allPuzzles = await puzzles.list({ excludeComplete: true });
+  allPuzzles.sort((a, b) => {
     const joinedA = a.users.map(u => u.id).indexOf(userId) !== -1;
     const joinedB = b.users.map(u => u.id).indexOf(userId) !== -1;
     if (joinedA && !joinedB) {
@@ -44,7 +43,7 @@ async function buildHomeBlocks(userId: string) {
     } else if (!joinedA && joinedB) {
       return 1;
     }
-    return solves.getIdleDuration(b).subtract(solves.getIdleDuration(a)).asMilliseconds();
+    return puzzles.getIdleDuration(b).subtract(puzzles.getIdleDuration(a)).asMilliseconds();
   });
   const blocks: Array<any> = [{
     type: "actions",
@@ -59,16 +58,16 @@ async function buildHomeBlocks(userId: string) {
       },
     ],
   }];
-  for (const solve of allSolves.slice(0, maxSolvesToList)) {
+  for (const puzzle of allPuzzles.slice(0, maxPuzzlesToList)) {
     blocks.push({
       type: "divider"
     });
-    blocks.push(...buildSolveBlocks(solve, userId));
+    blocks.push(...buildPuzzleBlocks(puzzle, userId));
   }
   blocks.push({
     type: "divider"
   });
-  if (allSolves.length > maxSolvesToList) {
+  if (allPuzzles.length > maxPuzzlesToList) {
     blocks.push({
       type: "section",
       text: {
@@ -126,6 +125,7 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
         {
           type: "input",
           "block_id": "puzzle_url_input",
+          optional: true,
           label: {
             type: "plain_text",
             text: "Puzzle URL",
@@ -146,6 +146,5 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
 app.view("home_register_puzzle_view", async ({ack, view}) => {
   ack();
   const values = getViewStateValues(view);
-  const puzzleId = await puzzles.create(values["puzzle_name_input"], values["puzzle_url_input"]);
-  await solves.create(puzzleId);
+  await puzzles.create(values["puzzle_name_input"], values["puzzle_url_input"]);
 });

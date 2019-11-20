@@ -37,7 +37,7 @@ Everything is configured using environment variables, and they need to be set fo
 - **PUZZLE_SHEET_TEMPLATE_URL**: A link to a Google Sheet that will be copied to create
   per-puzzle spreadsheets. It should be in a folder editable by the Google Cloud Platform
   service account, and this folder is where the spreadsheets will be created as well.
-- **MINIMUM_IDLE_MINUTES**: The number of minutes of inactivity on a solve for it to be
+- **MINIMUM_IDLE_MINUTES**: The number of minutes of inactivity on a puzzle for it to be
   considered idle.
 - **REFRESH_POLLING_MINUTES**: The frequency with which to internally poll for changes that
   aren't detected using events (e.g. spreadsheet edits). Alternatively, you can set up an
@@ -84,4 +84,4 @@ is clicked.
 ## HTTP pages
 
 - The index page currently has some buttons to help test various things
-- Visiting **/solves** will (poorly) list puzzle solves that have been created
+- Visiting **/puzzles** will (poorly) list puzzles that have been created

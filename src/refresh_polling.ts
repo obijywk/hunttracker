@@ -1,9 +1,9 @@
 import moment = require("moment");
 
-import * as solves from "./solves";
+import * as puzzles from "./puzzles";
 
 export async function refresh() {
-  await solves.refreshStale();
+  await puzzles.refreshStale();
 }
 
 if (process.env.REFRESH_POLLING_MINUTES) {
