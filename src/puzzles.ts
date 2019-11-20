@@ -105,7 +105,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       answer: row.answer,
       channelName: row.channel_name,
       channelTopic: row.channel_topic,
-      users: row.users,
+      users: row.users || [],
       sheetUrl: row.sheet_url,
       chatModifiedTimestamp: moment(row.chat_modified_timestamp),
       sheetModifiedTimestamp: moment(row.sheet_modified_timestamp),
