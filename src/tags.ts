@@ -84,15 +84,15 @@ app.action("tags_update", async ({ ack, body, payload }) => {
   }
 
   const blocks: Array<KnownBlock | Block> = [];
-  if (options) {
+  if (options.length > 0) {
     blocks.push(
       {
         type: "input",
-        "block_id": "tags_input",
+        "block_id": "previously_used_tags_input",
         optional: true,
         label: {
           type: "plain_text",
-          text: "Tags",
+          text: "Previously used tags",
         },
         element: {
           type: "multi_static_select",
@@ -106,6 +106,26 @@ app.action("tags_update", async ({ ack, body, payload }) => {
       },
     );
   }
+  blocks.push({
+    type: "input",
+    "block_id": "new_tags_input",
+    optional: true,
+    label: {
+      type: "plain_text",
+      text: "New tags",
+    },
+    hint: {
+      type: "plain_text",
+      text: "Enter tags that have not yet been introduced, separated by commas. Tags may not contain spaces.",
+    },
+    element: {
+      type: "plain_text_input",
+      placeholder: {
+        type: "plain_text",
+        text: "Enter tags",
+      },
+    },
+  });
 
   try {
   await app.client.views.open({
@@ -135,22 +155,42 @@ app.view("tags_update_view", async ({ack, view, body}) => {
   ack();
 
   const puzzleId = JSON.parse(body.view.private_metadata)["puzzleId"] as string;
-  const newTags = new Set(getViewStateValues(view)["tags_input"].map(Number));
+
+  const values = getViewStateValues(view);
+  let newTagIds = new Set();
+  if (values["previously_used_tags_input"]) {
+    newTagIds = new Set(values["previously_used_tags_input"].map(Number));
+  }
+  let newTagNames: Array<string> = [];
+  if (values["new_tags_input"]) {
+    newTagNames = values["new_tags_input"].split(",").map((s: string) => s.trim());
+  }
 
   const client = await db.connect();
   try {
     await client.query("BEGIN");
 
-    const oldTagsResult = await client.query("SELECT tag_id FROM puzzle_tag WHERE puzzle_id = $1", [puzzleId]);
-    const oldTags = new Set(oldTagsResult.rows.map(row => row.tag_id));
+    for (const newTagName of newTagNames) {
+      const newTagResult = await client.query(`
+        INSERT INTO tags (name) VALUES ($1)
+        ON CONFLICT (name) DO UPDATE SET name = $1
+        RETURNING id
+      `, [newTagName]);
+      if (newTagResult.rowCount > 0) {
+        newTagIds.add(newTagResult.rows[0].id);
+      }
+    }
 
-    for (const oldTag of oldTags) {
-      if (!newTags.has(oldTag)) {
+    const oldTagsResult = await client.query("SELECT tag_id FROM puzzle_tag WHERE puzzle_id = $1", [puzzleId]);
+    const oldTagIds = new Set(oldTagsResult.rows.map(row => row.tag_id));
+
+    for (const oldTag of oldTagIds) {
+      if (!newTagIds.has(oldTag)) {
         client.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1 AND tag_id = $2", [puzzleId, oldTag]);
       }
     }
-    for (const newTag of newTags) {
-      if (!oldTags.has(newTag)) {
+    for (const newTag of newTagIds) {
+      if (!oldTagIds.has(newTag)) {
         client.query("INSERT INTO puzzle_tag (puzzle_id, tag_id) VALUES ($1, $2)", [puzzleId, newTag]);
       }
     }
