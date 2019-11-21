@@ -12,6 +12,15 @@ export function getViewStateValues(view: ViewOutput) {
         case "static_select":
           values[inputId] = (input as any)["selected_option"].value;
           break;
+        case "multi_static_select":
+          values[inputId] = [];
+          const selectedOptions = (input as any)["selected_options"];
+          if (selectedOptions) {
+            for (const option of selectedOptions) {
+              values[inputId].push(option.value);
+            }
+          }
+          break;
       }
     }
   }

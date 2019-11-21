@@ -1,6 +1,9 @@
+import { Block, KnownBlock } from "@slack/types";
+
 import { app } from "./app";
 import * as puzzles from "./puzzles";
 import { getViewStateValues } from "./slack_util";
+import * as tags from "./tags";
 
 const maxUsersToList = 5;
 const maxPuzzlesToList = 30;
@@ -22,7 +25,7 @@ function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
     text += `\n:man-woman-girl-boy: (${puzzle.users.length}) ${users}`;
   }
 
-  return [
+  const blocks: Array<Block | KnownBlock> = [
     {
       type: "section",
       text: {
@@ -31,6 +34,13 @@ function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
       },
     },
   ];
+
+  const tagsBlock = tags.buildTagsBlock(puzzle.id, puzzle.tags, false);
+  if (tagsBlock) {
+    blocks.push(tagsBlock);
+  }
+
+  return blocks;
 }
 
 async function buildHomeBlocks(userId: string) {

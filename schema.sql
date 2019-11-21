@@ -27,7 +27,7 @@ CREATE TABLE puzzles (
 
 CREATE TABLE tags (
   id SERIAL PRIMARY KEY,
-  tag text
+  name text
 );
 
 CREATE TABLE users (

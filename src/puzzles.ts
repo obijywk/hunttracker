@@ -15,6 +15,7 @@ import {
   ConversationsMembersResult
 } from "./slack_results";
 import { getViewStateValues } from "./slack_util";
+import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
 
@@ -27,6 +28,7 @@ export interface Puzzle {
   channelName: string;
   channelTopic: string;
   users: Array<users.User>;
+  tags: Array<tags.Tag>;
   sheetUrl: string;
   chatModifiedTimestamp: moment.Moment;
   sheetModifiedTimestamp: moment.Moment;
@@ -77,6 +79,12 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
         JOIN puzzle_user ON puzzle_user.user_id = users.id
         WHERE puzzle_user.puzzle_id = puzzles.id
       ) users,
+      (
+        SELECT json_agg(row_to_json(tags) ORDER BY name)
+        FROM tags
+        JOIN puzzle_tag ON puzzle_tag.tag_id = tags.id
+        WHERE puzzle_tag.puzzle_id = puzzles.id
+      ) tags,
       chat_modified_timestamp,
       sheet_modified_timestamp,
       manual_poke_timestamp,
@@ -106,6 +114,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       channelName: row.channel_name,
       channelTopic: row.channel_topic,
       users: row.users || [],
+      tags: row.tags || [],
       sheetUrl: row.sheet_url,
       chatModifiedTimestamp: moment(row.chat_modified_timestamp),
       sheetModifiedTimestamp: moment(row.sheet_modified_timestamp),
@@ -224,7 +233,7 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
     });
   }
 
-  return [
+  const blocks = [
     {
       "type": "section",
       "text": {
@@ -238,6 +247,13 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
       "elements": actionButtons,
     },
   ];
+
+  const tagBlock = tags.buildTagsBlock(puzzle.id, puzzle.tags, true);
+  if (tagBlock) {
+    blocks.push(tagBlock);
+  }
+
+  return blocks;
 }
 
 app.action("puzzle_manual_poke", async ({ack, payload}) => {
@@ -647,6 +663,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     channelName,
     channelTopic: "",
     users: [],
+    tags: [],
     sheetUrl,
     chatModifiedTimestamp: now,
     sheetModifiedTimestamp: now,
