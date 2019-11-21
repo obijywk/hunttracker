@@ -196,7 +196,7 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
       "type": "button",
       "text": {
         "type": "plain_text",
-        "text": ":pencil: Record Confirmed Answer"
+        "text": ":phone: Record Confirmed Answer"
       },
       "action_id": "puzzle_record_confirmed_answer",
       "value": puzzle.id,
