@@ -17,6 +17,19 @@ receiver.app.get("/puzzles", async (req, res) => {
   });
 });
 
+receiver.app.get("/tag", async (req, res) => {
+  const tagName = req.query.tag;
+  if (!tagName) {
+    return res.redirect("/");
+  }
+  const puzzlesPromise = puzzles.list({ withTag: tagName });
+  return res.render("tag", {
+    tag: tagName,
+    puzzles: await puzzlesPromise,
+    slackUrlPrefix: process.env.SLACK_URL_PREFIX,
+  });
+});
+
 receiver.app.get("/refresh", async (req, res) => {
   await refreshPolling.refresh();
   return res.status(200).send("ok");

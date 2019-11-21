@@ -22,6 +22,7 @@ export function buildTagsBlock(puzzleId: string, tags: Array<Tag>, editable: boo
       },
       "action_id": `tags_click_${tag.id}`,
       "value": JSON.stringify({ puzzleId, tagId: tag.id }),
+      "url": encodeURI(process.env.WEB_SERVER_URL + "tag?tag=" + tag.name),
     });
   }
   if (editable) {
@@ -46,8 +47,6 @@ export function buildTagsBlock(puzzleId: string, tags: Array<Tag>, editable: boo
 
 app.action(/tags_click_.*/, async({ ack, payload, say }) => {
   ack();
-  const value = JSON.parse((payload as ButtonAction).value);
-  say(`Tag ${value.tagId} clicked for puzzle ${value.puzzleId}`);
 });
 
 app.action("tags_update", async ({ ack, body, payload }) => {

@@ -60,6 +60,7 @@ interface ReadFromDatabaseOptions {
   id?: string;
   client?: PoolClient;
   excludeComplete?: boolean;
+  withTag?: string;
 }
 
 async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array<Puzzle>> {
@@ -99,9 +100,18 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
   if (options.excludeComplete) {
     whereConditions.push("complete = FALSE");
   }
+  if (options.withTag) {
+    params.push(options.withTag);
+    whereConditions.push(`EXISTS (
+      SELECT 1 FROM puzzle_tag
+      JOIN tags ON puzzle_tag.tag_id = tags.id
+      WHERE puzzle_tag.puzzle_id = puzzles.id AND tags.name = $${params.length}
+    )`);
+  }
   if (whereConditions.length > 0) {
     query += "\nWHERE " + whereConditions.join(" AND ");
   }
+  query += "\nORDER BY name ASC";
   const result = await db.query(query, params, options.client);
   const puzzles: Array<Puzzle> = [];
   for (const row of result.rows) {
@@ -138,11 +148,13 @@ export async function get(id: string, client?: PoolClient): Promise<Puzzle> {
 
 export interface ListOptions {
   excludeComplete?: boolean;
+  withTag?: string;
 }
 
 export async function list(options: ListOptions = {}): Promise<Array<Puzzle>> {
   return await readFromDatabase({
     excludeComplete: options.excludeComplete,
+    withTag: options.withTag,
   });
 }
 
