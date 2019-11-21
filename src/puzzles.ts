@@ -705,6 +705,13 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
     if (puzzle.channelTopic !== channelInfoResult.channel.topic.value) {
       dirty = true;
       puzzle.channelTopic = channelInfoResult.channel.topic.value;
+      if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
+        app.client.chat.postMessage({
+          token: process.env.SLACK_USER_TOKEN,
+          channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
+          text: `<#${puzzle.id}> topic updated: ${puzzle.channelTopic}`,
+        });
+      }
     }
   }
   if (latestMessageTimestamp !== null &&
