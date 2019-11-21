@@ -58,11 +58,13 @@ app.action("tags_update", async ({ ack, body, payload }) => {
     SELECT
       id,
       name,
-      puzzle_tag.tag_id IS NOT NULL selected
+      selected_tag_id.tag_id IS NOT NULL selected
     FROM tags
-    LEFT JOIN puzzle_tag ON puzzle_tag.tag_id = tags.id
-    WHERE
-      puzzle_tag.puzzle_id IS NULL OR puzzle_tag.puzzle_id = $1
+    LEFT JOIN (
+      SELECT tag_id
+      FROM puzzle_tag
+      WHERE puzzle_id = $1
+    ) selected_tag_id ON selected_tag_id.tag_id = id
     ORDER BY name ASC
   `, [puzzleId]);
 
