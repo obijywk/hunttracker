@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE puzzles (
   id text PRIMARY KEY,  -- Slack channel ID
-  name text,
+  name text UNIQUE NOT NULL,
   url text,
   complete boolean,
   answer text,
@@ -27,7 +27,7 @@ CREATE TABLE puzzles (
 
 CREATE TABLE tags (
   id SERIAL PRIMARY KEY,
-  name text
+  name text UNIQUE NOT NULL
 );
 
 CREATE TABLE users (
