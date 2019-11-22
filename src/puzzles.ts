@@ -331,7 +331,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
             type: "plain_text_input",
             placeholder: {
               type: "plain_text",
-              text: "Enter topic here",
+              text: "Enter topic",
             },
             "initial_value": topic,
             multiline: true,
@@ -398,7 +398,7 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
             type: "plain_text_input",
             placeholder: {
               type: "plain_text",
-              text: "Enter answer here",
+              text: "Enter answer",
             },
             "initial_value": puzzle.answer || "",
           }
