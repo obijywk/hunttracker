@@ -5,7 +5,7 @@ import { ErrorCode, WebAPIPlatformError } from "@slack/web-api";
 
 export const receiver = new ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  endpoints: "/slack/events"
+  endpoints: "/slack/events",
 });
 
 receiver.app.use(bodyParser.urlencoded({extended: false}));
@@ -17,7 +17,7 @@ receiver.app.use("/static", express.static("public"));
 
 export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
-  receiver
+  receiver,
 });
 
 app.error(e => {

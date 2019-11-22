@@ -5,7 +5,7 @@ const auth = new google.auth.JWT({
   email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
   key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY,
   scopes: [
-    "https://www.googleapis.com/auth/drive"
+    "https://www.googleapis.com/auth/drive",
   ],
 });
 

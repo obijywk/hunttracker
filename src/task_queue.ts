@@ -5,7 +5,7 @@ import * as db from "./db";
 const handlers: { [key: string]: (client: PoolClient, payload: any) => Promise<void>} = {};
 export function registerHandler(
   taskType: string,
-  handler: (client: PoolClient, payload: any) => Promise<void>
+  handler: (client: PoolClient, payload: any) => Promise<void>,
 ) {
   handlers[taskType] = handler;
 }

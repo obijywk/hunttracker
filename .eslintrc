@@ -9,6 +9,7 @@
     "semi": ["error", "always"],
     "quotes": ["error", "double"],
     "no-trailing-spaces": "error",
+    "comma-dangle": ["error", "always-multiline"],
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-explicit-any": 1,
     "@typescript-eslint/no-inferrable-types": [

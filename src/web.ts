@@ -13,7 +13,7 @@ receiver.app.get("/puzzles", async (req, res) => {
   const puzzlesPromise = puzzles.list();
   return res.render("puzzles", {
     puzzles: await puzzlesPromise,
-    slackUrlPrefix: process.env.SLACK_URL_PREFIX
+    slackUrlPrefix: process.env.SLACK_URL_PREFIX,
   });
 });
 

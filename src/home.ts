@@ -70,7 +70,7 @@ async function buildHomeBlocks(userId: string) {
         type: "button",
         text: {
           type: "plain_text",
-          text: ":sparkles: Register Puzzle"
+          text: ":sparkles: Register Puzzle",
         },
         "action_id": "home_register_puzzle",
       },
@@ -87,12 +87,12 @@ async function buildHomeBlocks(userId: string) {
   }];
   for (const puzzle of allPuzzles.slice(0, maxPuzzlesToList)) {
     blocks.push({
-      type: "divider"
+      type: "divider",
     });
     blocks.push(...buildPuzzleBlocks(puzzle, userId));
   }
   blocks.push({
-    type: "divider"
+    type: "divider",
   });
   if (allPuzzles.length > maxPuzzlesToList) {
     blocks.push({
@@ -117,7 +117,7 @@ export async function publish(userId: string) {
         text: "Home",
       },
       blocks: await buildHomeBlocks(userId),
-    }
+    },
   });
 }
 
@@ -140,7 +140,7 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
       "callback_id": "home_register_puzzle_view",
       title: {
         type: "plain_text",
-        text: "Register Puzzle"
+        text: "Register Puzzle",
       },
       blocks: [
         {
@@ -156,7 +156,7 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
               type: "plain_text",
               text: "Enter puzzle name",
             },
-          }
+          },
         },
         {
           type: "input",
@@ -172,15 +172,15 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
               type: "plain_text",
               text: "Enter puzzle URL",
             },
-          }
+          },
         },
-        ...await tags.buildUpdateTagsBlocks("" /* no puzzle ID assigned yet */)
+        ...await tags.buildUpdateTagsBlocks("" /* no puzzle ID assigned yet */),
       ],
       submit: {
         type: "plain_text",
         text: "Register Puzzle",
       },
-    }
+    },
   });
 });
 

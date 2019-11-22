@@ -140,14 +140,14 @@ app.action("tags_update", async ({ ack, body, payload }) => {
       "private_metadata": JSON.stringify({ puzzleId }),
       title: {
         type: "plain_text",
-        text: "Update Tags"
+        text: "Update Tags",
       },
       blocks: await buildUpdateTagsBlocks(puzzleId),
       submit: {
         type: "plain_text",
         text: "Submit",
       },
-    }
+    },
   });
 });
 

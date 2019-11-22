@@ -12,7 +12,7 @@ import {
   ChannelsInfoResult,
   ChatPostMessageResult,
   ConversationsListResult,
-  ConversationsMembersResult
+  ConversationsMembersResult,
 } from "./slack_results";
 import { getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
@@ -43,7 +43,7 @@ export function getIdleDuration(puzzle: Puzzle): moment.Duration {
   const latestTimestamp = moment.max(
     puzzle.chatModifiedTimestamp,
     puzzle.sheetModifiedTimestamp,
-    puzzle.manualPokeTimestamp
+    puzzle.manualPokeTimestamp,
   );
   return moment.duration(moment().diff(latestTimestamp));
 }
@@ -217,7 +217,7 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
       "type": "button",
       "text": {
         "type": "plain_text",
-        "text": ":phone: Record Confirmed Answer"
+        "text": ":phone: Record Confirmed Answer",
       },
       "action_id": "puzzle_record_confirmed_answer",
       "value": puzzle.id,
@@ -288,7 +288,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
 
   const channelInfoResult = await app.client.conversations.info({
     token: process.env.SLACK_BOT_TOKEN,
-    channel: id
+    channel: id,
   }) as ChannelsInfoResult;
 
   const puzzle = await puzzlePromise;
@@ -307,7 +307,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
       "private_metadata": JSON.stringify({id}),
       title: {
         type: "plain_text",
-        text: "Update Topic"
+        text: "Update Topic",
       },
       blocks: [
         {
@@ -316,7 +316,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
             type: "mrkdwn",
             text: `Enter a topic for the puzzle *${buildPuzzleNameMrkdwn(puzzle)}* below.` +
               " Consider including a summary of the puzzle content, whether or how you're stuck, and" +
-              " how other team members might be able to help."
+              " how other team members might be able to help.",
           },
         },
         {
@@ -342,7 +342,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
         type: "plain_text",
         text: "Submit",
       },
-    }
+    },
   });
 });
 
@@ -375,7 +375,7 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
       "private_metadata": JSON.stringify({id}),
       title: {
         type: "plain_text",
-        text: "Record Confirmed Answer"
+        text: "Record Confirmed Answer",
       },
       blocks: [
         {
@@ -401,7 +401,7 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
               text: "Enter answer",
             },
             "initial_value": puzzle.answer || "",
-          }
+          },
         },
         {
           type: "input",
@@ -436,13 +436,13 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
               },
             ],
           },
-        }
+        },
       ],
       submit: {
         type: "plain_text",
         text: "Submit",
       },
-    }
+    },
   });
 });
 
@@ -491,7 +491,7 @@ async function updateStatusMessage(puzzle: Puzzle) {
     channel: puzzle.id,
     text: "",
     ts: puzzle.statusMessageTs,
-    blocks: buildStatusMessageBlocks(puzzle)
+    blocks: buildStatusMessageBlocks(puzzle),
   }) as ChatPostMessageResult;
 }
 
@@ -523,7 +523,7 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       puzzle.chatModifiedTimestamp.format(),
       puzzle.sheetModifiedTimestamp.format(),
       puzzle.manualPokeTimestamp.format(),
-      puzzle.statusMessageTs || ""
+      puzzle.statusMessageTs || "",
     ]);
 }
 
@@ -531,7 +531,7 @@ async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | nu
   const channelHistoryResult = await app.client.channels.history({
     token: process.env.SLACK_USER_TOKEN,
     channel: id,
-    count: 100
+    count: 100,
   }) as ChannelsHistoryResult;
   for (const message of channelHistoryResult.messages) {
     if (message.type === "message" && message.subtype === "channel_leave") {
@@ -551,7 +551,7 @@ async function refreshUsers(id: string, client: PoolClient) {
   do {
     const conversationMembersResult = await app.client.conversations.members({
       token: process.env.SLACK_USER_TOKEN,
-      channel: id
+      channel: id,
     }) as ConversationsMembersResult;
     for (const userId of conversationMembersResult.members) {
       channelUsers.add(userId);
@@ -592,7 +592,7 @@ export async function create(name: string, url: string, selectedTagIds: Array<nu
     name,
     url,
     selectedTagIds,
-    newTagNames
+    newTagNames,
   });
 }
 
@@ -600,7 +600,7 @@ export async function refreshAll() {
   const result = await db.query("SELECT id FROM puzzles");
   for (const row of result.rows) {
     await taskQueue.scheduleTask("refresh_puzzle", {
-      id: row.id
+      id: row.id,
     });
   }
 }
@@ -615,7 +615,7 @@ export async function refreshStale() {
       continue;
     }
     await taskQueue.scheduleTask("refresh_puzzle", {
-      id: puzzle.id
+      id: puzzle.id,
     });
   }
 }
@@ -625,7 +625,7 @@ async function findChannelIdForChannelName(channelName: string): Promise<string 
   do {
     const listConversationsResult = await app.client.conversations.list({
       token: process.env.SLACK_USER_TOKEN,
-      cursor
+      cursor,
     }) as ConversationsListResult;
     for (const channel of listConversationsResult.channels) {
       if (channel.name === channelName) {
@@ -650,7 +650,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   try {
     const createChannelResult = await app.client.channels.create({
       token: process.env.SLACK_USER_TOKEN,
-      name: channelName
+      name: channelName,
     }) as ChannelsCreateResult;
     id = createChannelResult.channel.id;
   } catch (e) {
@@ -683,14 +683,14 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     sheetUrl,
     chatModifiedTimestamp: now,
     sheetModifiedTimestamp: now,
-    manualPokeTimestamp: now
+    manualPokeTimestamp: now,
   };
 
   const postStatusMessageResult = await app.client.chat.postMessage({
     token: process.env.SLACK_BOT_TOKEN,
     channel: `#${puzzle.channelName}`,
     text: "",
-    blocks: buildStatusMessageBlocks(puzzle)
+    blocks: buildStatusMessageBlocks(puzzle),
   }) as ChatPostMessageResult;
   puzzle.statusMessageTs = postStatusMessageResult.ts;
 
@@ -701,7 +701,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   await app.client.pins.add({
     token: process.env.SLACK_BOT_TOKEN,
     channel: puzzle.id,
-    timestamp: puzzle.statusMessageTs
+    timestamp: puzzle.statusMessageTs,
   });
 
   await updateStatusMessage(puzzle);
@@ -710,7 +710,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     await app.client.chat.postMessage({
       token: process.env.SLACK_USER_TOKEN,
       channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
-      text: `<#${id}> created for ${buildPuzzleNameMrkdwn(puzzle)}.`
+      text: `<#${id}> created for ${buildPuzzleNameMrkdwn(puzzle)}.`,
     });
   }
 });
@@ -723,7 +723,7 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
   const latestMessageTimestampPromise = getLatestMessageTimestamp(id);
   const channelInfoResultPromise = app.client.conversations.info({
     token: process.env.SLACK_BOT_TOKEN,
-    channel: id
+    channel: id,
   }) as Promise<ChannelsInfoResult>;
 
   const puzzle = await get(id, client);
