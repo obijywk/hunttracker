@@ -194,7 +194,13 @@ export async function updateTagsWithTransaction(puzzleId: string, selectedTagIds
   }
 }
 
-export function getTagsFromViewStateValues(viewStateValues: any) {
+export interface TagViewStateValues {
+  selectedTagIds?: Array<number>;
+  newTagNames?: Array<string>;
+  errors?: { [key: string]: string };
+}
+
+export function getTagsFromViewStateValues(viewStateValues: any): TagViewStateValues {
   let selectedTagIds = [];
   if (viewStateValues["previously_used_tags_input"]) {
     selectedTagIds = viewStateValues["previously_used_tags_input"].map(Number);
@@ -206,6 +212,15 @@ export function getTagsFromViewStateValues(viewStateValues: any) {
       .filter((s: string) => s.length > 0)
       .map((s: string) => s.trim());
   }
+  for (const tagName of newTagNames) {
+    if (tagName.match(/[^a-z0-9-/]/g)) {
+      return {
+        errors: {
+          "new_tags_input": "Tags may only contain lowercase letters, numbers, dashes, and forward slashes.",
+        },
+      };
+    }
+  }
   return {
     selectedTagIds,
     newTagNames,
@@ -213,11 +228,19 @@ export function getTagsFromViewStateValues(viewStateValues: any) {
 }
 
 app.view("tags_update_view", async ({ack, view, body}) => {
-  ack();
-
   const puzzleId = JSON.parse(body.view.private_metadata)["puzzleId"] as string;
   const viewStateValues = getViewStateValues(view);
   const selectedTags = getTagsFromViewStateValues(viewStateValues);
+
+  if (selectedTags.errors) {
+    ack({
+      "response_action": "errors",
+      errors: selectedTags.errors,
+    } as any);
+    return;
+  }
+  ack();
+
   updateTagsWithTransaction(puzzleId, selectedTags.selectedTagIds, selectedTags.newTagNames);
 
   await taskQueue.scheduleTask("refresh_puzzle", {

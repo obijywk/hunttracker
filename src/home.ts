@@ -185,9 +185,18 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
 });
 
 app.view("home_register_puzzle_view", async ({ack, view}) => {
-  ack();
   const values = getViewStateValues(view);
   const selectedTags = tags.getTagsFromViewStateValues(values);
+
+  if (selectedTags.errors) {
+    ack({
+      "response_action": "errors",
+      errors: selectedTags.errors,
+    } as any);
+    return;
+  }
+  ack();
+
   await puzzles.create(
     values["puzzle_name_input"],
     values["puzzle_url_input"],
