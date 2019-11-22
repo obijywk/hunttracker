@@ -542,51 +542,6 @@ async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | nu
   return null;
 }
 
-async function refreshUsers(id: string, client: PoolClient) {
-  const dbUsersResultPromise = client.query(
-    "SELECT user_id FROM puzzle_user WHERE puzzle_id = $1", [id]);
-
-  const channelUsers: Set<string> = new Set();
-  let cursor = undefined;
-  do {
-    const conversationMembersResult = await app.client.conversations.members({
-      token: process.env.SLACK_USER_TOKEN,
-      channel: id,
-    }) as ConversationsMembersResult;
-    for (const userId of conversationMembersResult.members) {
-      channelUsers.add(userId);
-    }
-    cursor = conversationMembersResult.response_metadata.next_cursor;
-  } while (cursor);
-
-  const dbUsersResult = await dbUsersResultPromise;
-  const dbUsers: Set<string> = new Set();
-  for (const row of dbUsersResult.rows) {
-    dbUsers.add(row.user_id);
-  }
-
-  const promises = [];
-  for (const channelUser of channelUsers) {
-    if (!dbUsers.has(channelUser)) {
-      promises.push(
-        client.query(`
-          INSERT INTO puzzle_user (puzzle_id, user_id)
-          SELECT $1, id FROM users
-          WHERE id = $2`,
-          [id, channelUser]));
-    }
-  }
-  for (const dbUser of dbUsers) {
-    if (!channelUsers.has(dbUser)) {
-      promises.push(
-        client.query(
-          "DELETE FROM puzzle_user WHERE puzzle_id = $1 AND user_id = $2",
-          [id, dbUser]));
-    }
-  }
-  await Promise.all(promises);
-}
-
 export async function create(name: string, url: string, selectedTagIds: Array<number>, newTagNames: Array<string>) {
   await taskQueue.scheduleTask("create_puzzle", {
     name,
@@ -718,7 +673,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
 taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
   const id: string = payload.id;
 
-  const refreshUsersPromise = refreshUsers(id, client);
+  const refreshUsersPromise = users.refreshPuzzleUsers(id, client);
 
   const latestMessageTimestampPromise = getLatestMessageTimestamp(id);
   const channelInfoResultPromise = app.client.conversations.info({

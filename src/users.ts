@@ -1,9 +1,9 @@
-import { QueryResult } from "pg";
+import { PoolClient, QueryResult } from "pg";
 import { UserChangeEvent } from "@slack/bolt";
 
 import { app } from "./app";
 import * as db from "./db";
-import { UsersListResult, UserResult } from "./slack_results";
+import { ConversationsMembersResult, UsersListResult, UserResult } from "./slack_results";
 
 export interface User {
   id: string;
@@ -77,6 +77,47 @@ export async function refreshAll() {
     throw e;
   } finally {
     client.release();
+  }
+}
+
+export async function refreshPuzzleUsers(puzzleId: string, client: PoolClient) {
+  const dbUsersResultPromise = client.query(
+    "SELECT user_id FROM puzzle_user WHERE puzzle_id = $1", [puzzleId]);
+
+  const channelUsers: Set<string> = new Set();
+  let cursor = undefined;
+  do {
+    const conversationMembersResult = await app.client.conversations.members({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: puzzleId,
+    }) as ConversationsMembersResult;
+    for (const userId of conversationMembersResult.members) {
+      channelUsers.add(userId);
+    }
+    cursor = conversationMembersResult.response_metadata.next_cursor;
+  } while (cursor);
+
+  const dbUsersResult = await dbUsersResultPromise;
+  const dbUsers: Set<string> = new Set();
+  for (const row of dbUsersResult.rows) {
+    dbUsers.add(row.user_id);
+  }
+
+  for (const channelUser of channelUsers) {
+    if (!dbUsers.has(channelUser)) {
+      await client.query(`
+        INSERT INTO puzzle_user (puzzle_id, user_id)
+        SELECT $1, id FROM users
+        WHERE id = $2`,
+        [puzzleId, channelUser]);
+    }
+  }
+  for (const dbUser of dbUsers) {
+    if (!channelUsers.has(dbUser)) {
+      await client.query(
+        "DELETE FROM puzzle_user WHERE puzzle_id = $1 AND user_id = $2",
+        [puzzleId, dbUser]);
+    }
   }
 }
 
