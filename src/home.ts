@@ -152,6 +152,10 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
           },
           element: {
             type: "plain_text_input",
+            placeholder: {
+              type: "plain_text",
+              text: "Enter puzzle name",
+            },
           }
         },
         {
@@ -164,8 +168,13 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
           },
           element: {
             type: "plain_text_input",
+            placeholder: {
+              type: "plain_text",
+              text: "Enter puzzle URL",
+            },
           }
         },
+        ...await tags.buildUpdateTagsBlocks("" /* no puzzle ID assigned yet */)
       ],
       submit: {
         type: "plain_text",
@@ -178,7 +187,12 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
 app.view("home_register_puzzle_view", async ({ack, view}) => {
   ack();
   const values = getViewStateValues(view);
-  await puzzles.create(values["puzzle_name_input"], values["puzzle_url_input"]);
+  const selectedTags = tags.getTagsFromViewStateValues(values);
+  await puzzles.create(
+    values["puzzle_name_input"],
+    values["puzzle_url_input"],
+    selectedTags.selectedTagIds,
+    selectedTags.newTagNames);
 });
 
 app.action("home_see_all_puzzles", async ({ ack }) => {

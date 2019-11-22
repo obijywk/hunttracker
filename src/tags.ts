@@ -1,3 +1,4 @@
+import { PoolClient } from "pg";
 import { ButtonAction } from "@slack/bolt";
 import { Block, KnownBlock, Option } from "@slack/types";
 
@@ -49,10 +50,7 @@ app.action(/tags_click_.*/, async({ ack, payload, say }) => {
   ack();
 });
 
-app.action("tags_update", async ({ ack, body, payload }) => {
-  ack();
-  const puzzleId = (payload as ButtonAction).value;
-
+export async function buildUpdateTagsBlocks(puzzleId: string) {
   const tags = await db.query(`
     SELECT
       id,
@@ -126,8 +124,13 @@ app.action("tags_update", async ({ ack, body, payload }) => {
       },
     },
   });
+  return blocks;
+}
 
-  try {
+app.action("tags_update", async ({ ack, body, payload }) => {
+  ack();
+  const puzzleId = (payload as ButtonAction).value;
+
   await app.client.views.open({
     token: process.env.SLACK_BOT_TOKEN,
     "trigger_id": (body as any).trigger_id,
@@ -139,62 +142,48 @@ app.action("tags_update", async ({ ack, body, payload }) => {
         type: "plain_text",
         text: "Update Tags"
       },
-      blocks,
+      blocks: await buildUpdateTagsBlocks(puzzleId),
       submit: {
         type: "plain_text",
         text: "Submit",
       },
     }
   });
-  } catch (e) {
-    console.log(e.data.response_metadata.messages);
-  }
 });
 
-app.view("tags_update_view", async ({ack, view, body}) => {
-  ack();
-
-  const puzzleId = JSON.parse(body.view.private_metadata)["puzzleId"] as string;
-
-  const values = getViewStateValues(view);
-  let newTagIds = new Set();
-  if (values["previously_used_tags_input"]) {
-    newTagIds = new Set(values["previously_used_tags_input"].map(Number));
-  }
-  let newTagNames: Array<string> = [];
-  if (values["new_tags_input"]) {
-    newTagNames = values["new_tags_input"].split(",").map((s: string) => s.trim());
+export async function updateTags(puzzleId: string, selectedTagIds: Array<number>, newTagNames: Array<string>, client: PoolClient) {
+  const newTagIds = new Set(selectedTagIds);
+  for (const newTagName of newTagNames) {
+    const newTagResult = await client.query(`
+      INSERT INTO tags (name) VALUES ($1)
+      ON CONFLICT (name) DO UPDATE SET name = $1
+      RETURNING id
+    `, [newTagName]);
+    if (newTagResult.rowCount > 0) {
+      newTagIds.add(newTagResult.rows[0].id);
+    }
   }
 
+  const oldTagsResult = await client.query("SELECT tag_id FROM puzzle_tag WHERE puzzle_id = $1", [puzzleId]);
+  const oldTagIds = new Set(oldTagsResult.rows.map(row => row.tag_id));
+
+  for (const oldTag of oldTagIds) {
+    if (!newTagIds.has(oldTag)) {
+      client.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1 AND tag_id = $2", [puzzleId, oldTag]);
+    }
+  }
+  for (const newTag of newTagIds) {
+    if (!oldTagIds.has(newTag)) {
+      client.query("INSERT INTO puzzle_tag (puzzle_id, tag_id) VALUES ($1, $2)", [puzzleId, newTag]);
+    }
+  }
+}
+
+export async function updateTagsWithTransaction(puzzleId: string, selectedTagIds: Array<number>, newTagNames: Array<string>) {
   const client = await db.connect();
   try {
     await client.query("BEGIN");
-
-    for (const newTagName of newTagNames) {
-      const newTagResult = await client.query(`
-        INSERT INTO tags (name) VALUES ($1)
-        ON CONFLICT (name) DO UPDATE SET name = $1
-        RETURNING id
-      `, [newTagName]);
-      if (newTagResult.rowCount > 0) {
-        newTagIds.add(newTagResult.rows[0].id);
-      }
-    }
-
-    const oldTagsResult = await client.query("SELECT tag_id FROM puzzle_tag WHERE puzzle_id = $1", [puzzleId]);
-    const oldTagIds = new Set(oldTagsResult.rows.map(row => row.tag_id));
-
-    for (const oldTag of oldTagIds) {
-      if (!newTagIds.has(oldTag)) {
-        client.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1 AND tag_id = $2", [puzzleId, oldTag]);
-      }
-    }
-    for (const newTag of newTagIds) {
-      if (!oldTagIds.has(newTag)) {
-        client.query("INSERT INTO puzzle_tag (puzzle_id, tag_id) VALUES ($1, $2)", [puzzleId, newTag]);
-      }
-    }
-
+    await updateTags(puzzleId, selectedTagIds, newTagNames, client);
     await client.query("COMMIT");
   } catch (e) {
     console.error(`Failed to sync tags for puzzle ${puzzleId}`, e);
@@ -203,6 +192,30 @@ app.view("tags_update_view", async ({ack, view, body}) => {
   } finally {
     client.release();
   }
+}
+
+export function getTagsFromViewStateValues(viewStateValues: any) {
+  let selectedTagIds = [];
+  if (viewStateValues["previously_used_tags_input"]) {
+    selectedTagIds = viewStateValues["previously_used_tags_input"].map(Number);
+  }
+  let newTagNames: Array<string> = [];
+  if (viewStateValues["new_tags_input"]) {
+    newTagNames = viewStateValues["new_tags_input"].split(",").map((s: string) => s.trim());
+  }
+  return {
+    selectedTagIds,
+    newTagNames,
+  };
+}
+
+app.view("tags_update_view", async ({ack, view, body}) => {
+  ack();
+
+  const puzzleId = JSON.parse(body.view.private_metadata)["puzzleId"] as string;
+  const viewStateValues = getViewStateValues(view);
+  const selectedTags = getTagsFromViewStateValues(viewStateValues);
+  updateTagsWithTransaction(puzzleId, selectedTags.selectedTagIds, selectedTags.newTagNames);
 
   await taskQueue.scheduleTask("refresh_puzzle", {
     id: puzzleId,

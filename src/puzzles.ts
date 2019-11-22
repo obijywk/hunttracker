@@ -587,10 +587,12 @@ async function refreshUsers(id: string, client: PoolClient) {
   await Promise.all(promises);
 }
 
-export async function create(name: string, url: string) {
+export async function create(name: string, url: string, selectedTagIds: Array<number>, newTagNames: Array<string>) {
   await taskQueue.scheduleTask("create_puzzle", {
     name,
-    url
+    url,
+    selectedTagIds,
+    newTagNames
   });
 }
 
@@ -638,6 +640,8 @@ async function findChannelIdForChannelName(channelName: string): Promise<string 
 taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const name = payload.name;
   const url = payload.url;
+  const selectedTagIds: Array<number> = payload.selectedTagIds;
+  const newTagNames: Array<string> = payload.newTagNames;
 
   const sheetUrlPromise = googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, name);
 
@@ -666,7 +670,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const sheetUrl = await sheetUrlPromise;
 
   const now = moment();
-  const puzzle: Puzzle = {
+  let puzzle: Puzzle = {
     id,
     name,
     url,
@@ -691,12 +695,16 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   puzzle.statusMessageTs = postStatusMessageResult.ts;
 
   await insert(puzzle, client);
+  await tags.updateTags(id, selectedTagIds, newTagNames, client);
+  puzzle = await get(id, client);
 
   await app.client.pins.add({
     token: process.env.SLACK_BOT_TOKEN,
     channel: puzzle.id,
     timestamp: puzzle.statusMessageTs
   });
+
+  await updateStatusMessage(puzzle);
 
   if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
     await app.client.chat.postMessage({
