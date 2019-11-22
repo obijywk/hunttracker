@@ -114,7 +114,7 @@ export async function buildUpdateTagsBlocks(puzzleId: string) {
     },
     hint: {
       type: "plain_text",
-      text: "Enter tags that have not yet been introduced, separated by commas. Tags may not contain spaces.",
+      text: "Enter tags that have not yet been introduced, separated by spaces.",
     },
     element: {
       type: "plain_text_input",
@@ -201,7 +201,10 @@ export function getTagsFromViewStateValues(viewStateValues: any) {
   }
   let newTagNames: Array<string> = [];
   if (viewStateValues["new_tags_input"]) {
-    newTagNames = viewStateValues["new_tags_input"].split(",").map((s: string) => s.trim());
+    newTagNames = viewStateValues["new_tags_input"]
+      .split(" ")
+      .filter((s: string) => s.length > 0)
+      .map((s: string) => s.trim());
   }
   return {
     selectedTagIds,
