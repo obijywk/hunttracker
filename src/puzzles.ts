@@ -179,11 +179,41 @@ function buildChannelName(puzzleName: string): string {
   return channelName;
 }
 
-function buildStatusMessageBlocks(puzzle: Puzzle): any {
+function buildTopicBlock(puzzle: Puzzle) {
+  let topic = puzzle.channelTopic;
+  if (!topic) {
+    topic = "_Topic not set. Consider adding one for the benefit of your teammates._";
+  }
+  return {
+    "type": "section",
+    "text": {
+      "type": "mrkdwn",
+      text: ":mag_right: " + topic,
+    },
+    "accessory": {
+      "type": "button",
+      "text": {
+        "type": "plain_text",
+        "text": ":mag_right: Update Topic",
+      },
+      "action_id": "puzzle_update_topic",
+      "value": puzzle.id,
+    },
+  };
+}
+
+function buildIdleStatusBlock(puzzle: Puzzle) {
   const idleStatus = buildIdleStatus(puzzle);
-  let manualPokeAccessory = undefined;
-  if (idleStatus) {
-    manualPokeAccessory = {
+  if (!idleStatus) {
+    return null;
+  }
+  return {
+    "type": "section",
+    "text": {
+      "type": "mrkdwn",
+      text: idleStatus,
+    },
+    "accessory": {
       "type": "button",
       "text": {
         "type": "plain_text",
@@ -191,27 +221,28 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
       },
       "action_id": "puzzle_manual_poke",
       "value": puzzle.id,
-    };
-  }
-
-  let text = `:memo: ${buildPuzzleNameMrkdwn(puzzle)}`;
-  if (idleStatus) {
-    text += `\n${idleStatus}`;
-  }
-  text += `\n:bar_chart: <${puzzle.sheetUrl}|Open spreadsheet>`;
-  if (!puzzle.channelTopic) {
-    text += "\nHey! Consider *adding a channel topic* describing this puzzle for the benefit of your teammates.";
-  }
-
-  const actionButtons = [{
-    "type": "button",
-    "text": {
-      "type": "plain_text",
-      "text": ":mag_right: Update Topic",
     },
-    "action_id": "puzzle_update_topic",
-    "value": puzzle.id,
-  }];
+  };
+}
+
+function buildStatusMessageBlocks(puzzle: Puzzle): any {
+  const blocks: Array<any> = [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        text: `:memo: ${buildPuzzleNameMrkdwn(puzzle)}\n:bar_chart: <${puzzle.sheetUrl}|Open spreadsheet>`,
+      },
+    },
+    buildTopicBlock(puzzle),
+  ];
+
+  const idleStatusBlock = buildIdleStatusBlock(puzzle);
+  if (idleStatusBlock) {
+    blocks.push(idleStatusBlock);
+  }
+
+  const actionButtons = [];
   if (!puzzle.answer) {
     actionButtons.push({
       "type": "button",
@@ -238,27 +269,16 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
       "type": "button",
       "text": {
         "type": "plain_text",
-        "text": ":file_cabinet: Archive Channel",
+        "text": ":card_file_box: Archive",
       },
       "action_id": "puzzle_archive_channel",
       "value": puzzle.id,
     });
   }
-
-  const blocks = [
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        text,
-      },
-      "accessory": manualPokeAccessory,
-    },
-    {
-      "type": "actions",
-      "elements": actionButtons,
-    },
-  ];
+  blocks.push({
+    "type": "actions",
+    "elements": actionButtons,
+  });
 
   const tagBlock = tags.buildTagsBlock(puzzle.id, puzzle.tags, true);
   if (tagBlock) {
