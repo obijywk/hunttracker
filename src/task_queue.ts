@@ -54,6 +54,7 @@ async function processTaskQueue() {
     await client.query("ROLLBACK");
     throw e;
   } finally {
+    processTaskQueueRunning = false;
     client.release();
   }
 }
