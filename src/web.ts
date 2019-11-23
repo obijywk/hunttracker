@@ -3,6 +3,7 @@ import * as db from "./db";
 import * as home from "./home";
 import * as puzzles from "./puzzles";
 import * as refreshPolling from "./refresh_polling";
+import * as taskQueue from "./task_queue";
 import * as users from "./users";
 
 receiver.app.get("/", async (req, res) => {
@@ -54,4 +55,22 @@ receiver.app.post("/refreshallpuzzles", async (req, res) => {
 receiver.app.post("/publishhome", async (req, res) => {
   await home.publish(req.body.userId);
   return res.redirect("/");
+});
+
+receiver.app.get("/taskqueue", async (req, res) => {
+  const tasks = await taskQueue.list();
+  const displayTasks = tasks.map(t => Object.assign({}, t, {payload: JSON.stringify(t.payload)}));
+  return res.render("taskqueue", {
+    tasks: displayTasks,
+  });
+});
+
+receiver.app.post("/taskqueue/process", async (req, res) => {
+  await taskQueue.processTaskQueue();
+  return res.redirect("/taskqueue");
+});
+
+receiver.app.post("/taskqueue/delete", async (req, res) => {
+  await taskQueue.deleteTask(req.body.id);
+  return res.redirect("/taskqueue");
 });

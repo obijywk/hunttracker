@@ -18,7 +18,7 @@ export async function scheduleTask(taskType: string, payload: any) {
 
 let processTaskQueueRunning = false;
 
-async function processTaskQueue() {
+export async function processTaskQueue() {
   processTaskQueueRunning = true;
   const client = await db.connect();
   try {
@@ -68,4 +68,19 @@ export async function init() {
     }
   });
   processTaskQueue();
+}
+
+export interface Task {
+  id: number;
+  "task_type": string;
+  payload: any;
+}
+
+export async function list(): Promise<Array<Task>> {
+  const result = await db.query("SELECT id, task_type, payload FROM task_queue");
+  return result.rows;
+}
+
+export async function deleteTask(id: string) {
+  await db.query("DELETE FROM task_queue WHERE id = $1", [id]);
 }
