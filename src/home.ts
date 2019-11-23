@@ -35,7 +35,7 @@ function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
     },
   ];
 
-  const tagsBlock = tags.buildTagsBlock(puzzle.id, puzzle.tags, false);
+  const tagsBlock = tags.buildTagsBlock(puzzle.id, puzzle.tags);
   if (tagsBlock) {
     blocks.push(tagsBlock);
   }

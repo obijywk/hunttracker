@@ -194,7 +194,7 @@ function buildTopicBlock(puzzle: Puzzle) {
       "type": "button",
       "text": {
         "type": "plain_text",
-        "text": ":mag_right: Update Topic",
+        "text": ":mag_right: Update topic",
       },
       "action_id": "puzzle_update_topic",
       "value": puzzle.id,
@@ -217,7 +217,7 @@ function buildIdleStatusBlock(puzzle: Puzzle) {
       "type": "button",
       "text": {
         "type": "plain_text",
-        "text": ":stopwatch: Still solving!",
+        "text": ":stopwatch: Still solving",
       },
       "action_id": "puzzle_manual_poke",
       "value": puzzle.id,
@@ -226,14 +226,27 @@ function buildIdleStatusBlock(puzzle: Puzzle) {
 }
 
 function buildStatusMessageBlocks(puzzle: Puzzle): any {
-  const blocks: Array<any> = [
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        text: `:memo: ${buildPuzzleNameMrkdwn(puzzle)}\n:bar_chart: <${puzzle.sheetUrl}|Open spreadsheet>`,
-      },
+  const actionButtons = [tags.buildUpdateTagsButton(puzzle.id)];
+
+  const linksBlock = {
+    type: "section",
+    text: {
+      type: "mrkdwn",
+      text: `${puzzle.complete ? ":notebook:" : ":book:"} ${buildPuzzleNameMrkdwn(puzzle)}`,
     },
+    accessory: {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":bar_chart: Spreadsheet",
+      },
+      "action_id": "puzzle_open_spreadsheet",
+      url: puzzle.sheetUrl,
+    },
+  };
+
+  const blocks: Array<any> = [
+    linksBlock,
     buildTopicBlock(puzzle),
   ];
 
@@ -242,28 +255,40 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
     blocks.push(idleStatusBlock);
   }
 
-  const actionButtons = [];
-  if (!puzzle.answer) {
-    actionButtons.push({
-      "type": "button",
-      "text": {
-        "type": "plain_text",
-        "text": ":phone: Record Confirmed Answer",
+  if (puzzle.answer) {
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `:heavy_check_mark: ${puzzle.answer}`,
       },
-      "action_id": "puzzle_record_confirmed_answer",
-      "value": puzzle.id,
+      accessory: {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: ":phone: Update answer",
+        },
+        "action_id": "puzzle_record_confirmed_answer",
+        value: puzzle.id,
+      },
     });
   } else {
     actionButtons.push({
-      "type": "button",
-      "text": {
-        "type": "plain_text",
-        "text": `:pencil: Answer: ${puzzle.answer}`,
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":phone: Record confirmed answer",
       },
       "action_id": "puzzle_record_confirmed_answer",
-      "value": puzzle.id,
+      value: puzzle.id,
     });
   }
+
+  const tagBlock = tags.buildTagsBlock(puzzle.id, puzzle.tags);
+  if (tagBlock) {
+    blocks.push(tagBlock);
+  }
+
   if (puzzle.complete) {
     actionButtons.push({
       "type": "button",
@@ -280,13 +305,12 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
     "elements": actionButtons,
   });
 
-  const tagBlock = tags.buildTagsBlock(puzzle.id, puzzle.tags, true);
-  if (tagBlock) {
-    blocks.push(tagBlock);
-  }
-
   return blocks;
 }
+
+app.action("puzzle_open_spreadsheet", async ({ack}) => {
+  ack();
+});
 
 app.action("puzzle_manual_poke", async ({ack, payload}) => {
   const buttonAction = payload as ButtonAction;
@@ -327,7 +351,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
       "private_metadata": JSON.stringify({id}),
       title: {
         type: "plain_text",
-        text: "Update Topic",
+        text: "Update topic",
       },
       blocks: [
         {

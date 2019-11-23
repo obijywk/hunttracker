@@ -12,7 +12,7 @@ export interface Tag {
   name: string;
 }
 
-export function buildTagsBlock(puzzleId: string, tags: Array<Tag>, editable: boolean) {
+export function buildTagsBlock(puzzleId: string, tags: Array<Tag>) {
   const tagButtons = [];
   for (const tag of tags) {
     tagButtons.push({
@@ -24,17 +24,6 @@ export function buildTagsBlock(puzzleId: string, tags: Array<Tag>, editable: boo
       "action_id": `tags_click_${tag.id}`,
       "value": JSON.stringify({ puzzleId, tagId: tag.id }),
       "url": encodeURI(process.env.WEB_SERVER_URL + "tag?tag=" + tag.name),
-    });
-  }
-  if (editable) {
-    tagButtons.push({
-      "type": "button",
-      "text": {
-        "type": "plain_text",
-        "text": ":pencil2: Update Tags",
-      },
-      "action_id": "tags_update",
-      "value": puzzleId,
     });
   }
   if (tagButtons.length === 0) {
@@ -49,6 +38,18 @@ export function buildTagsBlock(puzzleId: string, tags: Array<Tag>, editable: boo
 app.action(/tags_click_.*/, async({ ack, payload, say }) => {
   ack();
 });
+
+export function buildUpdateTagsButton(puzzleId: string) {
+  return {
+    "type": "button",
+    "text": {
+      "type": "plain_text",
+      "text": ":pencil2: Update tags",
+    },
+    "action_id": "tags_update",
+    "value": puzzleId,
+  };
+}
 
 export async function buildUpdateTagsBlocks(puzzleId: string) {
   const tags = await db.query(`
