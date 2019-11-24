@@ -12,7 +12,6 @@ import {
   ChannelsInfoResult,
   ChatPostMessageResult,
   ConversationsListResult,
-  ConversationsMembersResult,
 } from "./slack_results";
 import { getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
