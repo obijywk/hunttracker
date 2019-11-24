@@ -1,21 +1,136 @@
 <html>
   <head>
-    <title>hunt</title>
+    <title>Puzzles</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
     <link rel="stylesheet" type="text/css" href="static/style.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
   </head>
   <body>
-    {{#each puzzles}}
-      <hr>
-      <div>
-        <p><a href="{{url}}">{{name}}</a></p>
-        <p><a href="{{../slackUrlPrefix}}{{id}}">#{{channelName}}</a></p>
-        <p><a href="{{sheetUrl}}">Spreadsheet</a></p>
-        <ul>
-          {{#each users}}
-            <li><a href="{{../../slackUrlPrefix}}{{id}}">{{name}}</a></li>
-          {{/each}}
-        </ul>
-      </div>
-    {{/each}}
+    <div class="puzzles-table-filter-controls">
+      <input type="radio" name="solved-filter" value="unsolved">Unsolved &nbsp;
+      <input type="radio" name="solved-filter" value="solved">Solved &nbsp;
+      <input type="radio" name="solved-filter" value="all" checked>All
+    </div>
+    <table id="puzzles-table" class="display" style="width: 100%">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Answer</th>
+          <th>Tags</th>
+          <th>Topic</th>
+          <th>Solved</th>
+        </tr>
+      </thead>
+    </table>
+    <script>
+      $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        const solvedFilterValue = $("input[name='solved-filter']:checked").val();
+        if (data[5] == "solved" && solvedFilterValue == "unsolved") {
+          return false;
+        }
+        if (data[5] == "unsolved" && solvedFilterValue == "solved") {
+          return false;
+        }
+        return true;
+      });
+
+      function formatDetails(data) {
+        return `
+          <table cellpadding="5" cellspacing="0" border="0" style="padding-left: 32px;">
+            <tr>
+              <td>Channel</td>
+              <td><a href="{{slackUrlPrefix}}${data.id}" target="_blank">#${data.channelName}</a></td>
+            </tr>
+            <tr>
+              <td>Spreadsheet</td>
+              <td><a href="${data.sheetUrl}" target="_blank">${data.sheetUrl}</a></td>
+            </tr>
+            <tr>
+              <td>Topic</td>
+              <td>${data.channelTopic}</td>
+            </tr>
+          </table>
+        `;
+      }
+
+      $(document).ready(function() {
+        const table = $("#puzzles-table").DataTable({
+          ajax: "/puzzles/data",
+          search: {
+            search: "{{initialSearch}}",
+          },
+          columns: [
+            {
+              data: null,
+              className: "details-control",
+              orderable: false,
+              defaultContent: "",
+              createdCell: (td, cellData, row, rowIndex, colIndex) => {
+                if (row.complete) {
+                  $(td).addClass("complete");
+                }
+              },
+            },
+            {
+              data: "name",
+              render: (data, type, row) => {
+                return `<a href="${row.url}" target="_blank">${data}</a>`;
+              },
+            },
+            {
+              data: "answer",
+              className: "answer",
+            },
+            {
+              data: "tags",
+              orderable: false,
+              render: (data, type, row) => {
+                return data.map(tag => {
+                  return `<a class="tag-link" href="javascript:void(0);">${tag.name}</a>`;
+                }).join(" ");
+              },
+            },
+            {
+              data: "channelTopic",
+              visible: false,
+            },
+            {
+              data: "complete",
+              visible: false,
+              render: (data, type, row) => {
+                if (data) {
+                  return "solved";
+                }
+                return "unsolved";
+              },
+            },
+          ],
+        });
+
+        $("#puzzles-table tbody").on("click", "td.details-control", function() {
+          const tr = $(this).closest("tr");
+          const row = table.row(tr);
+          if (row.child.isShown()) {
+            row.child.hide();
+            tr.removeClass("shown");
+          } else {
+            row.child(formatDetails(row.data())).show();
+            tr.addClass("shown");
+          }
+        });
+
+        $("#puzzles-table tbody").on("click", "a.tag-link", function() {
+          const searchString = (table.search() + " " + $(this).text()).trim();
+          table.search(searchString);
+          table.draw();
+        });
+
+        $("input[name='solved-filter']").change(function() {
+          table.draw();
+        });
+      });
+    </script>
   </body>
 </html>

@@ -23,7 +23,7 @@ export function buildTagsBlock(puzzleId: string, tags: Array<Tag>) {
       },
       "action_id": `tags_click_${tag.id}`,
       "value": JSON.stringify({ puzzleId, tagId: tag.id }),
-      "url": encodeURI(process.env.WEB_SERVER_URL + "tag?tag=" + tag.name),
+      "url": encodeURI(process.env.WEB_SERVER_URL + "puzzles?search=" + tag.name),
     });
   }
   if (tagButtons.length === 0) {

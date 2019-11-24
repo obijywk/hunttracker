@@ -11,11 +11,17 @@ receiver.app.get("/", async (req, res) => {
 });
 
 receiver.app.get("/puzzles", async (req, res) => {
-  const puzzlesPromise = puzzles.list();
   return res.render("puzzles", {
-    puzzles: await puzzlesPromise,
     slackUrlPrefix: process.env.SLACK_URL_PREFIX,
+    initialSearch: req.query.search || "",
   });
+});
+
+receiver.app.get("/puzzles/data", async (req, res) => {
+  res.contentType("application/json");
+  res.end(JSON.stringify({
+    data: await puzzles.list(),
+  }));
 });
 
 receiver.app.get("/tag", async (req, res) => {

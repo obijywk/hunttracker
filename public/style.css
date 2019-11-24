@@ -1,3 +1,33 @@
 body {
   font-family: sans-serif;
 }
+
+div.puzzles-table-filter-controls {
+  color: #333;
+  float: right;
+  text-align: right;
+}
+
+td.details-control {
+  background: url("details_open.png") no-repeat center center;
+  cursor: pointer;
+}
+tr.shown td.details-control {
+  background: url("details_close.png") no-repeat center center;
+}
+td.details-control.complete {
+  background-color: #70d070 !important;
+}
+
+td.answer {
+  font-family: "Roboto Mono", monospace;
+}
+
+a.tag-link {
+  border: 1px solid black;
+  padding: 4px;
+  border-radius: 4px;
+  text-decoration: none;
+  background-color: #ddd;
+  color: #333;
+}
