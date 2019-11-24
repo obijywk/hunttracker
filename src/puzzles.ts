@@ -247,13 +247,7 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
 
   const blocks: Array<any> = [
     linksBlock,
-    buildTopicBlock(puzzle),
   ];
-
-  const idleStatusBlock = buildIdleStatusBlock(puzzle);
-  if (idleStatusBlock) {
-    blocks.push(idleStatusBlock);
-  }
 
   if (puzzle.answer) {
     blocks.push({
@@ -282,6 +276,13 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
       "action_id": "puzzle_record_confirmed_answer",
       value: puzzle.id,
     });
+  }
+
+  blocks.push(buildTopicBlock(puzzle));
+
+  const idleStatusBlock = buildIdleStatusBlock(puzzle);
+  if (idleStatusBlock) {
+    blocks.push(idleStatusBlock);
   }
 
   const tagBlock = tags.buildTagsBlock(puzzle.id, puzzle.tags);
