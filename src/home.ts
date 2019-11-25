@@ -70,7 +70,7 @@ async function buildHomeBlocks(userId: string) {
         type: "button",
         text: {
           type: "plain_text",
-          text: ":sparkles: Register Puzzle",
+          text: ":sparkles: Register puzzle",
         },
         "action_id": "home_register_puzzle",
       },
@@ -78,7 +78,7 @@ async function buildHomeBlocks(userId: string) {
         type: "button",
         text: {
           type: "plain_text",
-          text: ":link: See All Puzzles",
+          text: ":link: See all puzzles",
         },
         "action_id": "home_see_all_puzzles",
         url: process.env.WEB_SERVER_URL + "puzzles",
