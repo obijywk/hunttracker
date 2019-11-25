@@ -19,8 +19,11 @@ receiver.app.get("/puzzles", async (req, res) => {
 
 receiver.app.get("/puzzles/data", async (req, res) => {
   res.contentType("application/json");
+  const allPuzzles = await puzzles.list();
+  const data = allPuzzles.map(p => Object.assign(
+    {}, p, {idleDurationMilliseconds: puzzles.getIdleDuration(p).asMilliseconds()}));
   res.end(JSON.stringify({
-    data: await puzzles.list(),
+    data,
   }));
 });
 

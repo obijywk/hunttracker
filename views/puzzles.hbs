@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
   </head>
   <body>
     <div class="puzzles-table-filter-controls">
@@ -16,21 +17,23 @@
       <thead>
         <tr>
           <th></th>
+          <th>Solved</th>
           <th>Name</th>
           <th>Answer</th>
-          <th>Tags</th>
           <th>Topic</th>
-          <th>Solved</th>
+          <th>Tags</th>
+          <th>Idle time</th>
+          <th>Users</th>
         </tr>
       </thead>
     </table>
     <script>
       $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
         const solvedFilterValue = $("input[name='solved-filter']:checked").val();
-        if (data[5] == "solved" && solvedFilterValue == "unsolved") {
+        if (data[1] == "solved" && solvedFilterValue == "unsolved") {
           return false;
         }
-        if (data[5] == "unsolved" && solvedFilterValue == "solved") {
+        if (data[1] == "unsolved" && solvedFilterValue == "solved") {
           return false;
         }
         return true;
@@ -48,8 +51,8 @@
               <td><a href="${data.sheetUrl}" target="_blank">${data.sheetUrl}</a></td>
             </tr>
             <tr>
-              <td>Topic</td>
-              <td>${data.channelTopic}</td>
+              <td>Users</td>
+              <td>${data.users.map(u => u.name).join(", ")}</td>
             </tr>
           </table>
         `;
@@ -74,6 +77,16 @@
               },
             },
             {
+              data: "complete",
+              visible: false,
+              render: (data, type, row) => {
+                if (data) {
+                  return "solved";
+                }
+                return "unsolved";
+              },
+            },
+            {
               data: "name",
               render: (data, type, row) => {
                 return `<a href="${row.url}" target="_blank">${data}</a>`;
@@ -82,6 +95,9 @@
             {
               data: "answer",
               className: "answer",
+            },
+            {
+              data: "channelTopic",
             },
             {
               data: "tags",
@@ -93,18 +109,22 @@
               },
             },
             {
-              data: "channelTopic",
-              visible: false,
+              data: "idleDurationMilliseconds",
+              render: (data, type, row) => {
+                if (type === "display" || type === "filter") {
+                  if (data === 0) {
+                    return "n/a";
+                  }
+                  return moment.duration(data).humanize();
+                }
+                return data;
+              },
             },
             {
-              data: "complete",
-              visible: false,
-              render: (data, type, row) => {
-                if (data) {
-                  return "solved";
-                }
-                return "unsolved";
+              data: (row, type, val, meta) => {
+                return row.users.map(u => u.name).join(", ");
               },
+              visible: false,
             },
           ],
         });

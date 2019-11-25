@@ -24,10 +24,15 @@ td.answer {
 }
 
 a.tag-link {
-  border: 1px solid black;
+  line-height: 2em;
   padding: 4px;
+  border: 1px solid black;
   border-radius: 4px;
   text-decoration: none;
   background-color: #ddd;
   color: #333;
+}
+
+a.tag-link:hover {
+  background-color: #aaa;
 }
