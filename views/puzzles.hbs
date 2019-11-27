@@ -2,16 +2,21 @@
   <head>
     <title>Puzzles</title>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css">
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
   </head>
   <body>
-    <div class="puzzles-table-filter-controls">
+    <div class="puzzles-table-filter-solved">
       <input type="radio" name="solved-filter" value="unsolved">Unsolved &nbsp;
       <input type="radio" name="solved-filter" value="solved">Solved &nbsp;
       <input type="radio" name="solved-filter" value="all" checked>All
+    </div>
+    <div class="puzzles-table-filter-tags">
+      <select class="tags-select" name="filteredTags[]" multiple="multiple"></select>
     </div>
     <table id="puzzles-table" class="display" style="width: 100%">
       <thead>
@@ -28,6 +33,20 @@
       </thead>
     </table>
     <script>
+      $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        const selectedTags = $(".tags-select").select2("data");
+        if (selectedTags.length === 0) {
+          return true;
+        }
+        const selectedTagNames = new Set(selectedTags.map(o => o.text));
+        for (const tagName of data[5].split(" ")) {
+          if (selectedTagNames.has(tagName)) {
+            return true;
+          }
+        }
+        return false;
+      });
+
       $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
         const solvedFilterValue = $("input[name='solved-filter']:checked").val();
         if (data[1] == "solved" && solvedFilterValue == "unsolved") {
@@ -129,6 +148,30 @@
           ],
         });
 
+        table.on("xhr", function() {
+          const json = table.ajax.json();
+          const tagNameSet = new Set();
+          for (const puzzle of json.data) {
+            for (const tag of puzzle.tags) {
+              tagNameSet.add(tag.name);
+            }
+          }
+          const tagNameArray = Array.from(tagNameSet);
+          tagNameArray.sort();
+          const tagData = [];
+          for (const tagName of tagNameArray) {
+            tagData.push({ id: tagName, text: tagName });
+          }
+          $(".tags-select").select2({
+            data: tagData,
+            placeholder: "Filter by tag",
+            allowClear: true,
+          });
+          $(".tags-select").on("change", function() {
+            table.draw();
+          });
+        });
+
         $("#puzzles-table tbody").on("click", "td.details-control", function() {
           const tr = $(this).closest("tr");
           const row = table.row(tr);
@@ -142,8 +185,10 @@
         });
 
         $("#puzzles-table tbody").on("click", "a.tag-link", function() {
-          const searchString = (table.search() + " " + $(this).text()).trim();
-          table.search(searchString);
+          const selected = $(".tags-select").val();
+          selected.push($(this).text());
+          $(".tags-select").val(selected);
+          $(".tags-select").trigger("change");
           table.draw();
         });
 
