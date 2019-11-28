@@ -195,13 +195,24 @@ app.view("home_register_puzzle_view", async ({ack, view}) => {
     } as any);
     return;
   }
-  ack();
 
-  await puzzles.create(
+  const createError = await puzzles.create(
     values["puzzle_name_input"],
     values["puzzle_url_input"],
     selectedTags.selectedTagIds,
     selectedTags.newTagNames);
+
+  if (createError) {
+    ack({
+      "response_action": "errors",
+      errors: {
+        "puzzle_name_input": createError,
+      },
+    } as any);
+    return;
+  }
+
+  ack();
 });
 
 app.action("home_see_all_puzzles", async ({ ack }) => {

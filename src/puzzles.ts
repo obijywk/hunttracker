@@ -586,13 +586,33 @@ async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | nu
   return null;
 }
 
-export async function create(name: string, url: string, selectedTagIds: Array<number>, newTagNames: Array<string>) {
+export async function create(
+  name: string,
+  url: string,
+  selectedTagIds: Array<number>,
+  newTagNames: Array<string>,
+): Promise<string | null> {
+  const channelName = buildChannelName(name);
+  const existsResult = await db.query(`
+    SELECT EXISTS (
+      SELECT 1
+      FROM puzzles
+      WHERE
+        name = $1 OR
+        channel_name = $2 OR
+        (char_length(url) > 0 AND url = $3)
+    )
+  `, [name, channelName, url]);
+  if (existsResult.rowCount > 0 && existsResult.rows[0].exists) {
+    return "This puzzle has already been registered.";
+  }
   await taskQueue.scheduleTask("create_puzzle", {
     name,
     url,
     selectedTagIds,
     newTagNames,
   });
+  return null;
 }
 
 export async function refreshAll() {
