@@ -46,3 +46,13 @@ a.tag-link {
 a.tag-link:hover {
   background-color: #aaa;
 }
+
+table.task-queue-table {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+table.task-queue-table td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}

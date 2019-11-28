@@ -105,7 +105,10 @@ receiver.app.get("/taskqueue", async (req, res) => {
     return;
   }
   const tasks = await taskQueue.list();
-  const displayTasks = tasks.map(t => Object.assign({}, t, {payload: JSON.stringify(t.payload)}));
+  const displayTasks = tasks.map(t => Object.assign({}, t, {
+    payload: JSON.stringify(t.payload),
+    error: t.error ? JSON.stringify(t.error) : null,
+  }));
   return res.render("taskqueue", {
     tasks: displayTasks,
   });
@@ -116,6 +119,14 @@ receiver.app.post("/taskqueue/process", async (req, res) => {
     return;
   }
   await taskQueue.processTaskQueue();
+  return res.redirect("/taskqueue");
+});
+
+receiver.app.post("/taskqueue/clearerror", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+  await taskQueue.clearTaskError(req.body.id);
   return res.redirect("/taskqueue");
 });
 

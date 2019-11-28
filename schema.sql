@@ -57,7 +57,8 @@ CREATE TYPE task_type AS ENUM (
 CREATE TABLE task_queue (
   id SERIAL PRIMARY KEY,
   task_type task_type,
-  payload jsonb
+  payload jsonb,
+  error json
 );
 
 CREATE FUNCTION task_queue_add_notify() RETURNS TRIGGER AS $$
