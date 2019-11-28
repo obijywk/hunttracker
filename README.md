@@ -7,6 +7,11 @@ Everything is configured using environment variables, and they need to be set fo
 - **PORT**: The server HTTP port. The default is 3000.
 - **WEB_SERVER_URL**: The publicly accessible URL for this server, with trailing slash.
   Used to build links.
+- **SESSION_SECRET**: A secret string used to sign the session cookie to prevent tampering.
+- **SLACK_CLIENT_ID**: This is the "Client ID" you can get from the "Basic Information"
+  page in the "Your Apps" section of https://api.slack.com/.
+- **SLACK_CLIENT_SECRET**: This is the "Client Secret" you can get from the "Basic Information"
+  page in the "Your Apps" section of https://api.slack.com/.
 - **SLACK_SIGNING_SECRET**: This is the "Signing Secret" you can get from the
   "Basic Information" page in the "Your Apps" section of https://api.slack.com/.
 - **SLACK_BOT_TOKEN**: This is the "Bot User OAUth Access Token" you can get from the
@@ -48,7 +53,8 @@ Everything is configured using environment variables, and they need to be set fo
 ## Required Slack configuration
 
 The following scopes to be added to the Slack app on the "OAuth & Permissions" page in the "Your Apps"
-section of https://api.slack.com/.
+section of https://api.slack.com/. Your web server URL plus "/auth/slack/callback" must be added as a
+"Redirect URL" on the "OAuth & Permissions" page.
 
 - bot
 - channels:read
@@ -60,7 +66,8 @@ section of https://api.slack.com/.
 - users:read
 
 The following workspace events need to be added on the "Event Subscriptions" page in the "Your Apps"
-section of https://api.slack.com/.
+section of https://api.slack.com/. The "Request URL" on the "Event Subscriptions" page should be set to
+your web server URL plus "/slack/events".
 
 - app_home_opened
 - message.channels
@@ -86,4 +93,4 @@ is clicked.
 ## HTTP pages
 
 - The index page currently has some buttons to help test various things
-- Visiting **/puzzles** will (poorly) list puzzles that have been created
+- **/puzzles** returns a dashboard of all puzzles

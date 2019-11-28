@@ -1,8 +1,11 @@
 <html>
   <head>
-    <title>hunt tracker</title>
+    <title>Hunt</title>
   </head>
   <body>
+    <p>
+      Signed in as {{user.displayName}}. <a href="/logout">Sign out.</a>
+    </p>
     <form action="/resetdatabase" method="post">
       <input type="submit" value="Reset Database" />
     </form>

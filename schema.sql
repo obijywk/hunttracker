@@ -1,14 +1,16 @@
+DROP TABLE IF EXISTS sessions;
+
 DROP TRIGGER IF EXISTS task_queue_add_trigger ON task_queue;
 DROP FUNCTION IF EXISTS task_queue_add_notify;
 DROP TABLE IF EXISTS task_queue;
 DROP TYPE IF EXISTS task_type;
 
-DROP TABLE IF EXISTS puzzle_tag;
-DROP TABLE IF EXISTS puzzle_user;
+DROP TABLE IF EXISTS puzzle_tag CASCADE;
+DROP TABLE IF EXISTS puzzle_user CASCADE;
 
-DROP TABLE IF EXISTS puzzles;
-DROP TABLE IF EXISTS tags;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS puzzles CASCADE;
+DROP TABLE IF EXISTS tags CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE puzzles (
   id text PRIMARY KEY,  -- Slack channel ID
@@ -68,3 +70,10 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER task_queue_add_trigger
 AFTER INSERT ON task_queue
 EXECUTE PROCEDURE task_queue_add_notify();
+
+CREATE TABLE sessions (
+  sid varchar NOT NULL,
+  sess json NOT NULL,
+  expire timestamp(6) NOT NULL
+) WITH (OIDS=FALSE);
+ALTER TABLE sessions ADD CONSTRAINT sessions_pkey PRIMARY KEY (sid) NOT DEFERRABLE INITIALLY IMMEDIATE;
