@@ -170,6 +170,11 @@
           $(".tags-select").on("change", function() {
             table.draw();
           });
+          const initialTags = "{{initialTags}}";
+          if (initialTags) {
+            $(".tags-select").val(initialTags.split(" ").filter(t => t.length > 0));
+            $(".tags-select").trigger("change");
+          }
         });
 
         $("#puzzles-table tbody").on("click", "td.details-control", function() {
