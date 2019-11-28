@@ -1,23 +1,13 @@
 <html>
   <head>
-    <title>Hunt</title>
+    <title>Hunt Tracker</title>
   </head>
   <body>
     <p>
-      Signed in as {{user.displayName}}. <a href="/logout">Sign out.</a>
+      Signed in as {{user.displayName}}. <a href="/logout">Sign out</a>.
     </p>
-    <form action="/resetdatabase" method="post">
-      <input type="submit" value="Reset Database" />
-    </form>
-    <form action="/refreshusers" method="post">
-      <input type="submit" value="Refresh Users" />
-    </form>
-    <form action="/refreshallpuzzles" method="post">
-      <input type="submit" value="Refresh All Puzzles" />
-    </form>
-    <form action="/publishhome" method="post">
-      <input type="text" name="userId" placeholder="Slack user ID" />
-      <input type="submit" value="Publish Home" />
-    </form>
+    <p>
+      Check out the <a href="/puzzles">dashboard of all puzzles</a>.
+    </p>
   </body>
 </html>

@@ -68,37 +68,44 @@ receiver.app.get("/refresh", async (req, res) => {
   return res.status(200).send("ok");
 });
 
-receiver.app.post("/resetdatabase", async (req, res) => {
+receiver.app.get("/admin", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+  return res.render("admin");
+});
+
+receiver.app.post("/admin/resetdatabase", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
   await db.applySchema();
   await users.refreshAll();
-  return res.redirect("/");
+  return res.redirect("/admin");
 });
 
-receiver.app.post("/refreshusers", async (req, res) => {
+receiver.app.post("/admin/refreshusers", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
   await users.refreshAll();
-  return res.redirect("/");
+  return res.redirect("/admin");
 });
 
-receiver.app.post("/refreshallpuzzles", async (req, res) => {
+receiver.app.post("/admin/refreshallpuzzles", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
   await puzzles.refreshAll();
-  return res.redirect("/");
+  return res.redirect("/admin");
 });
 
-receiver.app.post("/publishhome", async (req, res) => {
+receiver.app.post("/admin/publishhome", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
   await home.publish(req.body.userId);
-  return res.redirect("/");
+  return res.redirect("/admin");
 });
 
 receiver.app.get("/taskqueue", async (req, res) => {
