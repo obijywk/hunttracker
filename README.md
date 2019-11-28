@@ -94,5 +94,6 @@ is clicked.
 
 - **/** doesn't contain much. It has a sign out link.
 - **/puzzles** is a dashboard of all puzzles.
+- **/tagger** is a tool for adding and removing tags on multiple puzzles at once.
 - **/admin** has controls to trigger some administrative functions.
 - **/taskqueue** can be used to manage the queue of asynchronous background tasks.

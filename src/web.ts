@@ -5,6 +5,7 @@ import * as db from "./db";
 import * as home from "./home";
 import * as puzzles from "./puzzles";
 import * as refreshPolling from "./refresh_polling";
+import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
 
@@ -144,4 +145,55 @@ receiver.app.post("/taskqueue/delete", async (req, res) => {
   }
   await taskQueue.deleteTask(req.body.id);
   return res.redirect("/taskqueue");
+});
+
+receiver.app.get("/tagger", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+
+  const puzzlesPromise = puzzles.list();
+  const tagsPromise = tags.list();
+
+  const allTags = await tagsPromise;
+  const tagOptions = allTags.map(t => ({
+    id: t.id,
+    text: t.name,
+  }));
+
+  const allPuzzles = await puzzlesPromise;
+  const puzzleOptions = allPuzzles.map(p => ({
+    id: p.id,
+    text: p.name,
+  }));
+
+  res.render("tagger", {
+    puzzleOptions: JSON.stringify(puzzleOptions),
+    tagOptions: JSON.stringify(tagOptions),
+  });
+});
+
+receiver.app.post("/tagger/update", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+
+  const puzzleIds = (req.body.puzzles || []) as Array<string>;
+
+  const addedTags = (req.body.addedTags || []) as Array<string>;
+  const addedTagIds: Array<number> = [];
+  const addedTagNames: Array<string> = [];
+  for (const addedTag of addedTags) {
+    if (addedTag.indexOf("new_") === 0) {
+      addedTagNames.push(addedTag.substring(4));
+    } else {
+      addedTagIds.push(Number(addedTag));
+    }
+  }
+
+  const removedTagIds = (req.body.removedTags || []).map((s: string) => Number(s)) as Array<number>;
+
+  await tags.addAndRemoveTags(puzzleIds, addedTagIds, addedTagNames, removedTagIds);
+
+  return res.redirect("/tagger");
 });

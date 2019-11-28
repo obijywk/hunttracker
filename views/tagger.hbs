@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <title>Tagger</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
+  </head>
+  <body>
+    <form action="/tagger/update" method="post">
+      <p>Puzzles to update</p>
+      <select class="puzzles-select wide-select" name="puzzles[]" multiple="multiple"></select>
+      <p>Tags to add</p>
+      <select class="tags-add-select wide-select" name="addedTags[]" multiple="multiple"></select>
+      <p>Tags to remove</p>
+      <select class="tags-remove-select wide-select" name="removedTags[]" multiple="multiple"></select>
+      <p>
+        <input type="submit" value="Update Tags" />
+      </p>
+    </form>
+    <script>
+      $(document).ready(function() {
+        $(".puzzles-select").select2({
+          data: {{{puzzleOptions}}},
+          placeholder: "Select puzzles to update",
+        });
+        $(".tags-add-select").select2({
+          data: {{{tagOptions}}},
+          tags: "true",
+          tokenSeparators: " ",
+          createTag: function(params) {
+            if (params.term.length === 0) {
+              return null;
+            }
+            if (params.term.match(/[^a-z0-9-/]/g)) {
+              return null;
+            }
+            return {
+              id: "new_" + params.term,
+              text: params.term,
+            };
+          },
+          placeholder: "Select tags to add",
+        });
+        $(".tags-remove-select").select2({
+          data: {{{tagOptions}}},
+          placeholder: "Select tags to remove",
+        });
+      });
+    </script>
+  </body>
+</html>

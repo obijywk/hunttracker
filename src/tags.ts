@@ -12,6 +12,11 @@ export interface Tag {
   name: string;
 }
 
+export async function list(): Promise<Array<Tag>> {
+  const result = await db.query("SELECT id, name FROM tags ORDER BY name ASC");
+  return result.rows;
+}
+
 export function buildTagsBlock(puzzleId: string, tags: Array<Tag>) {
   const tagButtons = [];
   for (const tag of tags) {
@@ -192,6 +197,41 @@ export async function updateTagsWithTransaction(puzzleId: string, selectedTagIds
     throw e;
   } finally {
     client.release();
+  }
+}
+
+export async function addAndRemoveTags(
+  puzzleIds: Array<string>,
+  addedTagIds: Array<number>,
+  addedTagNames: Array<string>,
+  removedTagIds: Array<number>,
+) {
+  const createdTagIds = [];
+  for (const addedTagName of addedTagNames) {
+    const newTagResult = await db.query(`
+      INSERT INTO tags (name) VALUES ($1)
+      ON CONFLICT (name) DO UPDATE SET name = $1
+      RETURNING id
+    `, [addedTagName]);
+    if (newTagResult.rowCount > 0) {
+      createdTagIds.push(newTagResult.rows[0].id);
+    }
+  }
+  const allAddedTagIds = addedTagIds.concat(createdTagIds);
+
+  for (const puzzleId of puzzleIds) {
+    for (const tagId of allAddedTagIds) {
+      db.query(`
+        INSERT INTO puzzle_tag (puzzle_id, tag_id) VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+      `, [puzzleId, tagId]);
+    }
+    for (const tagId of removedTagIds) {
+      db.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1 AND tag_id = $2", [puzzleId, tagId]);
+    }
+    await taskQueue.scheduleTask("refresh_puzzle", {
+      id: puzzleId,
+    });
   }
 }
 
