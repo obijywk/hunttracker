@@ -44,7 +44,7 @@ export function buildUpdateTagsButton(puzzleId: string) {
     "type": "button",
     "text": {
       "type": "plain_text",
-      "text": ":pencil2: Update tags",
+      "text": ":bookmark: Update tags",
     },
     "action_id": "tags_update",
     "value": puzzleId,
