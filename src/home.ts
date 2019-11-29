@@ -1,9 +1,11 @@
-import { Block, KnownBlock } from "@slack/types";
+import { ButtonAction } from "@slack/bolt";
+import { Block, Button, KnownBlock } from "@slack/types";
 
 import { app } from "./app";
 import * as puzzles from "./puzzles";
 import { getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
+import * as taskQueue from "./task_queue";
 
 const maxUsersToList = 5;
 const maxPuzzlesToList = 30;
@@ -25,6 +27,19 @@ function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
     text += `\n:man-woman-girl-boy: (${puzzle.users.length}) ${users}`;
   }
 
+  let accessory: Button = undefined;
+  if (puzzle.users.map(u => u.id).indexOf(userId) === -1) {
+    accessory = {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: "Join channel",
+      },
+      "action_id": "home_join_channel",
+      value: JSON.stringify({ puzzleId: puzzle.id, userId }),
+    };
+  }
+
   const blocks: Array<Block | KnownBlock> = [
     {
       type: "section",
@@ -32,6 +47,7 @@ function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
         type: "mrkdwn",
         text,
       },
+      accessory,
     },
   ];
 
@@ -120,6 +136,10 @@ export async function publish(userId: string) {
     },
   });
 }
+
+taskQueue.registerHandler("publish_home", async (client, payload) => {
+  await publish(payload.userId);
+});
 
 app.event("app_home_opened", async ({ event }) => {
   await publish(event.user);
@@ -217,4 +237,18 @@ app.view("home_register_puzzle_view", async ({ack, view}) => {
 
 app.action("home_see_all_puzzles", async ({ ack }) => {
   ack();
+});
+
+app.action("home_join_channel", async ({ ack, payload }) => {
+  ack();
+
+  const value = JSON.parse((payload as ButtonAction).value);
+  const puzzleId = value.puzzleId;
+  const userId = value.userId;
+
+  await app.client.channels.invite({
+    token: process.env.SLACK_USER_TOKEN,
+    channel: puzzleId,
+    user: userId,
+  });
 });

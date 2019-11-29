@@ -51,7 +51,8 @@ CREATE TABLE puzzle_user (
 
 CREATE TYPE task_type AS ENUM (
   'create_puzzle',
-  'refresh_puzzle'
+  'refresh_puzzle',
+  'publish_home'
 );
 
 CREATE TABLE task_queue (

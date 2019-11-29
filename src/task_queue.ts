@@ -10,10 +10,11 @@ export function registerHandler(
   handlers[taskType] = handler;
 }
 
-export async function scheduleTask(taskType: string, payload: any) {
+export async function scheduleTask(taskType: string, payload: any, client?: PoolClient) {
   await db.query(
     "INSERT INTO task_queue (task_type, payload) VALUES ($1, $2)",
-    [taskType, payload]);
+    [taskType, payload],
+    client);
 }
 
 let processTaskQueueRunning = false;

@@ -794,7 +794,13 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
   }
 
   await updateStatusMessagePromise;
-  await refreshUsersPromise;
+
+  const affectedUserIds = await refreshUsersPromise;
+  for (const userId of affectedUserIds) {
+    await taskQueue.scheduleTask("publish_home", {
+      userId,
+    }, client);
+  }
 });
 
 const refreshPuzzleSubtypes = new Set([
