@@ -1,4 +1,5 @@
 import moment = require("moment");
+import * as diacritics from "diacritics";
 import { PoolClient } from "pg";
 import { ButtonAction, MessageEvent } from "@slack/bolt";
 import { ErrorCode } from "@slack/web-api";
@@ -166,7 +167,10 @@ export function buildPuzzleNameMrkdwn(puzzle: Puzzle) {
 }
 
 function normalizeStringForChannelName(s: string): string {
-  return s.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  return diacritics.remove(s)
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
 }
 
 function buildChannelName(puzzleName: string): string {
