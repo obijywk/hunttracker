@@ -94,10 +94,19 @@ async function buildHomeBlocks(userId: string) {
         type: "button",
         text: {
           type: "plain_text",
-          text: ":link: See all puzzles",
+          text: ":books: See all puzzles",
         },
         "action_id": "home_see_all_puzzles",
         url: process.env.WEB_SERVER_URL + "puzzles",
+      },
+      {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: ":bookmark: Update tags",
+        },
+        "action_id": "home_update_tags",
+        url: process.env.WEB_SERVER_URL + "tagger",
       },
     ],
   }];
@@ -236,6 +245,10 @@ app.view("home_register_puzzle_view", async ({ack, view}) => {
 });
 
 app.action("home_see_all_puzzles", async ({ ack }) => {
+  ack();
+});
+
+app.action("home_update_tags", async ({ ack }) => {
   ack();
 });
 
