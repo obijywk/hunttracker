@@ -108,7 +108,10 @@
             {
               data: "name",
               render: (data, type, row) => {
-                return `<a href="${row.url}" target="_blank">${data}</a>`;
+                if (type === "display" && row.url) {
+                  return `<a href="${row.url}" target="_blank">${data}</a>`;
+                }
+                return data;
               },
             },
             {
