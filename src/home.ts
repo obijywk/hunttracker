@@ -242,6 +242,14 @@ app.view("home_register_puzzle_view", async ({ack, view}) => {
   }
 
   ack();
+
+  if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
+    await app.client.chat.postMessage({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
+      text: `Registering ${values["puzzle_name_input"]}, please wait...`,
+    });
+  }
 });
 
 app.action("home_see_all_puzzles", async ({ ack }) => {
