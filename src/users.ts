@@ -4,7 +4,6 @@ import { UserChangeEvent } from "@slack/bolt";
 import { app } from "./app";
 import * as db from "./db";
 import { ConversationsMembersResult, UsersListResult, UserResult } from "./slack_results";
-import * as taskQueue from "./task_queue";
 
 export interface User {
   id: string;
