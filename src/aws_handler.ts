@@ -20,7 +20,7 @@ export const handler = serverlessHttp(receiver.app);
 
 export const refresh = async (
   event: AWSLambda.APIGatewayEvent,
-  context: AWSLambda.APIGatewayEventRequestContext
+  context: AWSLambda.APIGatewayEventRequestContext,
 ) => {
   await refreshPolling.refresh();
 };
