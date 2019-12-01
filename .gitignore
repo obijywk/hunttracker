@@ -4,5 +4,6 @@
 /dist
 .gcloudignore
 /node_modules
+serverless.yml
 .vagrant
 /Vagrantfile
