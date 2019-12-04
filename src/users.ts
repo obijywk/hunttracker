@@ -134,24 +134,30 @@ export async function refreshPuzzleUsers(
   return affectedUserIds;
 }
 
-app.event("user_change", async ({ event }) => {
-  const userChangeEvent = event as UserChangeEvent;
-  const member = userChangeEvent.user as UserResult;
-  if (!shouldAcceptMember(member)) {
-    return;
-  }
-  const memberName = getMemberName(member);
-  const dbUserResult = await db.query("SELECT id, name FROM users WHERE id = $1", [member.id]);
-  if (dbUserResult.rowCount === 0) {
-    await db.query(
-      "INSERT INTO users(id, name) VALUES ($1, $2)",
-      [member.id, memberName]);
-  } else {
-    const dbUser = dbUserResult.rows[0] as User;
-    if (dbUser.name != memberName) {
+app.event("user_change", async ({ event, body }) => {
+  try {
+    const userChangeEvent = event as UserChangeEvent;
+    const member = userChangeEvent.user as UserResult;
+    if (!shouldAcceptMember(member)) {
+      return;
+    }
+    const memberName = getMemberName(member);
+    const dbUserResult = await db.query("SELECT id, name FROM users WHERE id = $1", [member.id]);
+    if (dbUserResult.rowCount === 0) {
       await db.query(
-        "UPDATE users SET name = $2 WHERE id = $1",
-        [dbUser.id, memberName]);
+        "INSERT INTO users(id, name) VALUES ($1, $2)",
+        [member.id, memberName]);
+    } else {
+      const dbUser = dbUserResult.rows[0] as User;
+      if (dbUser.name != memberName) {
+        await db.query(
+          "UPDATE users SET name = $2 WHERE id = $1",
+          [dbUser.id, memberName]);
+      }
+    }
+  } finally {
+    if (body.eventAck) {
+      body.eventAck();
     }
   }
 });

@@ -48,7 +48,11 @@ Everything is configured using environment variables, and they need to be set fo
   considered idle.
 - **REFRESH_POLLING_MINUTES**: The frequency with which to internally poll for changes that
   aren't detected using events (e.g. spreadsheet edits). Alternatively, you can set up an
-  external process to periodically GET /refresh.
+  external process to periodically GET /refresh, and leave this unset.
+- **AWS_SNS_TOPIC_REGION**: The AWS region containing the SNS topic for task queue notifications,
+  or unset to not use SNS.
+- **AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN**: The AWS SNS topic for task queue notifications, or
+  unset to not use SNS.
 
 ## Required Slack configuration
 
@@ -73,6 +77,9 @@ your web server URL plus "/slack/events".
 - message.channels
 - user_change
 
+The "Request URL" on the "Interactive Components" page should be set to your web server URL plus
+"/slack/events".
+
 ## Setup and run locally
 
 Make sure the environment variables above are set before starting the server.
@@ -86,8 +93,7 @@ $ npm run build
 $ npm run start
 ```
 
-The first time you run it, you'll need to initialize the database by going to http://localhost:3000/
-and clicking the button to reset the database. The database will be erased each time this button
+The first time you run it, you'll need to initialize the database by going to http://localhost:3000/admin/initdatabase. The database will be erased each time this button
 is clicked.
 
 ## HTTP pages

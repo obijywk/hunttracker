@@ -16,7 +16,7 @@ export const sessionStore = new (connectPgSimple(expressSession))({
   pool,
   tableName: "sessions",
   ttl: moment.duration(7, "days").asSeconds(),
-  pruneSessionInterval: moment.duration(1, "hours").asSeconds(),
+  pruneSessionInterval: false,
 });
 
 export function connect() {

@@ -6,19 +6,19 @@
   </head>
   <body>
     <p>
-      Check out the <a href="/taskqueue">task queue</a>.
+      Check out the <a href="taskqueue">task queue</a>.
     </p>
-    <form action="/admin/refreshusers" method="post">
+    <form action="admin/refreshusers" method="post">
       <input type="submit" value="Refresh Users from Slack" />
     </form>
-    <form action="/admin/refreshallpuzzles" method="post">
+    <form action="admin/refreshallpuzzles" method="post">
       <input type="submit" value="Refresh All Puzzles" />
     </form>
-    <form action="/admin/publishhome" method="post">
+    <form action="admin/publishhome" method="post">
       <input type="text" name="userId" placeholder="Slack user ID" />
       <input type="submit" value="Force Publish User Home" />
     </form>
-    <form action="/admin/resetdatabase" method="post">
+    <form action="admin/resetdatabase" method="post">
       <button type="button" id="reset-database-check">I'm Sure I Want To Reset Database</button>
       <input type="submit" id="reset-database" value="Reset Database" disabled />
       <span>This will erase EVERYTHING!</span>

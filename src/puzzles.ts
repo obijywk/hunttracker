@@ -319,7 +319,6 @@ app.action("puzzle_open_spreadsheet", async ({ack}) => {
 app.action("puzzle_manual_poke", async ({ack, payload}) => {
   const buttonAction = payload as ButtonAction;
   const id = buttonAction.value;
-  ack();
   await db.query(`
     UPDATE puzzles
     SET
@@ -327,10 +326,10 @@ app.action("puzzle_manual_poke", async ({ack, payload}) => {
     WHERE id = $1`,
     [id]);
   await taskQueue.scheduleTask("refresh_puzzle", {id});
+  ack();
 });
 
 app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
-  ack();
   const id = (payload as ButtonAction).value;
   const puzzlePromise = get(id);
 
@@ -392,11 +391,10 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
       },
     },
   });
+  ack();
 });
 
 app.view("puzzle_update_topic_view", async ({ack, view, body}) => {
-  ack();
-
   const id = JSON.parse(body.view.private_metadata)["id"] as string;
   const values = getViewStateValues(view);
   const topic: string = values["puzzle_topic_input"];
@@ -407,10 +405,11 @@ app.view("puzzle_update_topic_view", async ({ack, view, body}) => {
     topic,
   });
   await taskQueue.scheduleTask("refresh_puzzle", {id});
+
+  ack();
 });
 
 app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
-  ack();
   const id = (payload as ButtonAction).value;
   const puzzle = await get(id);
 
@@ -492,11 +491,10 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
       },
     },
   });
+  ack();
 });
 
 app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
-  ack();
-
   const id = JSON.parse(body.view.private_metadata)["id"] as string;
   const values = getViewStateValues(view);
   const answer: string = values["puzzle_answer_input"];
@@ -521,16 +519,18 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
       text,
     });
   }
+
+  ack();
 });
 
 app.action("puzzle_archive_channel", async ({ack, payload}) => {
-  ack();
   const buttonAction = payload as ButtonAction;
   const id = buttonAction.value;
   await app.client.channels.archive({
     token: process.env.SLACK_USER_TOKEN,
     channel: id,
   });
+  ack();
 });
 
 async function updateStatusMessage(puzzle: Puzzle) {
@@ -813,11 +813,14 @@ const refreshPuzzleSubtypes = new Set([
   "channel_topic",
 ]);
 
-app.event("message", async ({ event }) => {
+app.event("message", async ({ event, body }) => {
   const messageEvent = event as unknown as MessageEvent;
   if (refreshPuzzleSubtypes.has(messageEvent.subtype)) {
     await taskQueue.scheduleTask("refresh_puzzle", {
       id: messageEvent.channel,
     });
+  }
+  if (body.eventAck) {
+    body.eventAck();
   }
 });

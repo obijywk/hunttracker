@@ -1,4 +1,6 @@
 import { Request, Response } from "express";
+import * as path from "path";
+import * as url from "url";
 
 import { receiver } from "./app";
 import * as db from "./db";
@@ -13,8 +15,8 @@ function checkAuth(req: Request, res: Response) {
   if (req.isAuthenticated()) {
     return true;
   }
-  req.session.postLoginUrl = req.url;
-  res.redirect("/login");
+  req.session.postLoginUrl = path.join(new url.URL(process.env.WEB_SERVER_URL).pathname, req.url);
+  res.redirect("login");
   return false;
 }
 
@@ -27,7 +29,7 @@ receiver.app.get("/login", async (req, res) => {
 receiver.app.get("/logout", async (req, res) => {
   req.logout();
   req.session.postLoginUrl = null;
-  return res.redirect("/login");
+  return res.redirect("login");
 });
 
 receiver.app.get("/", async (req, res) => {
@@ -76,13 +78,24 @@ receiver.app.get("/admin", async (req, res) => {
   return res.render("admin");
 });
 
+receiver.app.get("/admin/initdatabase", async (req, res) => {
+  // Intentionally allow this one to run without auth, as auth won't work if
+  // the database is not initialized. When the database is initialized, this
+  // route is a no-op, so it's relatively safe to expose. We can figure out
+  // a more secure way to do this later.
+  if (await db.applySchemaIfDatabaseNotInitialized()) {
+    await users.refreshAll();
+  }
+  return res.redirect("../admin");
+});
+
 receiver.app.post("/admin/resetdatabase", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
   await db.applySchema();
   await users.refreshAll();
-  return res.redirect("/admin");
+  return res.redirect("../admin");
 });
 
 receiver.app.post("/admin/refreshusers", async (req, res) => {
@@ -90,7 +103,7 @@ receiver.app.post("/admin/refreshusers", async (req, res) => {
     return;
   }
   await users.refreshAll();
-  return res.redirect("/admin");
+  return res.redirect("../admin");
 });
 
 receiver.app.post("/admin/refreshallpuzzles", async (req, res) => {
@@ -98,7 +111,7 @@ receiver.app.post("/admin/refreshallpuzzles", async (req, res) => {
     return;
   }
   await puzzles.refreshAll();
-  return res.redirect("/admin");
+  return res.redirect("../admin");
 });
 
 receiver.app.post("/admin/publishhome", async (req, res) => {
@@ -106,7 +119,7 @@ receiver.app.post("/admin/publishhome", async (req, res) => {
     return;
   }
   await home.publish(req.body.userId);
-  return res.redirect("/admin");
+  return res.redirect("../admin");
 });
 
 receiver.app.get("/taskqueue", async (req, res) => {
@@ -128,7 +141,7 @@ receiver.app.post("/taskqueue/process", async (req, res) => {
     return;
   }
   await taskQueue.processTaskQueue();
-  return res.redirect("/taskqueue");
+  return res.redirect("../taskqueue");
 });
 
 receiver.app.post("/taskqueue/clearerror", async (req, res) => {
@@ -136,7 +149,7 @@ receiver.app.post("/taskqueue/clearerror", async (req, res) => {
     return;
   }
   await taskQueue.clearTaskError(req.body.id);
-  return res.redirect("/taskqueue");
+  return res.redirect("../taskqueue");
 });
 
 receiver.app.post("/taskqueue/delete", async (req, res) => {
@@ -144,7 +157,7 @@ receiver.app.post("/taskqueue/delete", async (req, res) => {
     return;
   }
   await taskQueue.deleteTask(req.body.id);
-  return res.redirect("/taskqueue");
+  return res.redirect("../taskqueue");
 });
 
 receiver.app.get("/tagger", async (req, res) => {
@@ -195,5 +208,5 @@ receiver.app.post("/tagger/update", async (req, res) => {
 
   await tags.addAndRemoveTags(puzzleIds, addedTagIds, addedTagNames, removedTagIds);
 
-  return res.redirect("/tagger");
+  return res.redirect("../tagger");
 });

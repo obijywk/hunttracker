@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
   </head>
   <body>
-    <form action="/taskqueue/process" method="POST">
+    <form action="taskqueue/process" method="POST">
       <input type="submit" value="Force Process Queue Now">
     </form>
     <table class="task-queue-table">
@@ -16,12 +16,12 @@
           <td>{{error}}</td>
           <td>
             {{#if error}}
-              <form action="/taskqueue/clearerror" method="POST">
+              <form action="taskqueue/clearerror" method="POST">
                 <input type="hidden" name="id" value="{{id}}">
                 <input type="submit" value="Clear Error">
               </form>
             {{/if}}
-            <form action="/taskqueue/delete" method="POST">
+            <form action="taskqueue/delete" method="POST">
               <input type="hidden" name="id" value="{{id}}">
               <input type="submit" value="Delete">
             </form>

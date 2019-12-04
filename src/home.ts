@@ -150,17 +150,19 @@ taskQueue.registerHandler("publish_home", async (client, payload) => {
   await publish(payload.userId);
 });
 
-app.event("app_home_opened", async ({ event }) => {
+app.event("app_home_opened", async ({ event, body }) => {
   await publish(event.user);
+  if (body.eventAck) {
+    body.eventAck();
+  }
 });
 
 app.action("home_refresh", async ({ ack, body }) => {
-  ack();
   await publish(body.user.id);
+  ack();
 });
 
 app.action("home_register_puzzle", async ({ ack, body }) => {
-  ack();
   await app.client.views.open({
     token: process.env.SLACK_BOT_TOKEN,
     "trigger_id": (body as any).trigger_id,
@@ -211,6 +213,7 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
       },
     },
   });
+  ack();
 });
 
 app.view("home_register_puzzle_view", async ({ack, view}) => {
@@ -241,8 +244,6 @@ app.view("home_register_puzzle_view", async ({ack, view}) => {
     return;
   }
 
-  ack();
-
   if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
     await app.client.chat.postMessage({
       token: process.env.SLACK_USER_TOKEN,
@@ -250,6 +251,8 @@ app.view("home_register_puzzle_view", async ({ack, view}) => {
       text: `Registering ${values["puzzle_name_input"]}, please wait...`,
     });
   }
+
+  ack();
 });
 
 app.action("home_see_all_puzzles", async ({ ack }) => {
@@ -261,8 +264,6 @@ app.action("home_update_tags", async ({ ack }) => {
 });
 
 app.action("home_join_channel", async ({ ack, payload }) => {
-  ack();
-
   const value = JSON.parse((payload as ButtonAction).value);
   const puzzleId = value.puzzleId;
   const userId = value.userId;
@@ -272,4 +273,6 @@ app.action("home_join_channel", async ({ ack, payload }) => {
     channel: puzzleId,
     user: userId,
   });
+
+  ack();
 });

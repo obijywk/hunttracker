@@ -1,6 +1,11 @@
+import * as AWS from "aws-sdk";
 import { PoolClient } from "pg";
 
 import * as db from "./db";
+
+if (process.env.AWS_SNS_TOPIC_REGION) {
+  AWS.config.update({ region: process.env.AWS_REGION });
+}
 
 const handlers: { [key: string]: (client: PoolClient, payload: any) => Promise<void>} = {};
 export function registerHandler(
@@ -15,11 +20,20 @@ export async function scheduleTask(taskType: string, payload: any, client?: Pool
     "INSERT INTO task_queue (task_type, payload) VALUES ($1, $2)",
     [taskType, payload],
     client);
+  if (process.env.AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN) {
+    await new AWS.SNS({ apiVersion: "2010-03-31" }).publish({
+      Message: "NOTIFY",
+      TopicArn: process.env.AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN,
+    }).promise();
+  }
 }
 
 let processTaskQueueRunning = false;
 
 export async function processTaskQueue() {
+  if (processTaskQueueRunning) {
+    return;
+  }
   processTaskQueueRunning = true;
   const client = await db.connect();
   try {
@@ -68,13 +82,11 @@ export async function processTaskQueue() {
   }
 }
 
-export async function init() {
+export async function startListening() {
   const listenClient = await db.connect();
-  const query = listenClient.query("LISTEN task_queue_add");
+  listenClient.query("LISTEN task_queue_add");
   listenClient.on("notification", async (data) => {
-    if (!processTaskQueueRunning) {
-      processTaskQueue();
-    }
+    processTaskQueue();
   });
   processTaskQueue();
 }

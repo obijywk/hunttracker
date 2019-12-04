@@ -134,7 +134,6 @@ export async function buildUpdateTagsBlocks(puzzleId: string) {
 }
 
 app.action("tags_update", async ({ ack, body, payload }) => {
-  ack();
   const puzzleId = (payload as ButtonAction).value;
 
   await app.client.views.open({
@@ -155,6 +154,8 @@ app.action("tags_update", async ({ ack, body, payload }) => {
       },
     },
   });
+
+  ack();
 });
 
 export async function updateTags(puzzleId: string, selectedTagIds: Array<number>, newTagNames: Array<string>, client: PoolClient) {
@@ -280,11 +281,12 @@ app.view("tags_update_view", async ({ack, view, body}) => {
     } as any);
     return;
   }
-  ack();
 
   updateTagsWithTransaction(puzzleId, selectedTags.selectedTagIds, selectedTags.newTagNames);
 
   await taskQueue.scheduleTask("refresh_puzzle", {
     id: puzzleId,
   });
+
+  ack();
 });

@@ -12,6 +12,6 @@ require("./web");
     await users.refreshAll();
   }
   await app.start(port);
-  await taskQueue.init();
+  await taskQueue.startListening();
   console.log(`Listening on port ${port}.`);
 })();
