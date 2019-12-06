@@ -35,10 +35,10 @@ tr.shown td.details-control {
 }
 
 tr.complete {
-	background-color: #a5d6a7 !important;
+	background-color: #c8e6c9 !important;
 }
 tr:nth-child(2n).complete {
-	background-color: #c8e6c9 !important;
+	background-color: #a5d6a7 !important;
 }
 
 td.answer {
