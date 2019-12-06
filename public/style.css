@@ -1,58 +1,66 @@
 body {
-  font-family: sans-serif;
+	font-family: sans-serif;
+	font-size: 14px;
 }
 
 div.puzzles-table-filter-solved {
-  color: #333;
-  float: left;
-  margin-top: 8px;
+	color: #333;
+	float: left;
+	margin-top: 8px;
 }
 
 div.puzzles-table-filter-tags {
-  width: 512px;
-  float: right;
-  margin-bottom: 8px;
+	width: 40vw;
+	float: right;
+	margin-bottom: 8px;
 }
 
 select.wide-select {
-  width: 100%;
+	width: 100%;
 }
 
 td.details-control {
-  background: url("https://datatables.net/examples/resources/details_open.png") no-repeat center center;
-  cursor: pointer;
+	background: url("https://datatables.net/examples/resources/details_open.png") no-repeat center center;
+	cursor: pointer;
 }
 tr.shown td.details-control {
-  background: url("https://datatables.net/examples/resources/details_close.png") no-repeat center center;
+	background: url("https://datatables.net/examples/resources/details_close.png") no-repeat center center;
 }
-td.details-control.complete {
-  background-color: #70d070 !important;
+
+tr.complete {
+	background-color: #81c784 !important;
+}
+tr:nth-child(2n).complete {
+	background-color: #a5d6a7 !important;
 }
 
 td.answer {
-  font-family: "Roboto Mono", monospace;
+	font-family: "Roboto Mono", monospace;
+	font-weight: bold;
 }
 
 a.tag-link {
-  line-height: 2em;
-  padding: 4px;
-  border: 1px solid black;
-  border-radius: 4px;
-  text-decoration: none;
-  background-color: #ddd;
-  color: #333;
+    line-height: 2em;
+    padding: 0.6em;
+    border-radius: 4px;
+    text-decoration: none;
+    background: linear-gradient(to bottom, #42a5f5, #1e88e5);
+    color: #fff;
+    font-size: 0.8em;
+    margin: 0.1em;
+    box-shadow: 0px 0.25em 0px 0px #0d47a1;
 }
 
 a.tag-link:hover {
-  background-color: #aaa;
+	background: linear-gradient(to bottom, #1e88e5, #42a5f5);
 }
 
 table.task-queue-table {
-  border: 1px solid black;
-  border-collapse: collapse;
+	border: 1px solid black;
+	border-collapse: collapse;
 }
 
 table.task-queue-table td {
-  border: 1px solid black;
-  border-collapse: collapse;
+	border: 1px solid black;
+	border-collapse: collapse;
 }
