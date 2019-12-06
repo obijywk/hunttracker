@@ -34,7 +34,8 @@ CREATE TABLE tags (
 
 CREATE TABLE users (
   id text PRIMARY KEY,  -- Slack user ID
-  name text
+  name text,
+  admin boolean
 );
 
 CREATE TABLE puzzle_tag (
@@ -52,7 +53,8 @@ CREATE TABLE puzzle_user (
 CREATE TYPE task_type AS ENUM (
   'create_puzzle',
   'refresh_puzzle',
-  'publish_home'
+  'publish_home',
+  'refresh_users'
 );
 
 CREATE TABLE task_queue (

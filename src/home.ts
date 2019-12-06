@@ -6,6 +6,7 @@ import * as puzzles from "./puzzles";
 import { getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
+import * as users from "./users";
 
 const maxUsersToList = 5;
 const maxPuzzlesToList = 30;
@@ -60,6 +61,8 @@ function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
 }
 
 async function buildHomeBlocks(userId: string) {
+  const isAdminPromise = users.isAdmin(userId);
+
   const allPuzzles = await puzzles.list({ excludeComplete: true });
   allPuzzles.sort((a, b) => {
     const joinedA = a.users.map(u => u.id).indexOf(userId) !== -1;
@@ -71,54 +74,63 @@ async function buildHomeBlocks(userId: string) {
     }
     return puzzles.getIdleDuration(b).subtract(puzzles.getIdleDuration(a)).asMilliseconds();
   });
+
+  const isAdmin = await isAdminPromise;
+
+  const actionsElements = [];
+  actionsElements.push({
+    type: "button",
+    text: {
+      type: "plain_text",
+      text: ":repeat: Refresh",
+    },
+    "action_id": "home_refresh",
+  });
+  if (isAdmin) {
+    actionsElements.push({
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":sparkles: Register puzzle",
+      },
+      "action_id": "home_register_puzzle",
+    });
+  }
+  actionsElements.push({
+    type: "button",
+    text: {
+      type: "plain_text",
+      text: ":books: See all puzzles",
+    },
+    "action_id": "home_see_all_puzzles",
+    url: process.env.WEB_SERVER_URL + "puzzles",
+  });
+  actionsElements.push({
+    type: "button",
+    text: {
+      type: "plain_text",
+      text: ":bookmark: Update tags",
+    },
+    "action_id": "home_update_tags",
+    url: process.env.WEB_SERVER_URL + "tagger",
+  });
+
   const blocks: Array<any> = [{
     type: "actions",
-    elements: [
-      {
-        type: "button",
-        text: {
-          type: "plain_text",
-          text: ":repeat: Refresh",
-        },
-        "action_id": "home_refresh",
-      },
-      {
-        type: "button",
-        text: {
-          type: "plain_text",
-          text: ":sparkles: Register puzzle",
-        },
-        "action_id": "home_register_puzzle",
-      },
-      {
-        type: "button",
-        text: {
-          type: "plain_text",
-          text: ":books: See all puzzles",
-        },
-        "action_id": "home_see_all_puzzles",
-        url: process.env.WEB_SERVER_URL + "puzzles",
-      },
-      {
-        type: "button",
-        text: {
-          type: "plain_text",
-          text: ":bookmark: Update tags",
-        },
-        "action_id": "home_update_tags",
-        url: process.env.WEB_SERVER_URL + "tagger",
-      },
-    ],
+    elements: actionsElements,
   }];
+
   for (const puzzle of allPuzzles.slice(0, maxPuzzlesToList)) {
     blocks.push({
       type: "divider",
     });
     blocks.push(...buildPuzzleBlocks(puzzle, userId));
   }
+
   blocks.push({
     type: "divider",
   });
+
   if (allPuzzles.length > maxPuzzlesToList) {
     blocks.push({
       type: "section",
@@ -128,6 +140,7 @@ async function buildHomeBlocks(userId: string) {
       },
     });
   }
+
   return blocks;
 }
 

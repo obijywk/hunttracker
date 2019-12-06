@@ -1,7 +1,7 @@
 import moment = require("moment");
 import * as diacritics from "diacritics";
 import { PoolClient } from "pg";
-import { ButtonAction, MessageEvent } from "@slack/bolt";
+import { ButtonAction } from "@slack/bolt";
 import { ErrorCode } from "@slack/web-api";
 
 import { app } from "./app";
@@ -12,9 +12,8 @@ import {
   ChannelsHistoryResult,
   ChannelsInfoResult,
   ChatPostMessageResult,
-  ConversationsListResult,
 } from "./slack_results";
-import { getViewStateValues } from "./slack_util";
+import { findChannelIdForChannelName, getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
@@ -156,6 +155,13 @@ export async function list(options: ListOptions = {}): Promise<Array<Puzzle>> {
     excludeComplete: options.excludeComplete,
     withTag: options.withTag,
   });
+}
+
+export async function isPuzzleChannel(channelId: string): Promise<boolean> {
+  const result = await db.query(
+    "SELECT EXISTS (SELECT 1 FROM puzzles WHERE id = $1)",
+    [channelId]);
+  return result.rowCount > 0 && result.rows[0].exists;
 }
 
 export function buildPuzzleNameMrkdwn(puzzle: Puzzle) {
@@ -643,23 +649,6 @@ export async function refreshStale() {
   }
 }
 
-async function findChannelIdForChannelName(channelName: string): Promise<string | null> {
-  let cursor = undefined;
-  do {
-    const listConversationsResult = await app.client.conversations.list({
-      token: process.env.SLACK_USER_TOKEN,
-      cursor,
-    }) as ConversationsListResult;
-    for (const channel of listConversationsResult.channels) {
-      if (channel.name === channelName) {
-        return channel.id;
-      }
-    }
-    cursor = listConversationsResult.response_metadata.next_cursor;
-  } while (cursor);
-  return null;
-}
-
 taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const name = payload.name;
   const url = payload.url;
@@ -804,23 +793,5 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
     await taskQueue.scheduleTask("publish_home", {
       userId,
     }, client);
-  }
-});
-
-const refreshPuzzleSubtypes = new Set([
-  "channel_join",
-  "channel_leave",
-  "channel_topic",
-]);
-
-app.event("message", async ({ event, body }) => {
-  const messageEvent = event as unknown as MessageEvent;
-  if (refreshPuzzleSubtypes.has(messageEvent.subtype)) {
-    await taskQueue.scheduleTask("refresh_puzzle", {
-      id: messageEvent.channel,
-    });
-  }
-  if (body.eventAck) {
-    body.eventAck();
   }
 });
