@@ -20,6 +20,11 @@ function checkAuth(req: Request, res: Response) {
   return false;
 }
 
+async function checkAdmin(req: Request) {
+  const user = req.user as any;
+  return await users.isAdmin(user.id);
+}
+
 receiver.app.get("/login", async (req, res) => {
   return res.render("login", {
     slackClientId: process.env.SLACK_CLIENT_ID,
@@ -75,6 +80,10 @@ receiver.app.get("/admin", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
+  if (!await checkAdmin(req)) {
+    res.redirect("puzzles");
+    return;
+  }
   return res.render("admin");
 });
 
@@ -93,6 +102,10 @@ receiver.app.post("/admin/resetdatabase", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
+  if (!await checkAdmin(req)) {
+    res.redirect("../puzzles");
+    return;
+  }
   await db.applySchema();
   await users.refreshAll();
   return res.redirect("../admin");
@@ -100,6 +113,10 @@ receiver.app.post("/admin/resetdatabase", async (req, res) => {
 
 receiver.app.post("/admin/refreshusers", async (req, res) => {
   if (!checkAuth(req, res)) {
+    return;
+  }
+  if (!await checkAdmin(req)) {
+    res.redirect("../puzzles");
     return;
   }
   await users.refreshAll();
@@ -110,6 +127,10 @@ receiver.app.post("/admin/refreshallpuzzles", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
+  if (!await checkAdmin(req)) {
+    res.redirect("../puzzles");
+    return;
+  }
   await puzzles.refreshAll();
   return res.redirect("../admin");
 });
@@ -118,12 +139,20 @@ receiver.app.post("/admin/publishhome", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
+  if (!await checkAdmin(req)) {
+    res.redirect("../puzzles");
+    return;
+  }
   await home.publish(req.body.userId);
   return res.redirect("../admin");
 });
 
 receiver.app.get("/taskqueue", async (req, res) => {
   if (!checkAuth(req, res)) {
+    return;
+  }
+  if (!await checkAdmin(req)) {
+    res.redirect("puzzles");
     return;
   }
   const tasks = await taskQueue.list();
@@ -140,6 +169,10 @@ receiver.app.post("/taskqueue/process", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
+  if (!await checkAdmin(req)) {
+    res.redirect("../puzzles");
+    return;
+  }
   await taskQueue.processTaskQueue();
   return res.redirect("../taskqueue");
 });
@@ -148,12 +181,20 @@ receiver.app.post("/taskqueue/clearerror", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
+  if (!await checkAdmin(req)) {
+    res.redirect("../puzzles");
+    return;
+  }
   await taskQueue.clearTaskError(req.body.id);
   return res.redirect("../taskqueue");
 });
 
 receiver.app.post("/taskqueue/delete", async (req, res) => {
   if (!checkAuth(req, res)) {
+    return;
+  }
+  if (!await checkAdmin(req)) {
+    res.redirect("../puzzles");
     return;
   }
   await taskQueue.deleteTask(req.body.id);
