@@ -3,6 +3,7 @@ import * as db from "./db";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
 
+require("./events");
 require("./refresh_polling");
 require("./web");
 

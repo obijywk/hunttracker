@@ -1,5 +1,26 @@
 import { ViewOutput } from "@slack/bolt";
 
+import { app } from "./app";
+import { ConversationsListResult } from "./slack_results";
+
+export async function findChannelIdForChannelName(channelName: string): Promise<string | null> {
+  let cursor = undefined;
+  do {
+    const listConversationsResult = await app.client.conversations.list({
+      token: process.env.SLACK_USER_TOKEN,
+      cursor,
+      types: "public_channel,private_channel",
+    }) as ConversationsListResult;
+    for (const channel of listConversationsResult.channels) {
+      if (channel.name === channelName) {
+        return channel.id;
+      }
+    }
+    cursor = listConversationsResult.response_metadata.next_cursor;
+  } while (cursor);
+  return null;
+}
+
 export function getViewStateValues(view: ViewOutput) {
   const stateValues = (view.state as any)["values"];
   const values: any = {};

@@ -4,6 +4,7 @@ import { receiver } from "./app";
 import * as refreshPolling from "./refresh_polling";
 import * as taskQueue from "./task_queue";
 
+require("./events");
 require("./web");
 
 // Lambda and Bolt don't play well together with respect to events... Bolt

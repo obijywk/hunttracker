@@ -36,6 +36,9 @@ Everything is configured using environment variables, and they need to be set fo
   "https://app.slack.com/client/T0E2CSZ8F/". This is used for building deep links into Slack.
 - **SLACK_ACTIVITY_LOG_CHANNEL_NAME**: A Slack channel name (without the leading #) where
   puzzle creations etc. will be announced.
+- **SLACK_ADMIN_CHANNEL_ID**: A Slack channel ID (not name!). Only members of this channel will
+  be able to register puzzles. Leave this unset to allow any user to register puzzles. The app
+  user must be a member of this channel for this to work.
 - **SLACK_IGNORED_USER_IDS**: A comma-separated list of Slack user IDs to be ignored for the
   purposes of tracking channel membership. Useful for ignoring the "bot" user (who cannot be
   detected automatically, because they're not _really_ a bot, because they need to be able to
@@ -66,6 +69,8 @@ section of https://api.slack.com/. Your web server URL plus "/auth/slack/callbac
 - channels:history
 - chat:write:bot
 - chat:write:user
+- groups:history
+- groups:read
 - pins:write
 - users:read
 
@@ -74,7 +79,10 @@ section of https://api.slack.com/. The "Request URL" on the "Event Subscriptions
 your web server URL plus "/slack/events".
 
 - app_home_opened
+- member_joined_channel
+- member_left_channel
 - message.channels
+- message.groups
 - user_change
 
 The "Request URL" on the "Interactive Components" page should be set to your web server URL plus

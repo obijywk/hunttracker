@@ -4,10 +4,12 @@ import { UserChangeEvent } from "@slack/bolt";
 import { app } from "./app";
 import * as db from "./db";
 import { ConversationsMembersResult, UsersListResult, UserResult } from "./slack_results";
+import * as taskQueue from "./task_queue";
 
 export interface User {
   id: string;
   name: string;
+  admin: boolean;
 }
 
 const ignoredUserIds = new Set(process.env.SLACK_IGNORED_USER_IDS.split(","));
@@ -26,7 +28,33 @@ function getMemberName(member: UserResult): string {
   return member.name;
 }
 
-export async function refreshAll() {
+async function getConversationMemberUserIds(channelId: string): Promise<Set<string>> {
+  const channelUsers: Set<string> = new Set();
+  let cursor = undefined;
+  do {
+    const conversationMembersResult = await app.client.conversations.members({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: channelId,
+      cursor,
+    }) as ConversationsMembersResult;
+    for (const userId of conversationMembersResult.members) {
+      channelUsers.add(userId);
+    }
+    cursor = conversationMembersResult.response_metadata.next_cursor;
+  } while (cursor);
+  return channelUsers;
+}
+
+async function getAdminUserIds(): Promise<Set<string> | null> {
+  if (!process.env.SLACK_ADMIN_CHANNEL_ID) {
+    return null;
+  }
+  return getConversationMemberUserIds(process.env.SLACK_ADMIN_CHANNEL_ID);
+}
+
+async function refreshAllInternal(client: PoolClient) {
+  const adminUserIdsPromise = getAdminUserIds();
+
   const members: Array<UserResult> = [];
   let cursor = undefined;
   do {
@@ -38,38 +66,52 @@ export async function refreshAll() {
     cursor = userListResult.response_metadata.next_cursor;
   } while (cursor);
 
-  const client = await db.connect();
-  try {
-    await client.query("BEGIN");
+  const dbUsers = await client.query("SELECT id, name, admin FROM users") as QueryResult<User>;
+  const idToDbUser: { [key: string]: User } = {};
+  for (const dbUser of dbUsers.rows) {
+    idToDbUser[dbUser.id] = dbUser;
+  }
 
-    const dbUsers = await client.query("SELECT id, name FROM users") as QueryResult<User>;
-    const idToDbUser: { [key: string]: User } = {};
-    for (const dbUser of dbUsers.rows) {
-      idToDbUser[dbUser.id] = dbUser;
-    }
+  const adminUserIds = await adminUserIdsPromise;
 
-    for (const member of members) {
-      const acceptMember = shouldAcceptMember(member);
-      const memberName = getMemberName(member);
-      const dbUser = idToDbUser[member.id];
-      if (dbUser === undefined) {
-        if (!acceptMember) continue;
-        await client.query(
-          "INSERT INTO users(id, name) VALUES ($1, $2)",
-          [member.id, memberName]);
+  for (const member of members) {
+    const acceptMember = shouldAcceptMember(member);
+    const memberName = getMemberName(member);
+    const dbUser = idToDbUser[member.id];
+    const isAdminUser = adminUserIds !== null ? adminUserIds.has(member.id) : true;
+    if (dbUser === undefined) {
+      if (!acceptMember) continue;
+      await client.query(
+        "INSERT INTO users(id, name, admin) VALUES ($1, $2, $3)",
+        [member.id, memberName, isAdminUser]);
+    } else {
+      if (!acceptMember) {
+        await client.query("DELETE FROM users WHERE id = $1", [dbUser.id]);
       } else {
-        if (!acceptMember) {
-          await client.query("DELETE FROM users WHERE id = $1", [dbUser.id]);
-        } else {
-          if (dbUser.name != memberName) {
-            await client.query(
-              "UPDATE users SET name = $2 WHERE id = $1",
-              [dbUser.id, memberName]);
-          }
+        if (dbUser.name != memberName) {
+          await client.query(
+            "UPDATE users SET name = $2 WHERE id = $1",
+            [dbUser.id, memberName]);
+        }
+        if (dbUser.admin != isAdminUser) {
+          await client.query(
+            "UPDATE users SET admin = $2 WHERE id = $1",
+            [dbUser.id, isAdminUser]);
         }
       }
     }
+  }
+}
 
+taskQueue.registerHandler("refresh_users", async (client) => {
+  await refreshAllInternal(client);
+});
+
+export async function refreshAll() {
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    await refreshAllInternal(client);
     await client.query("COMMIT");
   } catch (e) {
     console.error("Failed to sync users", e);
@@ -89,18 +131,7 @@ export async function refreshPuzzleUsers(
   const dbUsersResultPromise = client.query(
     "SELECT user_id FROM puzzle_user WHERE puzzle_id = $1", [puzzleId]);
 
-  const channelUsers: Set<string> = new Set();
-  let cursor = undefined;
-  do {
-    const conversationMembersResult = await app.client.conversations.members({
-      token: process.env.SLACK_USER_TOKEN,
-      channel: puzzleId,
-    }) as ConversationsMembersResult;
-    for (const userId of conversationMembersResult.members) {
-      channelUsers.add(userId);
-    }
-    cursor = conversationMembersResult.response_metadata.next_cursor;
-  } while (cursor);
+  const channelUsers = await getConversationMemberUserIds(puzzleId);
 
   const dbUsersResult = await dbUsersResultPromise;
   const dbUsers: Set<string> = new Set();
@@ -134,6 +165,14 @@ export async function refreshPuzzleUsers(
   return affectedUserIds;
 }
 
+export async function isAdmin(userId: string): Promise<boolean> {
+  const result = await db.query("SELECT * FROM users WHERE id = $1", [userId]);
+  if (result.rowCount !== 1) {
+    return false;
+  }
+  return result.rows[0].admin;
+}
+
 app.event("user_change", async ({ event, body }) => {
   try {
     const userChangeEvent = event as UserChangeEvent;
@@ -143,16 +182,23 @@ app.event("user_change", async ({ event, body }) => {
     }
     const memberName = getMemberName(member);
     const dbUserResult = await db.query("SELECT id, name FROM users WHERE id = $1", [member.id]);
+    const adminUserIds = await getAdminUserIds();
+    const isAdminUser = adminUserIds !== null ? adminUserIds.has(member.id) : true;
     if (dbUserResult.rowCount === 0) {
       await db.query(
-        "INSERT INTO users(id, name) VALUES ($1, $2)",
-        [member.id, memberName]);
+        "INSERT INTO users(id, name, admin) VALUES ($1, $2, $3)",
+        [member.id, memberName, isAdminUser]);
     } else {
       const dbUser = dbUserResult.rows[0] as User;
       if (dbUser.name != memberName) {
         await db.query(
           "UPDATE users SET name = $2 WHERE id = $1",
           [dbUser.id, memberName]);
+      }
+      if (dbUser.admin != isAdminUser) {
+        await db.query(
+          "UPDATE users SET admin = $2 WHERE id = $1",
+          [dbUser.id, isAdminUser]);
       }
     }
   } finally {
