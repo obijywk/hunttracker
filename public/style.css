@@ -10,13 +10,20 @@ div.puzzles-table-filter-solved {
 }
 
 div.puzzles-table-filter-tags {
-	width: 40vw;
+	width: 30vw;
 	float: right;
 	margin-bottom: 8px;
 }
 
 select.wide-select {
 	width: 100%;
+}
+
+table.dataTable tbody tr {
+	background-color: #ffffff;
+}
+table.dataTable tbody tr:nth-child(2n) {
+	background-color: #eff0f2;
 }
 
 td.details-control {
@@ -28,27 +35,28 @@ tr.shown td.details-control {
 }
 
 tr.complete {
-	background-color: #81c784 !important;
+	background-color: #a5d6a7 !important;
 }
 tr:nth-child(2n).complete {
-	background-color: #a5d6a7 !important;
+	background-color: #c8e6c9 !important;
 }
 
 td.answer {
 	font-family: "Roboto Mono", monospace;
 	font-weight: bold;
+	font-size: 0.9em;
 }
 
 a.tag-link {
     line-height: 2em;
-    padding: 0.6em;
+    padding: 0.2em 0.6em;
     border-radius: 4px;
     text-decoration: none;
     background: linear-gradient(to bottom, #42a5f5, #1e88e5);
     color: #fff;
     font-size: 0.8em;
     margin: 0.1em;
-    box-shadow: 0px 0.25em 0px 0px #0d47a1;
+    box-shadow: 0px 0.1em 0px 0px #0d47a1;
 }
 
 a.tag-link:hover {
