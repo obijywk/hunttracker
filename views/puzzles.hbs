@@ -91,7 +91,7 @@
               defaultContent: "",
               createdCell: (td, cellData, row, rowIndex, colIndex) => {
                 if (row.complete) {
-                  $(td).addClass("complete");
+                  $(td).parent().addClass("complete");
                 }
               },
             },

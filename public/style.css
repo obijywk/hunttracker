@@ -25,7 +25,7 @@ td.details-control {
 tr.shown td.details-control {
   background: url("https://datatables.net/examples/resources/details_close.png") no-repeat center center;
 }
-td.details-control.complete {
+tr.complete td.details-control {
   background-color: #70d070 !important;
 }
 
