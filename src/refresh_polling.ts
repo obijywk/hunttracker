@@ -6,7 +6,7 @@ import * as puzzles from "./puzzles";
 
 export async function refresh() {
   await puzzles.refreshStale();
-  await promisify(db.sessionStore.pruneSessions)();
+  await promisify(db.sessionStore.pruneSessions.bind(db.sessionStore))();
 }
 
 if (process.env.REFRESH_POLLING_MINUTES) {
