@@ -4,40 +4,34 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
   </head>
   <body>
-    <h1>All Metas</h1>
-    <p>Puzzles tagged with <i>meta/</i> or <i>in/</i> tag prefixes will appear here.</p>
-    <ul>
-      {{#each metas}}
-        <li>
-          {{#if url}}
-            <a href="{{url}}" target="_blank">
-          {{/if}}
-          {{name}}
-          {{#if url}}
-            </a>
-          {{/if}}
-          (<a href="puzzles?tags=in/{{metaName}}">dashboard</a>)
-          {{#if answer}}
-            &mdash; <span class="answer">{{answer}}</span>
-          {{/if}}
-          <ul>
-            {{#each puzzles}}
-            <li>
-              {{#if url}}
-                <a href="{{url}}" target="_blank">
-              {{/if}}
-              {{name}}
-              {{#if url}}
-                </a>
-              {{/if}}
-              {{#if answer}}
-                &mdash; <span class="answer">{{answer}}</span>
-              {{/if}}
-            </li>
-            {{/each}}
-          </ul>
-        </li>
-      {{/each}}
-    </ul>
+    <h1>Meta View</h1>
+    <p>Puzzles that have been tagged with <i>meta/</i> or <i>in/</i> tag prefixes will appear here.</p>
+	{{#each metas}}
+	<div class="meta-view">
+		<div class="meta-view-header">
+			<span class="title">
+				{{#if url}}<a href="{{url}}" target="_blank">{{/if}}
+				{{name}}
+				{{#if url}}</a>{{/if}}
+				(<a href="puzzles?tags=in/{{metaName}}">view in dashboard</a>)
+			</span>
+			<span class="answer">
+				{{#if answer}}<span class="answer">{{answer}}</span>{{/if}}
+			</span>
+		</div>
+		{{#each puzzles}}
+		<div class="meta-view-puzzle">
+			<span class="title">
+				{{#if url}} <a href="{{url}}" target="_blank"> {{/if}}
+				{{name}}
+				{{#if url}} </a> {{/if}}
+			</span>
+			<span class="answer">
+				{{#if answer}} {{answer}} {{/if}}
+			</span>
+		</div>
+		{{/each}}
+	</div>
+	{{/each}}
   </body>
 </html>
