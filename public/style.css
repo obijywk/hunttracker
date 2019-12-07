@@ -102,25 +102,37 @@ table.task-queue-table td {
 
 div.meta-view {
 	display: grid;
+	grid-template-columns: max-content max-content;
+	margin: 0 0 2em;
 }
-div.meta-view-header {
+div.meta-header {
 	font-size: 1.2em;
-	background-color: #eef0cc;
+	background: linear-gradient(to bottom, #0288d1, #0277bd);
+	padding: 0.6em;
+	border-bottom: 1px solid #111;
+	color: #fff;
+	line-height: 1.2em;
 }
-div.meta-view-header .title {
+div.meta-header.title {
 	font-weight: bold;
 }
-div.meta-view-header .answer {
-	
+div.meta-header.title a {
+  color: #fff;
+}
+div.meta-header.title a.dash-link {
+  color: #fffd;
+  font-size: 0.8em;
+  padding-left: 1em;
 }
 
-div.meta-view-puzzle {
-	
+div.meta-puzzle {
+	padding: 0.3em 0.6em;
+	border-bottom: 1px solid #999;
 }
 
-div.meta-view-puzzle .title {
+div.meta-puzzle.title {
 	
 }
-div.meta-view-puzzle .answer {
+div.meta-puzzle.answer {
 	
 }
