@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <title>Metas</title>
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+  </head>
+  <body>
+    <h1>All Metas</h1>
+    <p>Puzzles tagged with <i>meta/</i> or <i>in/</i> tag prefixes will appear here.</p>
+    <ul>
+      {{#each metas}}
+        <li>
+          {{#if url}}
+            <a href="{{url}}" target="_blank">
+          {{/if}}
+          {{name}}
+          {{#if url}}
+            </a>
+          {{/if}}
+          (<a href="puzzles?tags=in/{{metaName}}">dashboard</a>)
+          {{#if answer}}
+            &mdash; <span class="answer">{{answer}}</span>
+          {{/if}}
+          <ul>
+            {{#each puzzles}}
+            <li>
+              {{#if url}}
+                <a href="{{url}}" target="_blank">
+              {{/if}}
+              {{name}}
+              {{#if url}}
+                </a>
+              {{/if}}
+              {{#if answer}}
+                &mdash; <span class="answer">{{answer}}</span>
+              {{/if}}
+            </li>
+            {{/each}}
+          </ul>
+        </li>
+      {{/each}}
+    </ul>
+  </body>
+</html>

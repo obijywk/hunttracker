@@ -71,6 +71,50 @@ receiver.app.get("/puzzles/data", async (req, res) => {
   }));
 });
 
+receiver.app.get("/metas", async(req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+  const allPuzzles = await puzzles.list();
+  const metaPrefix = "meta/";
+  const inPrefix = "in/";
+  const metas = [];
+  const metaToPuzzles: { [key: string]: any } = {};
+  for (const puzzle of allPuzzles) {
+    const puzzleData: any = {
+      id: puzzle.id,
+      name: puzzle.name,
+      url: puzzle.url,
+      complete: puzzle.complete,
+      answer: puzzle.answer,
+    };
+    for (const tag of puzzle.tags) {
+      if (tag.name.startsWith(metaPrefix)) {
+        puzzleData.metaName = tag.name.substr(metaPrefix.length);
+        metas.push(puzzleData);
+      } else if (tag.name.startsWith(inPrefix)) {
+        const metaName = tag.name.substr(inPrefix.length);
+        if (metaName in metaToPuzzles) {
+          metaToPuzzles[metaName].push(puzzleData);
+        } else {
+          metaToPuzzles[metaName] = [puzzleData];
+        }
+      }
+    }
+  }
+  for (const meta of metas) {
+    meta.puzzles = metaToPuzzles[meta.metaName];
+    if (meta.puzzles === undefined) {
+      meta.puzzles = [];
+    }
+    meta.puzzles.sort((a: any, b: any) => a.name < b.name ? -1 : 1);
+  }
+  metas.sort((a: any, b: any) => a.name < b.name ? -1 : 1);
+  return res.render("metas", {
+    metas,
+  });
+});
+
 receiver.app.get("/refresh", async (req, res) => {
   await refreshPolling.refresh();
   return res.status(200).send("ok");

@@ -64,7 +64,7 @@ table.puzzleDetails {
 	padding-left: 3em;
 }
 
-td.answer {
+.answer {
 	font-family: "Roboto Mono", monospace;
 	font-weight: bold;
 	font-size: 0.9em;
