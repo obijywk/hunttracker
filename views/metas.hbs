@@ -8,13 +8,13 @@
     <p>Puzzles that have been tagged with <i>meta/</i> or <i>in/</i> tag prefixes will appear here.</p>
 	{{#each metas}}
 	<div class="meta-view">
-		<div class="meta-header title">
+		<div class="meta-header title{{#if complete}} meta-complete{{/if}}">
 			{{#if url}}<a href="{{url}}" target="_blank">{{/if}}
 			{{name}}
 			{{#if url}}</a>{{/if}}
-			(<a href="puzzles?tags=in/{{metaName}}">view in dashboard</a>)
+			<a class="dash-link" href="puzzles?tags=in/{{metaName}}">[dashboard]</a>
 		</div>
-		<div class="meta-header answer">
+		<div class="meta-header answer{{#if complete}} meta-complete{{/if}}">
 			{{#if answer}}<span class="answer">{{answer}}</span>{{/if}}
 		</div>
 		{{#each puzzles}}
