@@ -99,3 +99,28 @@ table.task-queue-table td {
 	border: 1px solid black;
 	border-collapse: collapse;
 }
+
+div.meta-view {
+	display: grid;
+}
+div.meta-view-header {
+	font-size: 1.2em;
+	background-color: #eef0cc;
+}
+div.meta-view-header .title {
+	font-weight: bold;
+}
+div.meta-view-header .answer {
+	
+}
+
+div.meta-view-puzzle {
+	
+}
+
+div.meta-view-puzzle .title {
+	
+}
+div.meta-view-puzzle .answer {
+	
+}
