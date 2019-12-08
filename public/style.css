@@ -103,34 +103,35 @@ table.task-queue-table td {
 div.meta-view {
 	display: grid;
 	grid-template-columns: max-content max-content;
-	margin: 0 0 2em;
+	margin: 0.5em 1em 1.5em 1em;
 	width: max-content;
-	background-color: #f1f1f1;
-	box-shadow: 2px 5px 8px -2px #0004;
-	padding: 0.5em;
+	background-color: #f0f0f0;
+	box-shadow: 4px 6px 8px -2px #0003;
 }
 div.meta-header {
 	font-size: 1.1em;
 	background: linear-gradient(to bottom, #0288d1, #0277bd);
-	padding: 0.6em;
+	padding: 0.6em 1em;
 	border-bottom: 1px solid #111;
 	color: #fff;
 	line-height: 1.2em;
 }
-div.meta-header.title {
-	font-weight: bold;
+div.meta-header.meta-complete {
+	background: linear-gradient(to bottom, #388e3c, #2e7d32);
 }
 div.meta-header.title a {
-  color: #fffb;
+	color: #fff;
+	font-weight: bold;
 }
 div.meta-header.title a.dash-link {
-  color: #fffd;
-  font-size: 0.8em;
-  padding-left: 1em;
+	color: #fffd;
+	font-size: 0.8em;
+	padding-left: 1em;
 }
 
 div.meta-puzzle {
-	padding: 0.3em 0.6em;
+	padding: 0.5em 1em;
+	border-top: 1px solid white;
 }
 
 div.meta-puzzle.title {
