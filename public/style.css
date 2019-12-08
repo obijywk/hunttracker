@@ -19,23 +19,20 @@ select.wide-select {
 	width: 100%;
 }
 
-table.dataTable tbody tr.even {
-	background-color: #ffffff;
+table.dataTable thead th {
+  background: linear-gradient(to bottom, #0288d1, #0277bd);
+	color: white;
 }
-table.dataTable tbody tr.odd {
-	background-color: #eff0f2;
+table.dataTable tbody tr {
+	background-color: #f0f0f0;
 }
-
-table.dataTable tbody tr.even.complete {
+table.dataTable tbody tr.complete {
 	background-color: #dcedc8;
-}
-table.dataTable tbody tr.odd.complete {
-	background-color: #c8e6c9;
 }
 
 td.details-control {
 	background: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48dGl0bGU+PC90aXRsZT48ZyBpZD0iaWNvbW9vbi1pZ25vcmUiPjwvZz48cGF0aCBkPSJNNDU4LjkwMyAxMTQuNTM4Yy0xMS4xMDYtMTUuMTQ2LTI2LjU4Ny0zMi44NS00My41ODktNDkuODUycy0zNC43MDYtMzIuNDgyLTQ5Ljg1Mi00My41ODljLTI1Ljc4Ny0xOC45MS0zOC4yOTYtMjEuMDk3LTQ1LjQ2Mi0yMS4wOTdoLTI0OGMtMjIuMDU2IDAtNDAgMTcuOTQ0LTQwIDQwdjQzMmMwIDIyLjA1NiAxNy45NDQgNDAgNDAgNDBoMzY4YzIyLjA1NiAwIDQwLTE3Ljk0NCA0MC00MHYtMzEyYzAtNy4xNjYtMi4xODYtMTkuNjc1LTIxLjA5Ny00NS40NjJ6TTM5Mi42ODcgODcuMzEzYzE1LjM1IDE1LjM1IDI3LjQgMjkuMTk5IDM2LjI5IDQwLjY4N2gtNzYuOTc3di03Ni45NzNjMTEuNDkyIDguODkgMjUuMzM5IDIwLjkzOSA0MC42ODcgMzYuMjg2ek00NDggNDcyYzAgNC4zMzYtMy42NjQgOC04IDhoLTM2OGMtNC4zMzYgMC04LTMuNjY0LTgtOHYtNDMyYzAtNC4zMzYgMy42NjQtOCA4LTggMCAwIDI0Ny45NzgtMC4wMDEgMjQ4IDB2MTEyYzAgOC44MzYgNy4xNjMgMTYgMTYgMTZoMTEydjMxMnoiPjwvcGF0aD48cGF0aCBkPSJNMzY4IDQxNmgtMjI0Yy04LjgzNiAwLTE2LTcuMTYzLTE2LTE2czcuMTY0LTE2IDE2LTE2aDIyNGM4LjgzNyAwIDE2IDcuMTYzIDE2IDE2cy03LjE2MyAxNi0xNiAxNnoiPjwvcGF0aD48cGF0aCBkPSJNMzY4IDM1MmgtMjI0Yy04LjgzNiAwLTE2LTcuMTYzLTE2LTE2czcuMTY0LTE2IDE2LTE2aDIyNGM4LjgzNyAwIDE2IDcuMTYzIDE2IDE2cy03LjE2MyAxNi0xNiAxNnoiPjwvcGF0aD48cGF0aCBkPSJNMzY4IDI4OGgtMjI0Yy04LjgzNiAwLTE2LTcuMTYzLTE2LTE2czcuMTY0LTE2IDE2LTE2aDIyNGM4LjgzNyAwIDE2IDcuMTYzIDE2IDE2cy03LjE2MyAxNi0xNiAxNnoiPjwvcGF0aD48L3N2Zz4=) no-repeat center center;
-	background-size: 1.5em;
+	background-size: 1.25em;
 	cursor: pointer;
 }
 tr.shown td.details-control {
@@ -56,12 +53,9 @@ tr.shown + tr {
 	background: linear-gradient(to bottom, #ffecb3, #ffe082) !important;
 }
 
-table.dataTable tbody tr.shown + tr > td {
-  border-color: #ddd;
-}
-
 table.puzzleDetails {
-	padding-left: 3em;
+	padding-left: 2.4em;
+	border-spacing: 0;
 }
 
 .answer {
