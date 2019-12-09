@@ -64,6 +64,10 @@ table.puzzleDetails {
 	font-size: 0.9em;
 }
 
+td.idle-column {
+	text-align: right;
+}
+
 a {
 	text-decoration: none;
 }

@@ -31,7 +31,7 @@
           <th>Answer</th>
           <th>Topic</th>
           <th>Tags</th>
-          <th>Idle time</th>
+          <th>Idle</th>
           <th>Solvers</th>
         </tr>
       </thead>
@@ -153,6 +153,8 @@
             },
             {
               data: "idleDurationMilliseconds",
+              width: "4rem",
+              className: "idle-column",
               render: (data, type, row) => {
                 if (type === "display" || type === "filter") {
                   if (data === 0) {
@@ -162,7 +164,8 @@
                   if (idleDuration.asMinutes() < {{minimumIdleMinutes}}) {
                     return "active";
                   }
-                  return idleDuration.humanize();
+                  return Math.floor(idleDuration.asHours()) + "h"
+                    + String(idleDuration.minutes()).padStart(2, "0") + "m";
                 }
                 return data;
               },
