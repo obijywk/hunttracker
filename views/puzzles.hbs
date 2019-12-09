@@ -98,6 +98,14 @@
                 columns: [2, 3, 4, 5],
               },
             },
+            {
+              text: "Tag visible...",
+              action: function(e, dt, node, config) {
+                const puzzleIds = dt.rows({ search: "applied" }).data().map(r => r.id);
+                const params = puzzleIds.map(id => "p[]=" + id).join("&");
+                window.open("tagger?" + params);
+              },
+            },
           ],
           ajax: "puzzles/data",
           search: {
