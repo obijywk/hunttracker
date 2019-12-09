@@ -105,7 +105,7 @@ div.meta-view {
 	grid-template-columns: max-content max-content;
 	margin: 0.5em 1em 1.5em 1em;
 	width: max-content;
-	background-color: #f0f0f0;
+	background-color: #eeeeee;
 	box-shadow: 4px 6px 8px -2px #0003;
 }
 div.meta-header {
