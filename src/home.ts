@@ -228,6 +228,27 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
           },
         },
         ...await tags.buildUpdateTagsBlocks("" /* no puzzle ID assigned yet */),
+        {
+          type: "input",
+          "block_id": "puzzle_topic_input",
+          optional: true,
+          label: {
+            type: "plain_text",
+            text: "Topic",
+          },
+          hint: {
+            type: "plain_text",
+            text: "Consider including an initial summary of the puzzle content, if known.",
+          },
+          element: {
+            type: "plain_text_input",
+            placeholder: {
+              type: "plain_text",
+              text: "Enter initial topic",
+            },
+            multiline: true,
+          },
+        },
       ],
       submit: {
         type: "plain_text",
@@ -254,7 +275,8 @@ app.view("home_register_puzzle_view", async ({ack, view}) => {
     values["puzzle_name_input"],
     values["puzzle_url_input"],
     selectedTags.selectedTagIds,
-    selectedTags.newTagNames);
+    selectedTags.newTagNames,
+    values["puzzle_topic_input"]);
 
   if (createError) {
     ack({
