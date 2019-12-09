@@ -108,6 +108,13 @@ receiver.app.get("/metas", async(req, res) => {
       meta.puzzles = [];
     }
     meta.puzzles.sort((a: any, b: any) => a.name < b.name ? -1 : 1);
+    meta.numPuzzles = meta.puzzles.length;
+    meta.numIncompletePuzzles = meta.puzzles
+      .map((p: any) => p.complete ? 0 : 1)
+      .reduce((a: number, b: number) => a + b, 0);
+    meta.numCompletePuzzles = meta.puzzles
+      .map((p: any) => p.complete ? 1 : 0)
+      .reduce((a: number, b: number) => a + b, 0);
   }
   metas.sort((a: any, b: any) => a.name < b.name ? -1 : 1);
   return res.render("metas", {
