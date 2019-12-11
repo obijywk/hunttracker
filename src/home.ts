@@ -18,7 +18,7 @@ function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
     text += "   " + idleStatus;
   }
   if (puzzle.channelTopic) {
-    text += `\n:mag_right: ${puzzle.channelTopic}`;
+    text += `\n${puzzles.buildTopicString(puzzle)}`;
   }
   if (puzzle.users && puzzle.users.length > 0) {
     let users = puzzle.users.slice(0, maxUsersToList).map(u => u.name).join(", ");

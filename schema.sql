@@ -20,6 +20,7 @@ CREATE TABLE puzzles (
   answer text,
   channel_name text,
   channel_topic text,
+  channel_topic_modified_timestamp timestamp,
   sheet_url text,
   chat_modified_timestamp timestamp,
   sheet_modified_timestamp timestamp,

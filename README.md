@@ -49,6 +49,8 @@ Everything is configured using environment variables, and they need to be set fo
   service account, and this folder is where the spreadsheets will be created as well.
 - **MINIMUM_IDLE_MINUTES**: The number of minutes of inactivity on a puzzle for it to be
   considered idle.
+- **MINIMUM_TOPIC_IDLE_MINUTES**: The number of minutes for which a topic may be unmodified
+  before it is considered stale.
 - **REFRESH_POLLING_MINUTES**: The frequency with which to internally poll for changes that
   aren't detected using events (e.g. spreadsheet edits). Alternatively, you can set up an
   external process to periodically GET /refresh, and leave this unset.

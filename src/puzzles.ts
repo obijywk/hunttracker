@@ -26,6 +26,7 @@ export interface Puzzle {
   answer: string;
   channelName: string;
   channelTopic: string;
+  channelTopicModifiedTimestamp: moment.Moment;
   users: Array<users.User>;
   tags: Array<tags.Tag>;
   sheetUrl: string;
@@ -45,6 +46,13 @@ export function getIdleDuration(puzzle: Puzzle): moment.Duration {
     puzzle.manualPokeTimestamp,
   );
   return moment.duration(moment().diff(latestTimestamp));
+}
+
+export function getTopicIdleDuration(puzzle: Puzzle): moment.Duration {
+  if (puzzle.complete) {
+    return moment.duration(0);
+  }
+  return moment.duration(moment().diff(puzzle.channelTopicModifiedTimestamp));
 }
 
 export function buildIdleStatus(puzzle: Puzzle): string {
@@ -72,6 +80,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       answer,
       channel_name,
       channel_topic,
+      channel_topic_modified_timestamp,
       sheet_url,
       (
         SELECT json_agg(row_to_json(users))
@@ -122,6 +131,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       answer: row.answer,
       channelName: row.channel_name,
       channelTopic: row.channel_topic,
+      channelTopicModifiedTimestamp: moment(row.channel_topic_modified_timestamp),
       users: row.users || [],
       tags: row.tags || [],
       sheetUrl: row.sheet_url,
@@ -188,16 +198,26 @@ function buildChannelName(puzzleName: string): string {
   return channelName;
 }
 
-function buildTopicBlock(puzzle: Puzzle) {
-  let topic = puzzle.channelTopic;
-  if (!topic) {
-    topic = "_Topic not set. Consider adding one for the benefit of your teammates._";
+export function buildTopicString(puzzle: Puzzle): string {
+  let topicText = ":mag_right: ";
+  if (puzzle.channelTopic) {
+    topicText += puzzle.channelTopic;
+    const topicIdleDuration = getTopicIdleDuration(puzzle);
+    if (topicIdleDuration.asMinutes() > Number(process.env.MINIMUM_TOPIC_IDLE_MINUTES)) {
+      topicText += `   :stopwatch: _updated ${topicIdleDuration.humanize()} ago_`;
+    }
+  } else {
+    topicText += "_Topic not set. Consider adding one for the benefit of your teammates._";
   }
+  return topicText;
+}
+
+function buildTopicBlock(puzzle: Puzzle) {
   return {
     "type": "section",
     "text": {
       "type": "mrkdwn",
-      text: ":mag_right: " + topic,
+      text: buildTopicString(puzzle),
     },
     "accessory": {
       "type": "button",
@@ -691,6 +711,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     answer: "",
     channelName,
     channelTopic: topic,
+    channelTopicModifiedTimestamp: now,
     users: [],
     tags: [],
     sheetUrl,
@@ -777,6 +798,10 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
         });
       }
     }
+    if (puzzle.channelTopicModifiedTimestamp != topicUpdateTimestamp) {
+      dirty = true;
+      puzzle.channelTopicModifiedTimestamp = topicUpdateTimestamp;
+    }
   }
   if (latestMessageTimestamp !== null &&
       puzzle.chatModifiedTimestamp.isBefore(latestMessageTimestamp)) {
@@ -795,10 +820,17 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
       UPDATE puzzles
       SET
         channel_topic = $2,
-        chat_modified_timestamp = $3,
-        sheet_modified_timestamp = $4
+        channel_topic_modified_timestamp = $3,
+        chat_modified_timestamp = $4,
+        sheet_modified_timestamp = $5
       WHERE id = $1`,
-      [id, puzzle.channelTopic, puzzle.chatModifiedTimestamp, puzzle.sheetModifiedTimestamp]);
+      [
+        id,
+        puzzle.channelTopic,
+        puzzle.channelTopicModifiedTimestamp,
+        puzzle.chatModifiedTimestamp,
+        puzzle.sheetModifiedTimestamp,
+      ]);
   }
 
   await updateStatusMessagePromise;
