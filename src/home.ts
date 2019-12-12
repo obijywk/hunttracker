@@ -123,6 +123,9 @@ async function buildHomeBlocks(userId: string) {
     "action_id": "home_update_tags",
     url: process.env.WEB_SERVER_URL + "tagger",
   });
+  if (isAdmin) {
+    actionsElements.push(tags.buildRenameTagButton());
+  }
 
   const blocks: Array<any> = [{
     type: "actions",
@@ -261,7 +264,7 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
 
 app.view("home_register_puzzle_view", async ({ack, view}) => {
   const values = getViewStateValues(view);
-  const selectedTags = tags.getTagsFromViewStateValues(values);
+  const selectedTags = tags.getUpdateTagsViewStateValues(values);
 
   if (selectedTags.errors) {
     ack({

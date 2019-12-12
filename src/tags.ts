@@ -56,6 +56,17 @@ export function buildUpdateTagsButton(puzzleId: string) {
   };
 }
 
+export function buildRenameTagButton() {
+  return {
+    "type": "button",
+    "text": {
+      "type": "plain_text",
+      "text": ":bookmark: Rename tag",
+    },
+    "action_id": "tags_rename",
+  };
+}
+
 export async function buildUpdateTagsBlocks(puzzleId: string) {
   const tags = await db.query(`
     SELECT
@@ -236,13 +247,13 @@ export async function addAndRemoveTags(
   }
 }
 
-export interface TagViewStateValues {
+export interface UpdateTagsViewStateValues {
   selectedTagIds?: Array<number>;
   newTagNames?: Array<string>;
   errors?: { [key: string]: string };
 }
 
-export function getTagsFromViewStateValues(viewStateValues: any): TagViewStateValues {
+export function getUpdateTagsViewStateValues(viewStateValues: any): UpdateTagsViewStateValues {
   let selectedTagIds = [];
   if (viewStateValues["previously_used_tags_input"]) {
     selectedTagIds = viewStateValues["previously_used_tags_input"].map(Number);
@@ -272,7 +283,7 @@ export function getTagsFromViewStateValues(viewStateValues: any): TagViewStateVa
 app.view("tags_update_view", async ({ack, view, body}) => {
   const puzzleId = JSON.parse(body.view.private_metadata)["puzzleId"] as string;
   const viewStateValues = getViewStateValues(view);
-  const selectedTags = getTagsFromViewStateValues(viewStateValues);
+  const selectedTags = getUpdateTagsViewStateValues(viewStateValues);
 
   if (selectedTags.errors) {
     ack({
@@ -286,6 +297,139 @@ app.view("tags_update_view", async ({ack, view, body}) => {
 
   await taskQueue.scheduleTask("refresh_puzzle", {
     id: puzzleId,
+  });
+
+  ack();
+});
+
+async function buildRenameTagBlocks() {
+  const tags = await db.query(`
+    SELECT
+      id,
+      name
+    FROM tags
+    ORDER BY name ASC
+  `);
+
+  const options = [];
+  for (const tag of tags.rows) {
+    const option: Option = {
+      text: {
+        type: "plain_text",
+        text: tag.name,
+      },
+      value: String(tag.id),
+    };
+    options.push(option);
+  }
+
+  const blocks: Array<KnownBlock | Block> = [];
+  if (options.length > 0) {
+    blocks.push(
+      {
+        type: "input",
+        "block_id": "tag_input",
+        label: {
+          type: "plain_text",
+          text: "Tag",
+        },
+        element: {
+          type: "static_select",
+          options,
+          "initial_option": options[0],
+        },
+      },
+    );
+    blocks.push({
+      type: "input",
+      "block_id": "new_tag_name_input",
+      label: {
+        type: "plain_text",
+        text: "New tag name",
+      },
+      element: {
+        type: "plain_text_input",
+        placeholder: {
+          type: "plain_text",
+          text: "Enter new tag name",
+        },
+      },
+    });
+  } else {
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "No tags yet exist.",
+      },
+    });
+  }
+  return blocks;
+}
+
+app.action("tags_rename", async ({ ack, body }) => {
+  await app.client.views.open({
+    token: process.env.SLACK_BOT_TOKEN,
+    "trigger_id": (body as any).trigger_id,
+    view: {
+      type: "modal",
+      "callback_id": "tags_rename_view",
+      title: {
+        type: "plain_text",
+        text: "Rename Tag",
+      },
+      blocks: await buildRenameTagBlocks(),
+      submit: {
+        type: "plain_text",
+        text: "Rename Tag",
+      },
+    },
+  });
+  ack();
+});
+
+app.view("tags_rename_view", async ({ack, body, view}) => {
+  const values = getViewStateValues(view);
+
+  if (values["tag_input"] === undefined) {
+    ack();
+    return;
+  }
+  const selectedTagId = Number(values["tag_input"]);
+
+  if (values["new_tag_name_input"] === undefined) {
+    ack();
+    return;
+  }
+  const newTagName = values["new_tag_name_input"].trim();
+  if (newTagName.match(/[^a-z0-9-/]/g)) {
+    ack({
+      "response_action": "errors",
+      errors: {
+        "new_tag_name_input": "Tags may only contain lowercase letters, numbers, dashes, and forward slashes.",
+      },
+    } as any);
+    return;
+  }
+
+  await db.query(`
+    UPDATE tags
+    SET name = $2
+    WHERE id = $1
+  `, [selectedTagId, newTagName]);
+
+  const puzzleIdsResult = await db.query(`
+    SELECT puzzle_id FROM puzzle_tag WHERE tag_id = $1
+  `, [selectedTagId]);
+
+  for (const row of puzzleIdsResult.rows) {
+    await taskQueue.scheduleTask("refresh_puzzle", {
+      id: row["puzzle_id"],
+    });
+  }
+
+  await taskQueue.scheduleTask("publish_home", {
+    userId: body.user.id,
   });
 
   ack();
