@@ -89,7 +89,15 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
         WHERE puzzle_user.puzzle_id = puzzles.id
       ) users,
       (
-        SELECT json_agg(row_to_json(tags) ORDER BY name)
+        SELECT
+          json_agg(
+            json_build_object(
+              'id', tags.id,
+              'name', tags.name,
+              'applied', puzzle_tag.applied
+            )
+            ORDER BY name
+          )
         FROM tags
         JOIN puzzle_tag ON puzzle_tag.tag_id = tags.id
         WHERE puzzle_tag.puzzle_id = puzzles.id

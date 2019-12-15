@@ -42,6 +42,7 @@ CREATE TABLE users (
 CREATE TABLE puzzle_tag (
   puzzle_id text REFERENCES puzzles(id),
   tag_id SERIAL REFERENCES tags(id),
+  applied timestamp,
   PRIMARY KEY (puzzle_id, tag_id)
 );
 

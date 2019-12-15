@@ -1,3 +1,4 @@
+import moment = require("moment");
 import { PoolClient } from "pg";
 import { ButtonAction } from "@slack/bolt";
 import { Block, KnownBlock, Option } from "@slack/types";
@@ -10,6 +11,8 @@ import * as taskQueue from "./task_queue";
 export interface Tag {
   id: number;
   name: string;
+  // Only present when associated with a puzzle.
+  applied?: moment.Moment;
 }
 
 export async function list(): Promise<Array<Tag>> {
@@ -192,7 +195,7 @@ export async function updateTags(puzzleId: string, selectedTagIds: Array<number>
   }
   for (const newTag of newTagIds) {
     if (!oldTagIds.has(newTag)) {
-      client.query("INSERT INTO puzzle_tag (puzzle_id, tag_id) VALUES ($1, $2)", [puzzleId, newTag]);
+      client.query("INSERT INTO puzzle_tag (puzzle_id, tag_id, applied) VALUES ($1, $2, NOW())", [puzzleId, newTag]);
     }
   }
 }
@@ -234,7 +237,7 @@ export async function addAndRemoveTags(
   for (const puzzleId of puzzleIds) {
     for (const tagId of allAddedTagIds) {
       db.query(`
-        INSERT INTO puzzle_tag (puzzle_id, tag_id) VALUES ($1, $2)
+        INSERT INTO puzzle_tag (puzzle_id, tag_id, applied) VALUES ($1, $2, NOW())
         ON CONFLICT DO NOTHING
       `, [puzzleId, tagId]);
     }
