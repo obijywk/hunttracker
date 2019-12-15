@@ -125,6 +125,7 @@ async function buildHomeBlocks(userId: string) {
   });
   if (isAdmin) {
     actionsElements.push(tags.buildRenameTagButton());
+    actionsElements.push(tags.buildDeleteTagsButton());
   }
 
   const blocks: Array<any> = [{

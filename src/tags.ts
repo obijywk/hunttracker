@@ -70,6 +70,17 @@ export function buildRenameTagButton() {
   };
 }
 
+export function buildDeleteTagsButton() {
+  return {
+    "type": "button",
+    "text": {
+      "type": "plain_text",
+      "text": ":bookmark: Delete tags",
+    },
+    "action_id": "tags_delete",
+  };
+}
+
 export async function buildUpdateTagsBlocks(puzzleId: string) {
   const tags = await db.query(`
     SELECT
@@ -424,6 +435,109 @@ app.view("tags_rename_view", async ({ack, body, view}) => {
   const puzzleIdsResult = await db.query(`
     SELECT puzzle_id FROM puzzle_tag WHERE tag_id = $1
   `, [selectedTagId]);
+
+  for (const row of puzzleIdsResult.rows) {
+    await taskQueue.scheduleTask("refresh_puzzle", {
+      id: row["puzzle_id"],
+    });
+  }
+
+  await taskQueue.scheduleTask("publish_home", {
+    userId: body.user.id,
+  });
+
+  ack();
+});
+
+async function buildDeleteTagsBlocks() {
+  const tags = await db.query(`
+    SELECT
+      id,
+      name
+    FROM tags
+    ORDER BY name ASC
+  `);
+
+  const options = [];
+  for (const tag of tags.rows) {
+    const option: Option = {
+      text: {
+        type: "plain_text",
+        text: tag.name,
+      },
+      value: String(tag.id),
+    };
+    options.push(option);
+  }
+
+  const blocks: Array<KnownBlock | Block> = [];
+  if (options.length > 0) {
+    blocks.push(
+      {
+        type: "input",
+        "block_id": "tags_input",
+        label: {
+          type: "plain_text",
+          text: "Tags",
+        },
+        element: {
+          type: "multi_static_select",
+          options,
+          placeholder: {
+            type: "plain_text",
+            text: "Select tags",
+          },
+        },
+      },
+    );
+  } else {
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "No tags yet exist.",
+      },
+    });
+  }
+  return blocks;
+}
+
+app.action("tags_delete", async ({ ack, body }) => {
+  await app.client.views.open({
+    token: process.env.SLACK_BOT_TOKEN,
+    "trigger_id": (body as any).trigger_id,
+    view: {
+      type: "modal",
+      "callback_id": "tags_delete_view",
+      title: {
+        type: "plain_text",
+        text: "Delete tags",
+      },
+      blocks: await buildDeleteTagsBlocks(),
+      submit: {
+        type: "plain_text",
+        text: "Delete tags",
+      },
+    },
+  });
+  ack();
+});
+
+app.view("tags_delete_view", async ({ack, body, view}) => {
+  const values = getViewStateValues(view);
+
+  if (values["tags_input"] === undefined) {
+    ack();
+    return;
+  }
+  const selectedTagIds = values["tags_input"].map(Number);
+
+  const puzzleIdsResult = await db.query(`
+    SELECT puzzle_id FROM puzzle_tag WHERE tag_id = ANY($1)
+  `, [selectedTagIds]);
+
+  await db.query("DELETE FROM puzzle_tag WHERE tag_id = ANY($1)", [selectedTagIds]);
+  await db.query("DELETE FROM tags WHERE id = ANY($1)", [selectedTagIds]);
 
   for (const row of puzzleIdsResult.rows) {
     await taskQueue.scheduleTask("refresh_puzzle", {
