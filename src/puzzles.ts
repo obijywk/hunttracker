@@ -421,7 +421,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
       ],
       submit: {
         type: "plain_text",
-        text: "Submit",
+        text: "Update topic",
       },
     },
   });
@@ -456,7 +456,7 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
       "private_metadata": JSON.stringify({id}),
       title: {
         type: "plain_text",
-        text: "Record Confirmed Answer",
+        text: "Record confirmed answer",
       },
       blocks: [
         {

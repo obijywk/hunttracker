@@ -196,7 +196,7 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
       "callback_id": "home_register_puzzle_view",
       title: {
         type: "plain_text",
-        text: "Register Puzzle",
+        text: "Register puzzle",
       },
       blocks: [
         {
@@ -255,7 +255,7 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
       ],
       submit: {
         type: "plain_text",
-        text: "Register Puzzle",
+        text: "Register puzzle",
       },
     },
   });

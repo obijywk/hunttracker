@@ -159,12 +159,12 @@ app.action("tags_update", async ({ ack, body, payload }) => {
       "private_metadata": JSON.stringify({ puzzleId }),
       title: {
         type: "plain_text",
-        text: "Update Tags",
+        text: "Update tags",
       },
       blocks: await buildUpdateTagsBlocks(puzzleId),
       submit: {
         type: "plain_text",
-        text: "Submit",
+        text: "Update tags",
       },
     },
   });
@@ -379,12 +379,12 @@ app.action("tags_rename", async ({ ack, body }) => {
       "callback_id": "tags_rename_view",
       title: {
         type: "plain_text",
-        text: "Rename Tag",
+        text: "Rename tag",
       },
       blocks: await buildRenameTagBlocks(),
       submit: {
         type: "plain_text",
-        text: "Rename Tag",
+        text: "Rename tag",
       },
     },
   });
