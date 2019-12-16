@@ -77,61 +77,78 @@ async function buildHomeBlocks(userId: string) {
 
   const isAdmin = await isAdminPromise;
 
-  const actionsElements = [];
-  actionsElements.push({
-    type: "button",
-    text: {
-      type: "plain_text",
-      text: ":repeat: Refresh",
+  const actionsElements = [
+    {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":repeat: Refresh",
+      },
+      "action_id": "home_refresh",
     },
-    "action_id": "home_refresh",
-  });
-  if (isAdmin) {
+    {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":books: See all puzzles",
+      },
+      "action_id": "home_see_all_puzzles",
+      url: process.env.WEB_SERVER_URL + "puzzles",
+    },
+    {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":books: See all metas",
+      },
+      "action_id": "home_see_all_metas",
+      url: process.env.WEB_SERVER_URL + "metas",
+    },
+    {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":bookmark: Update tags",
+      },
+      "action_id": "home_update_tags",
+      url: process.env.WEB_SERVER_URL + "tagger",
+    },
+  ];
+
+  if (process.env.HELP_URL) {
     actionsElements.push({
       type: "button",
       text: {
         type: "plain_text",
-        text: ":sparkles: Register puzzle",
+        text: ":question: Help",
       },
-      "action_id": "home_register_puzzle",
+      "action_id": "home_help",
+      url: process.env.HELP_URL,
     });
-  }
-  actionsElements.push({
-    type: "button",
-    text: {
-      type: "plain_text",
-      text: ":books: See all puzzles",
-    },
-    "action_id": "home_see_all_puzzles",
-    url: process.env.WEB_SERVER_URL + "puzzles",
-  });
-  actionsElements.push({
-    type: "button",
-    text: {
-      type: "plain_text",
-      text: ":books: See all metas",
-    },
-    "action_id": "home_see_all_metas",
-    url: process.env.WEB_SERVER_URL + "metas",
-  });
-  actionsElements.push({
-    type: "button",
-    text: {
-      type: "plain_text",
-      text: ":bookmark: Update tags",
-    },
-    "action_id": "home_update_tags",
-    url: process.env.WEB_SERVER_URL + "tagger",
-  });
-  if (isAdmin) {
-    actionsElements.push(tags.buildRenameTagButton());
-    actionsElements.push(tags.buildDeleteTagsButton());
   }
 
   const blocks: Array<any> = [{
     type: "actions",
     elements: actionsElements,
   }];
+
+  if (isAdmin) {
+    blocks.push({
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: {
+            type: "plain_text",
+            text: ":sparkles: Register puzzle",
+          },
+          "action_id": "home_register_puzzle",
+        },
+        tags.buildRenameTagButton(),
+        tags.buildDeleteTagsButton(),
+      ],
+    });
+  }
 
   for (const puzzle of allPuzzles.slice(0, maxPuzzlesToList)) {
     blocks.push({
@@ -312,6 +329,10 @@ app.action("home_see_all_metas", async ({ ack }) => {
 });
 
 app.action("home_update_tags", async ({ ack }) => {
+  ack();
+});
+
+app.action("home_help", async ({ ack }) => {
   ack();
 });
 
