@@ -173,6 +173,13 @@ export async function isAdmin(userId: string): Promise<boolean> {
   return result.rows[0].admin;
 }
 
+export async function exists(userId: string): Promise<boolean> {
+  const result = await db.query(
+    "SELECT EXISTS (SELECT 1 FROM users WHERE id = $1)",
+    [userId]);
+  return result.rowCount > 0 && result.rows[0].exists;
+}
+
 app.event("user_change", async ({ event, body }) => {
   try {
     const userChangeEvent = event as UserChangeEvent;

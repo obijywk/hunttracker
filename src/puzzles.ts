@@ -182,6 +182,31 @@ export async function isPuzzleChannel(channelId: string): Promise<boolean> {
   return result.rowCount > 0 && result.rows[0].exists;
 }
 
+export async function isIdlePuzzleChannel(channelId: string): Promise<boolean> {
+  const result = await db.query(`
+    SELECT
+      complete,
+      chat_modified_timestamp,
+      sheet_modified_timestamp,
+      manual_poke_timestamp
+    FROM puzzles
+    WHERE id = $1
+    `, [channelId]);
+  if (result.rowCount === 0) {
+    return false;
+  }
+  const row = result.rows[0];
+  if (row.complete) {
+    return false;
+  }
+  const latestTimestamp = moment.max(
+    moment(row.chat_modified_timestamp),
+    moment(row.sheet_modified_timestamp),
+    moment(row.manual_poke_timestamp),
+  );
+  return moment.duration(moment().diff(latestTimestamp)).asMinutes() >= Number(process.env.MINIMUM_IDLE_MINUTES);
+}
+
 export function buildPuzzleNameMrkdwn(puzzle: Puzzle) {
   if (puzzle.url) {
     return `<${puzzle.url}|${puzzle.name}>`;

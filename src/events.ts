@@ -7,6 +7,7 @@ import {
 import { app } from "./app";
 import * as puzzles from "./puzzles";
 import * as taskQueue from "./task_queue";
+import * as users from "./users";
 
 const refreshPuzzleSubtypes = new Set([
   "channel_topic",
@@ -19,6 +20,14 @@ app.event("message", async ({ event, body }) => {
     await taskQueue.scheduleTask("refresh_puzzle", {
       id: messageEvent.channel,
     });
+  } else {
+    const userExistsPromise = users.exists(messageEvent.user);
+    const isIdlePuzzleChannelPromise = puzzles.isIdlePuzzleChannel(messageEvent.channel);
+    if (await userExistsPromise && await isIdlePuzzleChannelPromise) {
+      await taskQueue.scheduleTask("refresh_puzzle", {
+        id: messageEvent.channel,
+      });
+    }
   }
   if (body.eventAck) {
     body.eventAck();
