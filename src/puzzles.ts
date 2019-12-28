@@ -655,6 +655,7 @@ export async function create(
   selectedTagIds: Array<number>,
   newTagNames: Array<string>,
   topic: string,
+  creatorUserId: string,
 ): Promise<string | null> {
   const channelName = buildChannelName(name);
   const existsResult = await db.query(`
@@ -676,6 +677,7 @@ export async function create(
     selectedTagIds,
     newTagNames,
     topic,
+    creatorUserId,
   });
   return null;
 }
@@ -710,6 +712,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const selectedTagIds: Array<number> = payload.selectedTagIds;
   const newTagNames: Array<string> = payload.newTagNames;
   const topic = payload.topic;
+  const creatorUserId = payload.creatorUserId;
 
   const sheetUrl = await googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, name);
 
@@ -792,6 +795,12 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
       token: process.env.SLACK_USER_TOKEN,
       channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
       text: `<#${id}> created for ${buildPuzzleNameMrkdwn(puzzle)}.`,
+    });
+  }
+
+  if (creatorUserId) {
+    await taskQueue.scheduleTask("publish_home", {
+      userId: creatorUserId,
     });
   }
 });

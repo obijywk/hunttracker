@@ -280,7 +280,7 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
   ack();
 });
 
-app.view("home_register_puzzle_view", async ({ack, view}) => {
+app.view("home_register_puzzle_view", async ({ack, body, view}) => {
   const values = getViewStateValues(view);
   const selectedTags = tags.getUpdateTagsViewStateValues(values);
 
@@ -297,7 +297,8 @@ app.view("home_register_puzzle_view", async ({ack, view}) => {
     values["puzzle_url_input"],
     selectedTags.selectedTagIds,
     selectedTags.newTagNames,
-    values["puzzle_topic_input"]);
+    values["puzzle_topic_input"],
+    body.user.id);
 
   if (createError) {
     ack({
