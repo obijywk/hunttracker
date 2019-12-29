@@ -81,6 +81,10 @@
               <td>Solvers</td>
               <td>${data.users.map(u => u.name).join(", ")}</td>
             </tr>
+            <tr>
+              <td>Topic</td>
+              <td>${data.channelTopic}</td>
+            </tr>
           </table>
         `;
       }
@@ -154,6 +158,8 @@
             },
             {
               data: "channelTopic",
+              width: "30vw",
+              className: "channel-topic",
             },
             {
               data: "tags",

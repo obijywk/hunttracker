@@ -67,6 +67,13 @@ span.answer {
 	font-size: 0.9em;
 }
 
+td.channel-topic {
+	max-width: 30vw;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
 td.idle-column {
 	text-align: right;
 }
