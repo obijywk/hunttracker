@@ -458,6 +458,16 @@ app.view("puzzle_update_topic_view", async ({ack, view, body}) => {
   const values = getViewStateValues(view);
   const topic: string = values["puzzle_topic_input"];
 
+  if (topic.length > 250) {
+    ack({
+      "response_action": "errors",
+      errors: {
+        "puzzle_topic_input": "A topic may only contain a maximum of 250 characters.",
+      },
+    } as any);
+    return;
+  }
+
   await app.client.channels.setTopic({
     token: process.env.SLACK_USER_TOKEN,
     channel: id,
