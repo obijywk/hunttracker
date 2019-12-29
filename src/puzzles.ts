@@ -478,7 +478,10 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
     view: {
       type: "modal",
       "callback_id": "puzzle_record_confirmed_answer_view",
-      "private_metadata": JSON.stringify({id}),
+      "private_metadata": JSON.stringify({
+        id,
+        channelName: puzzle.channelName,
+      }),
       title: {
         type: "plain_text",
         text: "Record confirmed answer",
@@ -554,7 +557,9 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
 });
 
 app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
-  const id = JSON.parse(body.view.private_metadata)["id"] as string;
+  const privateMetadata = JSON.parse(body.view.private_metadata);
+  const id = privateMetadata.id as string;
+  const channelName = privateMetadata.channelName as string;
   const values = getViewStateValues(view);
   const answer: string = values["puzzle_answer_input"];
   const complete: boolean = values["puzzle_solved_input"] === "true";
@@ -564,7 +569,7 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
     [id, answer, complete]);
   await taskQueue.scheduleTask("refresh_puzzle", {id});
 
-  if (complete && process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
+  if (complete) {
     const puzzle = await get(id);
     let text;
     if (answer) {
@@ -574,9 +579,16 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
     }
     await app.client.chat.postMessage({
       token: process.env.SLACK_USER_TOKEN,
-      channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
+      channel: `#${channelName}`,
       text,
     });
+    if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
+      await app.client.chat.postMessage({
+        token: process.env.SLACK_USER_TOKEN,
+        channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
+        text,
+      });
+    }
   }
 
   ack();
