@@ -66,6 +66,10 @@
         return `
           <table class="puzzleDetails">
             <tr>
+              <td>Puzzle</td>
+              <td><a href="${data.url}" target="_blank">${data.url}</a></td>
+            </tr>
+            <tr>
               <td>Channel</td>
               <td><a href="{{slackUrlPrefix}}${data.id}" target="_blank">#${data.channelName}</a></td>
             </tr>
@@ -138,8 +142,8 @@
             {
               data: "name",
               render: (data, type, row) => {
-                if (type === "display" && row.url) {
-                  return `<a href="${row.url}" target="_blank">${data}</a>`;
+                if (type === "display") {
+                  return `<a href="javascript:void(0);" class="puzzle-name-link">${data}</a>`;
                 }
                 return data;
               },
@@ -217,7 +221,7 @@
           }
         });
 
-        $("#puzzles-table tbody").on("click", "td.details-control", function() {
+        function expandOrCollapseClickedRow() {
           const tr = $(this).closest("tr");
           const row = table.row(tr);
           if (row.child.isShown()) {
@@ -227,7 +231,9 @@
             row.child(formatDetails(row.data())).show();
             tr.addClass("shown");
           }
-        });
+        }
+        $("#puzzles-table tbody").on("click", "td.details-control", expandOrCollapseClickedRow);
+        $("#puzzles-table tbody").on("click", "a.puzzle-name-link", expandOrCollapseClickedRow);
 
         $("#puzzles-table tbody").on("click", "a.tag-link", function() {
           const selected = $(".tags-select").val();
