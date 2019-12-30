@@ -91,7 +91,7 @@ table.dataTable.compact tbody td {
 table.dataTable,
 table.dataTable th,
 table.dataTable td {
- box-sizing:content-box
+ box-sizing:border-box
 }
 .dataTables_wrapper {
  position:relative;

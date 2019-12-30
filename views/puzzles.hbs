@@ -27,6 +27,9 @@
         <tr>
           <th></th>
           <th>Solved</th>
+          <th class="icon-column">&nbsp;</th>
+          <th class="icon-column">&nbsp;</th>
+          <th class="icon-column">&nbsp;</th>
           <th>Name</th>
           <th>Answer</th>
           <th>Topic</th>
@@ -43,7 +46,7 @@
           return true;
         }
         const selectedTagNames = new Set(selectedTags.map(o => o.text));
-        for (const tagName of data[5].split(" ")) {
+        for (const tagName of data[8].split(" ")) {
           if (selectedTagNames.has(tagName)) {
             return true;
           }
@@ -66,22 +69,27 @@
         return `
           <table class="puzzleDetails">
             <tr>
-              <td class="icon-puzzle">&nbsp;</td>
+              <td class="detail-icon-column"><a href="${data.url}" target="_blank"><div class="icon-puzzle">&nbsp;</div></a></td>
+              <td>Puzzle</td>
               <td><a href="${data.url}" target="_blank">${data.url}</a></td>
             </tr>
             <tr>
-              <td class="icon-slack">&nbsp;</td>
+              <td class="detail-icon-column"><a href="{{slackUrlPrefix}}${data.id}" target="_blank"><div class="icon-slack">&nbsp;</div></a></td>
+              <td>Channel</td>
               <td><a href="{{slackUrlPrefix}}${data.id}" target="_blank">#${data.channelName}</a></td>
             </tr>
             <tr>
-              <td class="icon-sheet">&nbsp;</td>
+              <td class="detail-icon-column"><a href="${data.sheetUrl}" target="_blank"><div class="icon-sheet">&nbsp;</div></a></td>
+              <td>Sheet</td>
               <td><a href="${data.sheetUrl}" target="_blank">${data.sheetUrl}</a></td>
             </tr>
             <tr>
+              <td></td>
               <td>Solvers</td>
               <td>${data.users.map(u => u.name).join(", ")}</td>
             </tr>
             <tr>
+              <td></td>
               <td>Topic</td>
               <td>${data.channelTopic}</td>
             </tr>
@@ -97,13 +105,13 @@
             {
               extend: "copy",
               exportOptions: {
-                columns: [2, 3, 4, 5],
+                columns: [5, 6, 7, 8],
               },
             },
             {
               extend: "csv",
               exportOptions: {
-                columns: [2, 3, 4, 5],
+                columns: [5, 6, 7, 8],
               },
             },
             {
@@ -120,7 +128,7 @@
             search: "{{initialSearch}}",
             regex: true,
           },
-          order: [[2, "asc"]],
+          order: [[5, "asc"]],
           columns: [
             {
               data: null,
@@ -141,6 +149,42 @@
                   return "solved";
                 }
                 return "unsolved";
+              },
+            },
+            {
+              data: "url",
+              className: "icon-column",
+              orderable: false,
+              width: "1.5em",
+              render: (data, type, row) => {
+                if (type === "display") {
+                  return `<a href="${data}" target="_blank"><div class="icon-puzzle">&nbsp;</div></a>`;
+                }
+                return data;
+              },
+            },
+            {
+              data: "id",
+              className: "icon-column",
+              orderable: false,
+              width: "1.5em",
+              render: (data, type, row) => {
+                if (type === "display") {
+                  return `<a href="{{slackUrlPrefix}}${data}" target="_blank"><div class="icon-slack">&nbsp;</div></a>`;
+                }
+                return data;
+              },
+            },
+            {
+              data: "sheetUrl",
+              className: "icon-column",
+              orderable: false,
+              width: "1.5em",
+              render: (data, type, row) => {
+                if (type === "display") {
+                  return `<a href="${data}" target="_blank"><div class="icon-sheet">&nbsp;</div></a>`;
+                }
+                return data;
               },
             },
             {
