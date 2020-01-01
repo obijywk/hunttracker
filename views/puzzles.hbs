@@ -109,6 +109,12 @@
           dom: "Bfrtip",
           buttons: [
             {
+              text: "Refresh",
+              action: function(e, dt, node, config) {
+                dt.ajax.reload();
+              },
+            },
+            {
               extend: "copy",
               exportOptions: {
                 columns: [5, 6, 7, 8],
@@ -251,6 +257,26 @@
           ],
         });
 
+        $(".tags-select").select2({
+          placeholder: "Filter by tag",
+          allowClear: true,
+        });
+        $(".tags-select").on("change", function() {
+          table.draw();
+        });
+        const initialTags = "{{initialTags}}";
+        if (initialTags) {
+          const initialTagsArray = initialTags.split(" ").filter(t => t.length > 0);
+          for (const tag of initialTagsArray) {
+            if (!$(".tags-select").find("option[value='" + tag + "']").length) {
+              const newOption = new Option(tag, tag, true, true);
+              $(".tags-select").append(newOption);
+            }
+          }
+          $(".tags-select").val(initialTagsArray);
+          $(".tags-select").trigger("change");
+        }
+
         table.on("xhr", function() {
           const json = table.ajax.json();
           const tagNameSet = new Set();
@@ -262,21 +288,11 @@
           const tagNameArray = Array.from(tagNameSet);
           tagNameArray.sort();
           const tagData = [];
-          for (const tagName of tagNameArray) {
-            tagData.push({ id: tagName, text: tagName });
-          }
-          $(".tags-select").select2({
-            data: tagData,
-            placeholder: "Filter by tag",
-            allowClear: true,
-          });
-          $(".tags-select").on("change", function() {
-            table.draw();
-          });
-          const initialTags = "{{initialTags}}";
-          if (initialTags) {
-            $(".tags-select").val(initialTags.split(" ").filter(t => t.length > 0));
-            $(".tags-select").trigger("change");
+          for (const tag of tagNameArray) {
+            if (!$(".tags-select").find("option[value='" + tag + "']").length) {
+              const newOption = new Option(tag, tag, false, false);
+              $(".tags-select").append(newOption).trigger("change");
+            }
           }
         });
 
