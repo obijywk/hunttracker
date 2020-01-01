@@ -1,11 +1,9 @@
-import * as AWS from "aws-sdk";
 import { PoolClient } from "pg";
 
-import * as db from "./db";
+import { SNSClient } from "@aws-sdk/client-sns-node/SNSClient";
+import { PublishCommand } from "@aws-sdk/client-sns-node/commands/PublishCommand";
 
-if (process.env.AWS_SNS_TOPIC_REGION) {
-  AWS.config.update({ region: process.env.AWS_REGION });
-}
+import * as db from "./db";
 
 const handlers: { [key: string]: (client: PoolClient, payload: any) => Promise<void>} = {};
 export function registerHandler(
@@ -21,10 +19,12 @@ export async function scheduleTask(taskType: string, payload: any, client?: Pool
     [taskType, payload],
     client);
   if (process.env.AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN) {
-    await new AWS.SNS({ apiVersion: "2010-03-31" }).publish({
+    const snsClient = new SNSClient({ region: process.env.AWS_REGION });
+    const publishCommand = new PublishCommand({
       Message: "NOTIFY",
       TopicArn: process.env.AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN,
-    }).promise();
+    });
+    await snsClient.send(publishCommand);
   }
 }
 
