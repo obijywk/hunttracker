@@ -48,6 +48,8 @@ Everything is configured using environment variables, and they need to be set fo
 - **PUZZLE_SHEET_TEMPLATE_URL**: A link to a Google Sheet that will be copied to create
   per-puzzle spreadsheets. It should be in a folder editable by the Google Cloud Platform
   service account, and this folder is where the spreadsheets will be created as well.
+- **AUTO_ARCHIVE**: If set, then puzzle channels will be automatically archived as they become
+  solved.
 - **MINIMUM_IDLE_MINUTES**: The number of minutes of inactivity on a puzzle for it to be
   considered idle.
 - **MINIMUM_TOPIC_IDLE_MINUTES**: The number of minutes for which a topic may be unmodified

@@ -599,6 +599,12 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
         text,
       });
     }
+    if (process.env.AUTO_ARCHIVE) {
+      await app.client.channels.archive({
+        token: process.env.SLACK_USER_TOKEN,
+        channel: id,
+      });
+    }
   }
 
   ack();
