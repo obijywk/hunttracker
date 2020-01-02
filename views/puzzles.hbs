@@ -167,7 +167,6 @@
               data: "url",
               className: "icon-column",
               orderable: false,
-              width: "1.5em",
               render: (data, type, row) => {
                 if (type === "display") {
                   if (data) {
@@ -182,7 +181,6 @@
               data: "id",
               className: "icon-column",
               orderable: false,
-              width: "1.5em",
               render: (data, type, row) => {
                 if (type === "display") {
                   return `<a href="{{slackUrlPrefix}}${data}" target="_blank"><div class="icon-slack">&nbsp;</div></a>`;
@@ -194,7 +192,6 @@
               data: "sheetUrl",
               className: "icon-column",
               orderable: false,
-              width: "1.5em",
               render: (data, type, row) => {
                 if (type === "display") {
                   return `<a href="${data}" target="_blank"><div class="icon-sheet">&nbsp;</div></a>`;
