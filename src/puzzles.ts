@@ -371,6 +371,16 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
   return blocks;
 }
 
+async function updateStatusMessage(puzzle: Puzzle) {
+  const postStatusMessageResult = await app.client.chat.update({
+    token: process.env.SLACK_BOT_TOKEN,
+    channel: puzzle.id,
+    text: "",
+    ts: puzzle.statusMessageTs,
+    blocks: buildStatusMessageBlocks(puzzle),
+  }) as ChatPostMessageResult;
+}
+
 app.action("puzzle_open_spreadsheet", async ({ack}) => {
   ack();
 });
@@ -577,7 +587,6 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
   await db.query(
     "UPDATE puzzles SET answer = $2, complete = $3 WHERE id = $1",
     [id, answer, complete]);
-  await taskQueue.scheduleTask("refresh_puzzle", {id});
 
   if (complete) {
     const puzzle = await get(id);
@@ -599,12 +608,15 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
         text,
       });
     }
+    await updateStatusMessage(puzzle);
     if (process.env.AUTO_ARCHIVE) {
       await app.client.channels.archive({
         token: process.env.SLACK_USER_TOKEN,
         channel: id,
       });
     }
+  } else {
+    await taskQueue.scheduleTask("refresh_puzzle", {id});
   }
 
   ack();
@@ -619,16 +631,6 @@ app.action("puzzle_archive_channel", async ({ack, payload}) => {
   });
   ack();
 });
-
-async function updateStatusMessage(puzzle: Puzzle) {
-  const postStatusMessageResult = await app.client.chat.update({
-    token: process.env.SLACK_BOT_TOKEN,
-    channel: puzzle.id,
-    text: "",
-    ts: puzzle.statusMessageTs,
-    blocks: buildStatusMessageBlocks(puzzle),
-  }) as ChatPostMessageResult;
-}
 
 async function insert(puzzle: Puzzle, client: PoolClient) {
   await client.query(
