@@ -93,7 +93,8 @@ div.icon-sheet {
 }
 
 td.detail-icon-column {
-	width: 2em;
+	width: 2.5em;
+	padding: 0 !important;
 }
 
 td.answer,
