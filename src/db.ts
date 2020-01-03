@@ -5,7 +5,9 @@ import moment = require("moment");
 import { Pool, PoolClient } from "pg";
 import { promisify } from "util";
 
-const pool = new Pool();
+const pool = new Pool({
+  idleTimeoutMillis: 30000,
+});
 
 pool.on("error", (err, client) => {
   console.error("Unexpected error on idle client", err);
