@@ -426,6 +426,19 @@ app.view("tags_rename_view", async ({ack, body, view}) => {
     return;
   }
 
+  const existsResult = await db.query(
+    "SELECT EXISTS (SELECT 1 FROM tags WHERE name = $1)",
+    [newTagName]);
+  if (existsResult.rowCount > 0 && existsResult.rows[0].exists) {
+    ack({
+      "response_action": "errors",
+      errors: {
+        "new_tag_name_input": "A tag with this name already exists.",
+      },
+    } as any);
+    return;
+  }
+
   await db.query(`
     UPDATE tags
     SET name = $2
