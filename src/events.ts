@@ -23,7 +23,9 @@ app.event("message", async ({ event, body }) => {
   } else {
     const userExistsPromise = users.exists(messageEvent.user);
     const isIdlePuzzleChannelPromise = puzzles.isIdlePuzzleChannel(messageEvent.channel);
-    if (await userExistsPromise && await isIdlePuzzleChannelPromise) {
+    const userExists = await userExistsPromise;
+    const isIdlePuzzleChannel = await isIdlePuzzleChannelPromise;
+    if (userExists && isIdlePuzzleChannel) {
       await taskQueue.scheduleTask("refresh_puzzle", {
         id: messageEvent.channel,
       });

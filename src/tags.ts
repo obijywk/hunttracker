@@ -201,12 +201,12 @@ export async function updateTags(puzzleId: string, selectedTagIds: Array<number>
 
   for (const oldTag of oldTagIds) {
     if (!newTagIds.has(oldTag)) {
-      client.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1 AND tag_id = $2", [puzzleId, oldTag]);
+      await client.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1 AND tag_id = $2", [puzzleId, oldTag]);
     }
   }
   for (const newTag of newTagIds) {
     if (!oldTagIds.has(newTag)) {
-      client.query("INSERT INTO puzzle_tag (puzzle_id, tag_id, applied) VALUES ($1, $2, NOW())", [puzzleId, newTag]);
+      await client.query("INSERT INTO puzzle_tag (puzzle_id, tag_id, applied) VALUES ($1, $2, NOW())", [puzzleId, newTag]);
     }
   }
 }
@@ -247,13 +247,13 @@ export async function addAndRemoveTags(
 
   for (const puzzleId of puzzleIds) {
     for (const tagId of allAddedTagIds) {
-      db.query(`
+      await db.query(`
         INSERT INTO puzzle_tag (puzzle_id, tag_id, applied) VALUES ($1, $2, NOW())
         ON CONFLICT DO NOTHING
       `, [puzzleId, tagId]);
     }
     for (const tagId of removedTagIds) {
-      db.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1 AND tag_id = $2", [puzzleId, tagId]);
+      await db.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1 AND tag_id = $2", [puzzleId, tagId]);
     }
     await taskQueue.scheduleTask("refresh_puzzle", {
       id: puzzleId,
