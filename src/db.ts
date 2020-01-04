@@ -6,12 +6,17 @@ import { Pool, PoolClient } from "pg";
 import { promisify } from "util";
 
 const pool = new Pool({
-  idleTimeoutMillis: 30000,
+  idleTimeoutMillis: 300000,
+});
+
+pool.on("connect", client => {
+  client.on("error", err => {
+    console.error("Client error", err);
+  });
 });
 
 pool.on("error", (err, client) => {
   console.error("Unexpected error on idle client", err);
-  process.exit(-1);
 });
 
 export const sessionStore = new (connectPgSimple(expressSession))({
