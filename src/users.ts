@@ -19,11 +19,11 @@ function shouldAcceptMember(member: UserResult): boolean {
 }
 
 function getMemberName(member: UserResult): string {
-  if (member.profile.display_name_normalized) {
-    return member.profile.display_name_normalized;
-  }
   if (member.profile.real_name_normalized) {
     return member.profile.real_name_normalized;
+  }
+  if (member.profile.display_name_normalized) {
+    return member.profile.display_name_normalized;
   }
   return member.name;
 }
