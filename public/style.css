@@ -1,6 +1,8 @@
 body {
 	font-family: sans-serif;
 	font-size: 14px;
+	margin:0;
+	padding:0;
 }
 
 div.puzzles-table-filter-solved {
@@ -189,15 +191,15 @@ div.meta-puzzle {
 }
 
 div.menu-header {
-    min-width: 100vw;
-    display: block;
     background: linear-gradient(to bottom, #78909c, #546e7a);
-	display: flex; line-height: 1.8em;
+	display: flex;
+	line-height: 1.8em;
 	margin: 0;
 	padding: 0;
 	font-size: 1.1em;
 	flex-wrap: nowrap;
 	align-items: center;
+	color: white;
 }
 
 span.menu-item {
@@ -207,4 +209,7 @@ span.menu-item {
 span.menu-selected {
 	background: linear-gradient(to bottom, #26c6da, #00acc1);
 	font-weight: bold;
+}
+a:visited span.menu-item  {
+	color: white;
 }
