@@ -13,11 +13,7 @@ export function registerHandler(
   handlers[taskType] = handler;
 }
 
-export async function scheduleTask(taskType: string, payload: any, client?: PoolClient) {
-  await db.query(
-    "INSERT INTO task_queue (task_type, payload) VALUES ($1, $2)",
-    [taskType, payload],
-    client);
+export async function notifyQueue() {
   if (process.env.AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN) {
     const snsClient = new SNSClient({ region: process.env.AWS_REGION });
     const publishCommand = new PublishCommand({
@@ -25,6 +21,16 @@ export async function scheduleTask(taskType: string, payload: any, client?: Pool
       TopicArn: process.env.AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN,
     });
     await snsClient.send(publishCommand);
+  }
+}
+
+export async function scheduleTask(taskType: string, payload: any, client?: PoolClient, notify: boolean = true) {
+  await db.query(
+    "INSERT INTO task_queue (task_type, payload) VALUES ($1, $2)",
+    [taskType, payload],
+    client);
+  if (notify) {
+    await notifyQueue();
   }
 }
 

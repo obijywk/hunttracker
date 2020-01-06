@@ -715,10 +715,14 @@ export async function create(
 export async function refreshAll() {
   const result = await db.query("SELECT id FROM puzzles");
   for (const row of result.rows) {
-    await taskQueue.scheduleTask("refresh_puzzle", {
-      id: row.id,
-    });
+    await taskQueue.scheduleTask(
+      "refresh_puzzle",
+      { id: row.id },
+      undefined  /* client */,
+      false,  /* notify */
+    );
   }
+  await taskQueue.notifyQueue();
 }
 
 export async function refreshStale() {
@@ -730,10 +734,14 @@ export async function refreshStale() {
     if (getIdleDuration(puzzle).asMinutes() < Number(process.env.MINIMUM_IDLE_MINUTES)) {
       continue;
     }
-    await taskQueue.scheduleTask("refresh_puzzle", {
-      id: puzzle.id,
-    });
+    await taskQueue.scheduleTask(
+      "refresh_puzzle",
+      { id: puzzle.id },
+      undefined  /* client */,
+      false,  /* notify */
+    );
   }
+  await taskQueue.notifyQueue();
 }
 
 taskQueue.registerHandler("create_puzzle", async (client, payload) => {
@@ -910,8 +918,14 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
 
   const affectedUserIds = await refreshUsersPromise;
   for (const userId of affectedUserIds) {
-    await taskQueue.scheduleTask("publish_home", {
-      userId,
-    }, client);
+    await taskQueue.scheduleTask(
+      "publish_home",
+      { userId },
+      client,
+      false,  /* notify */
+    );
+  }
+  if (affectedUserIds.length > 0) {
+    await taskQueue.notifyQueue();
   }
 });

@@ -255,9 +255,15 @@ export async function addAndRemoveTags(
     for (const tagId of removedTagIds) {
       await db.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1 AND tag_id = $2", [puzzleId, tagId]);
     }
-    await taskQueue.scheduleTask("refresh_puzzle", {
-      id: puzzleId,
-    });
+    await taskQueue.scheduleTask(
+      "refresh_puzzle",
+      { id: puzzleId },
+      undefined  /* client */,
+      false,  /* notify */
+    );
+  }
+  if (puzzleIds.length > 0) {
+    await taskQueue.notifyQueue();
   }
 }
 
@@ -450,14 +456,22 @@ app.view("tags_rename_view", async ({ack, body, view}) => {
   `, [selectedTagId]);
 
   for (const row of puzzleIdsResult.rows) {
-    await taskQueue.scheduleTask("refresh_puzzle", {
-      id: row["puzzle_id"],
-    });
+    await taskQueue.scheduleTask(
+      "refresh_puzzle",
+      { id: row["puzzle_id"] },
+      undefined  /* client */,
+      false,  /* notify */
+    );
   }
 
-  await taskQueue.scheduleTask("publish_home", {
-    userId: body.user.id,
-  });
+  await taskQueue.scheduleTask(
+    "publish_home",
+    { userId: body.user.id },
+    undefined  /* client */,
+    false,  /* notify */
+  );
+
+  await taskQueue.notifyQueue();
 
   ack();
 });
@@ -553,14 +567,22 @@ app.view("tags_delete_view", async ({ack, body, view}) => {
   await db.query("DELETE FROM tags WHERE id = ANY($1)", [selectedTagIds]);
 
   for (const row of puzzleIdsResult.rows) {
-    await taskQueue.scheduleTask("refresh_puzzle", {
-      id: row["puzzle_id"],
-    });
+    await taskQueue.scheduleTask(
+      "refresh_puzzle",
+      { id: row["puzzle_id"] },
+      undefined  /* client */,
+      false,  /* notify */
+    );
   }
 
-  await taskQueue.scheduleTask("publish_home", {
-    userId: body.user.id,
-  });
+  await taskQueue.scheduleTask(
+    "publish_home",
+    { userId: body.user.id },
+    undefined  /* client */,
+    false,  /* notify */
+  );
+
+  await taskQueue.notifyQueue();
 
   ack();
 });
