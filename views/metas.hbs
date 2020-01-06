@@ -4,14 +4,15 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
   </head>
   <body>
-		<div class="menu-header">
-			<span class="menu-item">Passport</span>
-			<a href="puzzles"><span class="menu-item">Puzzles</span></a>
-			<a href="metas"><span class="menu-item menu-selected">Metas</span></a>
-			<a href="tagger"><span class="menu-item">Tag Editor</span></a>
-		</div>
+	<div class="menu-header">
+		<span class="menu-item">Passport</span>
+		<a href="puzzles"><span class="menu-item">Puzzles</span></a>
+		<a href="metas"><span class="menu-item menu-selected">Metas</span></a>
+		<a href="tagger"><span class="menu-item">Tag Editor</span></a>
+	</div>
     <div class="body-wrapper">
-			<p>Puzzles that have been tagged with <i>meta/</i> or <i>in/</i> tag prefixes will appear here.</p>
+		<p>Puzzles that have been tagged with <i>meta/</i> or <i>in/</i> tag prefixes will appear here.</p>
+		<div class="meta-view-wrapper">
 			{{#each metas}}
 				<div class="meta-view">
 					<div class="meta-header title{{#if complete}} meta-complete{{/if}}">
@@ -36,5 +37,6 @@
 				</div>
 			{{/each}}
 		</div>
+	</div>
   </body>
 </html>
