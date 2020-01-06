@@ -880,7 +880,8 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
     dirty = true;
     puzzle.chatModifiedTimestamp = latestMessageTimestamp;
   }
-  if (puzzle.sheetModifiedTimestamp.isBefore(sheetModifiedTimestamp)) {
+  if (sheetModifiedTimestamp !== null &&
+      puzzle.sheetModifiedTimestamp.isBefore(sheetModifiedTimestamp)) {
     dirty = true;
     puzzle.sheetModifiedTimestamp = sheetModifiedTimestamp;
   }
