@@ -63,6 +63,7 @@ receiver.app.use("/static", express.static("public"));
 export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   receiver,
+  ignoreSelf: false,
 });
 
 app.error(e => {
