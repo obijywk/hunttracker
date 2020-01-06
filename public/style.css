@@ -131,14 +131,14 @@ a {
 }
 
 a.tag-link {
-    line-height: 2em;
-    padding: 0.2em 0.6em;
-    border-radius: 2px;
-    text-decoration: none;
-    background: linear-gradient(to bottom, #90a4ae, #78909c);
-    color: #fff;
-    font-size: 0.8em;
-    margin: 0.1em;
+	line-height: 2em;
+	padding: 0.2em 0.6em;
+	border-radius: 2px;
+	text-decoration: none;
+	background: linear-gradient(to bottom, #90a4ae, #78909c);
+	color: #fff;
+	font-size: 0.8em;
+	margin: 0.1em;
 	box-shadow: 0px 0.1em 0px 0px #263238;
 	white-space: nowrap;
 }
@@ -192,7 +192,7 @@ div.meta-puzzle {
 }
 
 div.menu-header {
-    background: linear-gradient(to bottom, #607d8b, #455a64);
+  background: linear-gradient(to bottom, #607d8b, #455a64);
 	display: flex;
 	line-height: 1.8em;
 	margin: 0;
