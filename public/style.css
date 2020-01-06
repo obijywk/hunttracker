@@ -7,12 +7,18 @@ div.puzzles-table-filter-solved {
 	color: #333;
 	float: left;
 	margin-top: 8px;
+	padding: 0.6em 1.2em;
 }
 
 div.puzzles-table-filter-tags {
 	width: 30vw;
 	float: right;
 	margin-bottom: 8px;
+	padding: 0.6em 1.2em;
+}
+
+#puzzles-table_wrapper {
+	padding: 0.6em 1.2em;
 }
 
 select.wide-select {
@@ -64,7 +70,8 @@ td.icon-column {
 	padding: 0 !important;
 }
 
-th.icon-column {
+th.icon-column,
+th.details-control {
 	width: 0.5em;
 }
 
@@ -129,8 +136,8 @@ a.tag-link {
     color: #fff;
     font-size: 0.8em;
     margin: 0.1em;
-		box-shadow: 0px 0.1em 0px 0px #263238;
-		white-space: nowrap;
+	box-shadow: 0px 0.1em 0px 0px #263238;
+	white-space: nowrap;
 }
 a.tag-link:hover {
 	background: linear-gradient(to bottom, #ffa726, #fb8c00);
@@ -181,9 +188,23 @@ div.meta-puzzle {
 	border-top: 1px solid white;
 }
 
-div.meta-puzzle.title {
-	
+div.menu-header {
+    min-width: 100vw;
+    display: block;
+    background: linear-gradient(to bottom, #78909c, #546e7a);
+	display: flex; line-height: 1.8em;
+	margin: 0;
+	padding: 0;
+	font-size: 1.1em;
+	flex-wrap: nowrap;
+	align-items: center;
 }
-div.meta-puzzle.answer {
-	
+
+span.menu-item {
+	padding: 0.2em 1.2em;
+	line-height: 1.8em;
+}
+span.menu-selected {
+	background: linear-gradient(to bottom, #26c6da, #00acc1);
+	font-weight: bold;
 }
