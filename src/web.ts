@@ -51,7 +51,7 @@ receiver.app.get("/puzzles", async (req, res) => {
     return;
   }
   return res.render("puzzles", {
-    slackUrlPrefix: process.env.SLACK_URL_PREFIX,
+    slackUrlPrefix: `https://app.slack.com/client/${process.env.SLACK_TEAM_ID}/`,
     minimumIdleMinutes: process.env.MINIMUM_IDLE_MINUTES,
     initialSearch: req.query.search || "",
     initialTags: req.query.tags || "",

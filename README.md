@@ -9,6 +9,8 @@ Everything is configured using environment variables, and they need to be set fo
   Used to build links.
 - **HELP_URL**: A link to help instructions for how to use this.
 - **SESSION_SECRET**: A secret string used to sign the session cookie to prevent tampering.
+- **SLACK_TEAM_ID**: This is your Slack workspace Team ID (prefixed with T) which can be found in
+  the Slack app URL.
 - **SLACK_CLIENT_ID**: This is the "Client ID" you can get from the "Basic Information"
   page in the "Your Apps" section of https://api.slack.com/.
 - **SLACK_CLIENT_SECRET**: This is the "Client Secret" you can get from the "Basic Information"
@@ -33,8 +35,6 @@ Everything is configured using environment variables, and they need to be set fo
 - **PGUSER**: The PostgreSQL database username.
 - **PGPASSWORD**: The PostgreSQL database password for the given user.
 - **PGDATABASE**: The name of the PostgreSQL database to use.
-- **SLACK_URL_PREFIX**: The beginning of your Slack instance URL e.g.
-  "https://app.slack.com/client/T0E2CSZ8F/". This is used for building deep links into Slack.
 - **SLACK_ACTIVITY_LOG_CHANNEL_NAME**: A Slack channel name (without the leading #) where
   puzzle creations etc. will be announced.
 - **SLACK_ADMIN_CHANNEL_ID**: A Slack channel ID (not name!). Only members of this channel will

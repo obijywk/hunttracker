@@ -27,6 +27,7 @@ receiver.app.use(expressSession({
 }));
 
 passport.use(new SlackStrategy({
+  team: process.env.SLACK_TEAM_ID,
   clientID: process.env.SLACK_CLIENT_ID,
   clientSecret: process.env.SLACK_CLIENT_SECRET,
   scope: ["identity.basic"],

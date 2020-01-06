@@ -12,7 +12,7 @@ const maxUsersToList = 5;
 const maxPuzzlesToList = 30;
 
 function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
-  let text = `:eye-in-speech-bubble: <${process.env.SLACK_URL_PREFIX}${puzzle.id}|${puzzle.name}>`;
+  let text = `:eye-in-speech-bubble: <https://app.slack.com/client/${process.env.SLACK_TEAM_ID}/${puzzle.id}|${puzzle.name}>`;
   const idleStatus = puzzles.buildIdleStatus(puzzle);
   if (idleStatus) {
     text += "   " + idleStatus;
