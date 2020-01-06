@@ -15,15 +15,24 @@ interface TrackedClient {
 
 const idleClients: Array<TrackedClient> = [];
 
+const logDatabaseClientUsage = process.env.LOG_DATABASE_CLIENT_USAGE !== undefined;
+
 async function getClient() {
   const now = moment();
   while (idleClients.length > 0) {
     const trackedClient = idleClients.shift();
-    if (now.diff(trackedClient.lastActive) > maxClientAge.asMilliseconds()) {
+    const age = now.diff(trackedClient.lastActive);
+    if (age > maxClientAge.asMilliseconds()) {
       trackedClient.client.end().catch(e => console.error("Failed to end stale client", e));
     } else {
+      if (logDatabaseClientUsage) {
+        console.info("Reusing DB client with age (ms)", age);
+      }
       return trackedClient.client;
     }
+  }
+  if (logDatabaseClientUsage) {
+    console.info("Creating new DB client");
   }
   const client = new Client();
   client.on("error", e => console.error("Client error", e));

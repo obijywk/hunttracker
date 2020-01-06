@@ -61,6 +61,10 @@ Everything is configured using environment variables, and they need to be set fo
   or unset to not use SNS.
 - **AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN**: The AWS SNS topic for task queue notifications, or
   unset to not use SNS.
+- **LOG_DATABASE_CLIENT_USAGE**: If set, logs debugging information about database client creation
+  and reuse.
+- **LOG_MESSAGE_EVENTS**: If set, logs debugging information about incoming Slack requests and
+  event messages. Currently only implemented for the AWS handler.
 
 ## Required Slack configuration
 

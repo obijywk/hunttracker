@@ -14,10 +14,14 @@ require("./web");
 // This hack adds an additional ack function to the body that's passed to the
 // event handler, and prevents the Lambda handler from returning until this ack
 // function is executed.
+const logMessageEvents = process.env.LOG_MESSAGE_EVENTS !== undefined;
 const messageEventListeners = receiver.listeners("message");
 for (const messageEventListener of messageEventListeners) {
   receiver.removeListener("message", messageEventListener as (...args: any[]) => void);
   receiver.addListener("message", async (message) => {
+    if (logMessageEvents) {
+      console.info("Received", JSON.stringify(message));
+    }
     const originalAck = message.ack;
     const ackArgsPromise = new Promise<any[]>((resolve) => {
       message.ack = (...ackArgs: any[]) => resolve(ackArgs);
