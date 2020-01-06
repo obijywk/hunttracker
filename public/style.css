@@ -5,22 +5,23 @@ body {
 	padding:0;
 }
 
-div.puzzles-table-filter-solved {
+div.body-wrapper {
+	padding: 1em;
+}
+
+div.puzzle-filters {
+	display: flex;
+	justify-content: space-between;
+	padding: 0 0 0.5em 0;
+}
+
+div.filter-solved {
 	color: #333;
-	float: left;
-	margin-top: 8px;
-	padding: 0.6em 1.2em;
-}
-
-div.puzzles-table-filter-tags {
 	width: 30vw;
-	float: right;
-	margin-bottom: 8px;
-	padding: 0.6em 1.2em;
 }
 
-#puzzles-table_wrapper {
-	padding: 0.6em 1.2em;
+div.filter-tags {
+	width: 30vw;
 }
 
 select.wide-select {
@@ -28,7 +29,7 @@ select.wide-select {
 }
 
 table.dataTable thead th {
-  background: linear-gradient(to bottom, #0288d1, #0277bd);
+	background: linear-gradient(to bottom, #0288d1, #0277bd);
 	color: white;
 }
 table.dataTable tbody tr {
@@ -191,7 +192,7 @@ div.meta-puzzle {
 }
 
 div.menu-header {
-    background: linear-gradient(to bottom, #78909c, #546e7a);
+    background: linear-gradient(to bottom, #607d8b, #455a64);
 	display: flex;
 	line-height: 1.8em;
 	margin: 0;
@@ -207,7 +208,7 @@ span.menu-item {
 	line-height: 1.8em;
 }
 span.menu-selected {
-	background: linear-gradient(to bottom, #26c6da, #00acc1);
+	background: linear-gradient(to bottom, #00e5ff, #00b8d4);
 	font-weight: bold;
 }
 a:visited span.menu-item  {
