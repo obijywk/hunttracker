@@ -5,22 +5,23 @@ body {
 	padding:0;
 }
 
-div.puzzles-table-filter-solved {
+div.body-wrapper {
+	padding: 1em;
+}
+
+div.puzzle-filters {
+	display: flex;
+	justify-content: space-between;
+	padding: 0 0 0.5em 0;
+}
+
+div.filter-solved {
 	color: #333;
-	float: left;
-	margin-top: 8px;
-	padding: 0.6em 1.2em;
-}
-
-div.puzzles-table-filter-tags {
 	width: 30vw;
-	float: right;
-	margin-bottom: 8px;
-	padding: 0.6em 1.2em;
 }
 
-#puzzles-table_wrapper {
-	padding: 0.6em 1.2em;
+div.filter-tags {
+	width: 30vw;
 }
 
 select.wide-select {
