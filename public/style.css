@@ -156,10 +156,16 @@ table.task-queue-table td {
 	border-collapse: collapse;
 }
 
+div.meta-view-wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: start;
+}
+
 div.meta-view {
 	display: grid;
 	grid-template-columns: max-content max-content;
-	margin: 0.5em 1em 1.5em 1em;
+	margin: 0.5em 1.5em 1.5em 0em;
 	width: max-content;
 	background-color: #eeeeee;
 	box-shadow: 4px 6px 8px -2px #0003;
@@ -192,7 +198,7 @@ div.meta-puzzle {
 }
 
 div.menu-header {
-  background: linear-gradient(to bottom, #607d8b, #455a64);
+	background: linear-gradient(to bottom, #607d8b, #455a64);
 	display: flex;
 	line-height: 1.8em;
 	margin: 0;
@@ -207,10 +213,13 @@ span.menu-item {
 	padding: 0.2em 1.2em;
 	line-height: 1.8em;
 }
+
 span.menu-selected {
 	background: linear-gradient(to bottom, #00e5ff, #00b8d4);
 	font-weight: bold;
 }
-a:visited span.menu-item  {
+
+div.menu-header a,
+div.menu-header a:visited {
 	color: white;
 }
