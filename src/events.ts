@@ -15,12 +15,16 @@ const refreshPuzzleSubtypes = new Set([
 
 app.event("message", async ({ event, body }) => {
   const messageEvent = event as unknown as MessageEvent;
+  let isBotMessage = messageEvent.subtype === "bot_message";
+  if (messageEvent.message) {
+    isBotMessage = isBotMessage || messageEvent.message.subtype === "bot_message";
+  }
   if (refreshPuzzleSubtypes.has(messageEvent.subtype) &&
       await puzzles.isPuzzleChannel(messageEvent.channel)) {
     await taskQueue.scheduleTask("refresh_puzzle", {
       id: messageEvent.channel,
     });
-  } else {
+  } else if (!isBotMessage) {
     const userExistsPromise = users.exists(messageEvent.user);
     const isIdlePuzzleChannelPromise = puzzles.isIdlePuzzleChannel(messageEvent.channel);
     const userExists = await userExistsPromise;
