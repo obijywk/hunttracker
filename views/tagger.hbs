@@ -8,22 +8,22 @@
   </head>
   <body>
   	<div class="menu-header">
-		<span class="menu-item">Passport</span>
-		<a href="puzzles"><span class="menu-item">Puzzles</span></a>
-		<a href="metas"><span class="menu-item">Metas</span></a>
-		<a href="tagger"><span class="menu-item menu-selected">Tag Editor</span></a>
-	</div>
-	<div class="body-wrapper">
-		<form action="tagger/update" method="post">
-		<p>Puzzles to update</p>
-		<select class="puzzles-select wide-select" name="puzzles[]" multiple="multiple"></select>
-		<p>Tags to add</p>
-		<select class="tags-add-select wide-select" name="addedTags[]" multiple="multiple"></select>
-		<p>Tags to remove</p>
-		<select class="tags-remove-select wide-select" name="removedTags[]" multiple="multiple"></select>
-		<p><input type="submit" value="Update Tags" /></p>
-		</form>
-	</div>
+      <span class="menu-item">Passport</span>
+      <a href="puzzles"><span class="menu-item">Puzzles</span></a>
+      <a href="metas"><span class="menu-item">Metas</span></a>
+      <a href="tagger"><span class="menu-item menu-selected">Tag Editor</span></a>
+  	</div>
+    <div class="body-wrapper">
+      <form action="tagger/update" method="post">
+        <p>Puzzles to update</p>
+        <select class="puzzles-select wide-select" name="puzzles[]" multiple="multiple"></select>
+        <p>Tags to add</p>
+        <select class="tags-add-select wide-select" name="addedTags[]" multiple="multiple"></select>
+        <p>Tags to remove</p>
+        <select class="tags-remove-select wide-select" name="removedTags[]" multiple="multiple"></select>
+        <p><input type="submit" value="Update Tags" /></p>
+      </form>
+    </div>
     <script>
       $(document).ready(function() {
         $(".puzzles-select").select2({

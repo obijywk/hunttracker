@@ -4,37 +4,37 @@
     <link rel="stylesheet" type="text/css" href="static/style.css">
   </head>
   <body>
-	<div class="menu-header">
-		<span class="menu-item">Passport</span>
-		<a href="puzzles"><span class="menu-item">Puzzles</span></a>
-		<a href="metas"><span class="menu-item menu-selected">Metas</span></a>
-		<a href="tagger"><span class="menu-item">Tag Editor</span></a>
-	</div>
+		<div class="menu-header">
+			<span class="menu-item">Passport</span>
+			<a href="puzzles"><span class="menu-item">Puzzles</span></a>
+			<a href="metas"><span class="menu-item menu-selected">Metas</span></a>
+			<a href="tagger"><span class="menu-item">Tag Editor</span></a>
+		</div>
     <div class="body-wrapper">
-		<p>Puzzles that have been tagged with <i>meta/</i> or <i>in/</i> tag prefixes will appear here.</p>
-		{{#each metas}}
-		<div class="meta-view">
-			<div class="meta-header title{{#if complete}} meta-complete{{/if}}">
-				{{#if url}}<a href="{{url}}" target="_blank">{{/if}}
-				{{name}}
-				{{#if url}}</a>{{/if}}
-				<a class="dash-link" href="puzzles?tags=in/{{metaName}}">[dashboard]</a>
-			</div>
-			<div class="meta-header answer{{#if complete}} meta-complete{{/if}}">
-				{{#if answer}}<span class="answer">{{answer}}</span>{{/if}}
-			</div>
-			{{#each puzzles}}
-			<div class="meta-puzzle title{{#if complete}} puzzle-complete{{/if}}">
-				{{#if url}} <a href="{{url}}" target="_blank"> {{/if}}
-				{{name}}
-				{{#if url}} </a> {{/if}}
-			</div>
-			<div class="meta-puzzle answer{{#if complete}} puzzle-complete{{/if}}">
-				{{#if answer}} {{answer}} {{/if}}
-			</div>
+			<p>Puzzles that have been tagged with <i>meta/</i> or <i>in/</i> tag prefixes will appear here.</p>
+			{{#each metas}}
+				<div class="meta-view">
+					<div class="meta-header title{{#if complete}} meta-complete{{/if}}">
+						{{#if url}}<a href="{{url}}" target="_blank">{{/if}}
+						{{name}}
+						{{#if url}}</a>{{/if}}
+						<a class="dash-link" href="puzzles?tags=in/{{metaName}}">[dashboard]</a>
+					</div>
+					<div class="meta-header answer{{#if complete}} meta-complete{{/if}}">
+						{{#if answer}}<span class="answer">{{answer}}</span>{{/if}}
+					</div>
+					{{#each puzzles}}
+						<div class="meta-puzzle title{{#if complete}} puzzle-complete{{/if}}">
+							{{#if url}}<a href="{{url}}" target="_blank">{{/if}}
+							{{name}}
+							{{#if url}}</a>{{/if}}
+						</div>
+						<div class="meta-puzzle answer{{#if complete}} puzzle-complete{{/if}}">
+							{{#if answer}}{{answer}}{{/if}}
+						</div>
+					{{/each}}
+				</div>
 			{{/each}}
 		</div>
-		{{/each}}
-	</div>
   </body>
 </html>

@@ -13,41 +13,41 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
   </head>
   <body>
-	<div class="menu-header">
-		<span class="menu-item">Passport</span>
-		<a href="puzzles"><span class="menu-item menu-selected">Puzzles</span></a>
-		<a href="metas"><span class="menu-item">Metas</span></a>
-		<a href="tagger"><span class="menu-item">Tag Editor</span></a>
-	</div>
-	<div class="body-wrapper">
-		<div class="puzzle-filters">
-			<div class="filter-solved">
-				<input type="radio" name="solved-filter" value="unsolved">Unsolved &nbsp;
-				<input type="radio" name="solved-filter" value="solved">Solved &nbsp;
-				<input type="radio" name="solved-filter" value="all" checked>All
-			</div>
-			<div class="filter-tags">
-				<select class="tags-select wide-select" name="filteredTags[]" multiple="multiple"></select>
-			</div>
-		</div>
-		<table id="puzzles-table" class="display" style="width: 100%">
-		  <thead>
-			<tr>
-			  <th></th>
-			  <th>Solved</th>
-			  <th class="icon-column">&nbsp;</th>
-			  <th class="icon-column">&nbsp;</th>
-			  <th class="icon-column">&nbsp;</th>
-			  <th>Name</th>
-			  <th>Answer</th>
-			  <th>Topic</th>
-			  <th>Tags</th>
-			  <th>Idle</th>
-			  <th>Solvers</th>
-			</tr>
-		  </thead>
-		</table>
-	</div>
+    <div class="menu-header">
+      <span class="menu-item">Passport</span>
+      <a href="puzzles"><span class="menu-item menu-selected">Puzzles</span></a>
+      <a href="metas"><span class="menu-item">Metas</span></a>
+      <a href="tagger"><span class="menu-item">Tag Editor</span></a>
+    </div>
+    <div class="body-wrapper">
+      <div class="puzzle-filters">
+        <div class="filter-solved">
+          <input type="radio" name="solved-filter" value="unsolved">Unsolved &nbsp;
+          <input type="radio" name="solved-filter" value="solved">Solved &nbsp;
+          <input type="radio" name="solved-filter" value="all" checked>All
+        </div>
+        <div class="filter-tags">
+          <select class="tags-select wide-select" name="filteredTags[]" multiple="multiple"></select>
+        </div>
+      </div>
+      <table id="puzzles-table" class="display" style="width: 100%">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Solved</th>
+            <th class="icon-column">&nbsp;</th>
+            <th class="icon-column">&nbsp;</th>
+            <th class="icon-column">&nbsp;</th>
+            <th>Name</th>
+            <th>Answer</th>
+            <th>Topic</th>
+            <th>Tags</th>
+            <th>Idle</th>
+            <th>Solvers</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
     <script>
       $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
         const selectedTags = $(".tags-select").select2("data");
