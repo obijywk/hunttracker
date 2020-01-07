@@ -846,19 +846,20 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
 taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
   const id: string = payload.id;
 
-  const refreshUsersPromise = users.refreshPuzzleUsers(id, client);
-
-  const latestMessageTimestampPromise = getLatestMessageTimestamp(id);
-  const channelInfoResultPromise = app.client.conversations.info({
+  const channelInfoResult = await app.client.conversations.info({
     token: process.env.SLACK_BOT_TOKEN,
     channel: id,
-  }) as Promise<ChannelsInfoResult>;
+  }) as ChannelsInfoResult;
 
+  if (channelInfoResult.channel.is_archived) {
+    return;
+  }
+
+  const refreshUsersPromise = users.refreshPuzzleUsers(id, client);
+  const latestMessageTimestampPromise = getLatestMessageTimestamp(id);
   const puzzle = await get(id, client);
-
   const sheetModifiedTimestamp = await googleDrive.getSheetModifiedTimestamp(puzzle.sheetUrl);
   const latestMessageTimestamp = await latestMessageTimestampPromise;
-  const channelInfoResult = await channelInfoResultPromise;
 
   let dirty = false;
   if (channelInfoResult.channel.topic) {

@@ -17,6 +17,7 @@ export interface ChannelsHistoryResult extends WebAPICallResult {
 
 export interface ChannelsInfoResult extends WebAPICallResult {
   channel: {
+    is_archived: boolean;
     latest: {
       ts: string;
     };
