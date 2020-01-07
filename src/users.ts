@@ -144,7 +144,8 @@ export async function refreshPuzzleUsers(
       const result = await client.query(`
         INSERT INTO puzzle_user (puzzle_id, user_id)
         SELECT $1, id FROM users
-        WHERE id = $2`,
+        WHERE id = $2
+        ON CONFLICT DO NOTHING`,
         [puzzleId, channelUser]);
       if (result.rowCount > 0) {
         affectedUserIds.push(channelUser);

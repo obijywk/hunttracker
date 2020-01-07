@@ -855,9 +855,9 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
     return;
   }
 
+  const puzzle = await get(id, client);
   const refreshUsersPromise = users.refreshPuzzleUsers(id, client);
   const latestMessageTimestampPromise = getLatestMessageTimestamp(id);
-  const puzzle = await get(id, client);
   const sheetModifiedTimestamp = await googleDrive.getSheetModifiedTimestamp(puzzle.sheetUrl);
   const latestMessageTimestamp = await latestMessageTimestampPromise;
 
@@ -897,6 +897,8 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
 
   const updateStatusMessagePromise = updateStatusMessage(puzzle);
 
+  const affectedUserIds = await refreshUsersPromise;
+
   if (dirty) {
     await client.query(`
       UPDATE puzzles
@@ -917,7 +919,6 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
 
   await updateStatusMessagePromise;
 
-  const affectedUserIds = await refreshUsersPromise;
   for (const userId of affectedUserIds) {
     await taskQueue.scheduleTask(
       "publish_home",
