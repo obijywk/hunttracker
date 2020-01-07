@@ -43,6 +43,8 @@ receiver.app.get("/", async (req, res) => {
   }
   return res.render("index", {
     user: req.user,
+    helpUrl: process.env.HELP_URL,
+    isAdmin: await checkAdmin(req),
   });
 });
 

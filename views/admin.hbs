@@ -5,24 +5,32 @@
     <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   </head>
   <body>
-    <p>
-      Check out the <a href="taskqueue">task queue</a>.
-    </p>
-    <form action="admin/refreshusers" method="post">
-      <input type="submit" value="Refresh Users from Slack" />
-    </form>
-    <form action="admin/refreshallpuzzles" method="post">
-      <input type="submit" value="Refresh All Puzzles" />
-    </form>
-    <form action="admin/publishhome" method="post">
-      <input type="text" name="userId" placeholder="Slack user ID" />
-      <input type="submit" value="Force Publish User Home" />
-    </form>
-    <form action="admin/resetdatabase" method="post">
-      <button type="button" id="reset-database-check">I'm Sure I Want To Reset Database</button>
-      <input type="submit" id="reset-database" value="Reset Database" disabled />
-      <span>This will erase EVERYTHING!</span>
-    </form>
+    <div class="menu-header">
+      <span class="menu-item">Passport</span>
+      <a href="puzzles"><span class="menu-item">Puzzles</span></a>
+      <a href="metas"><span class="menu-item">Metas</span></a>
+      <a href="tagger"><span class="menu-item">Tag Editor</span></a>
+    </div>
+    <div class="body-wrapper">
+      <p>
+        Check out the <a href="taskqueue">task queue</a>.
+      </p>
+      <form action="admin/refreshusers" method="post">
+        <input type="submit" value="Refresh Users from Slack" />
+      </form>
+      <form action="admin/refreshallpuzzles" method="post">
+        <input type="submit" value="Refresh All Puzzles" />
+      </form>
+      <form action="admin/publishhome" method="post">
+        <input type="text" name="userId" placeholder="Slack user ID" />
+        <input type="submit" value="Force Publish User Home" />
+      </form>
+      <form action="admin/resetdatabase" method="post">
+        <button type="button" id="reset-database-check">I'm Sure I Want To Reset Database</button>
+        <input type="submit" id="reset-database" value="Reset Database" disabled />
+        <span>This will erase EVERYTHING!</span>
+      </form>
+    </div>
     <script>
       $("#reset-database-check").click(function() {
         $("#reset-database").attr("disabled", false);
