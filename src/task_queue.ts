@@ -1,3 +1,4 @@
+import moment = require("moment");
 import { PoolClient } from "pg";
 
 import { SNSClient } from "@aws-sdk/client-sns-node/SNSClient";
@@ -36,14 +37,17 @@ export async function scheduleTask(taskType: string, payload: any, client?: Pool
 
 let processTaskQueueRunning = false;
 
+const maxProcessTaskQueueExecutionTime = moment.duration(5, "seconds");
+
 export async function processTaskQueue() {
   if (processTaskQueueRunning) {
     return;
   }
   processTaskQueueRunning = true;
+  const startTime = moment();
   const client = await db.connect();
   try {
-    while (true) {
+    while (moment().diff(startTime) < maxProcessTaskQueueExecutionTime.asMilliseconds()) {
       await client.query("BEGIN");
       const result = await client.query(
         `
@@ -86,6 +90,8 @@ export async function processTaskQueue() {
     processTaskQueueRunning = false;
     client.release();
   }
+  await notifyQueue();
+  await db.query("NOTIFY task_queue_add");
 }
 
 export async function startListening() {
