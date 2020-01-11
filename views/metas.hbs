@@ -37,9 +37,9 @@
 						</div>
 						{{#each puzzles}}
 							<div class="meta-puzzle title{{#if complete}} puzzle-complete{{/if}}">
-								{{#if url}}<a href="{{url}}" target="_blank">{{/if}}
-								{{name}}
-								{{#if url}}</a>{{/if}}
+								<a href="puzzles?tags=in/{{../metaName}}&expanded={{id}}">
+								  {{name}}
+								</a>
 							</div>
 							<div class="meta-puzzle answer{{#if complete}} puzzle-complete{{/if}}">
 								{{#if answer}}{{answer}}{{/if}}

@@ -283,6 +283,34 @@
           $(".tags-select").trigger("change");
         }
 
+        function expandOrCollapseClickedRow() {
+          const tr = $(this).closest("tr");
+          const row = table.row(tr);
+          if (row.child.isShown()) {
+            row.child.hide();
+            tr.removeClass("shown");
+          } else {
+            row.child(formatDetails(row.data())).show();
+            tr.addClass("shown");
+          }
+        }
+        $("#puzzles-table tbody").on("click", "td.details-control", expandOrCollapseClickedRow);
+        $("#puzzles-table tbody").on("click", "a.puzzle-name-link", expandOrCollapseClickedRow);
+
+        const initialExpandedPuzzleIds = "{{initialExpandedPuzzleIds}}";
+        let initialExpandedPuzzleIdsCallback = null;
+        if (initialExpandedPuzzleIds.length > 0) {
+          initialExpandedPuzzleIdsCallback = () => {
+            table.rows().every(i => {
+              const row = table.row(i);
+              if (initialExpandedPuzzleIds.indexOf(row.data().id) !== -1) {
+                row.child(formatDetails(row.data())).show();
+                $(row.node()).addClass("shown");
+              }
+            });
+          };
+        }
+
         table.on("xhr", function() {
           const json = table.ajax.json();
           const tagNameSet = new Set();
@@ -300,21 +328,10 @@
               $(".tags-select").append(newOption).trigger("change");
             }
           }
-        });
-
-        function expandOrCollapseClickedRow() {
-          const tr = $(this).closest("tr");
-          const row = table.row(tr);
-          if (row.child.isShown()) {
-            row.child.hide();
-            tr.removeClass("shown");
-          } else {
-            row.child(formatDetails(row.data())).show();
-            tr.addClass("shown");
+          if (initialExpandedPuzzleIdsCallback) {
+            table.one("draw", initialExpandedPuzzleIdsCallback);
           }
-        }
-        $("#puzzles-table tbody").on("click", "td.details-control", expandOrCollapseClickedRow);
-        $("#puzzles-table tbody").on("click", "a.puzzle-name-link", expandOrCollapseClickedRow);
+        });
 
         $("#puzzles-table tbody").on("click", "a.tag-link", function() {
           const selected = $(".tags-select").val();

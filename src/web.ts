@@ -57,6 +57,7 @@ receiver.app.get("/puzzles", async (req, res) => {
     minimumIdleMinutes: process.env.MINIMUM_IDLE_MINUTES,
     initialSearch: req.query.search || "",
     initialTags: req.query.tags || "",
+    initialExpandedPuzzleIds: req.query.expanded || "",
   });
 });
 
