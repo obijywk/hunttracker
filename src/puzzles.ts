@@ -858,7 +858,13 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
   const puzzle = await get(id, client);
   const refreshUsersPromise = users.refreshPuzzleUsers(id, client);
   const latestMessageTimestampPromise = getLatestMessageTimestamp(id);
-  const sheetModifiedTimestamp = await googleDrive.getSheetModifiedTimestamp(puzzle.sheetUrl);
+
+  let sheetModifiedTimestamp = null;
+  if (moment.duration(moment().diff(puzzle.sheetModifiedTimestamp)).asMinutes() >=
+      Number(process.env.MINIMUM_IDLE_MINUTES)) {
+    sheetModifiedTimestamp = await googleDrive.getSheetModifiedTimestamp(puzzle.sheetUrl);
+  }
+
   const latestMessageTimestamp = await latestMessageTimestampPromise;
 
   let dirty = false;
