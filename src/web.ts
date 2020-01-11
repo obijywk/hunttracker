@@ -83,13 +83,7 @@ receiver.app.get("/metas", async(req, res) => {
   const metas = [];
   const metaToPuzzles: { [key: string]: any } = {};
   for (const puzzle of allPuzzles) {
-    const puzzleData: any = {
-      id: puzzle.id,
-      name: puzzle.name,
-      url: puzzle.url,
-      complete: puzzle.complete,
-      answer: puzzle.answer,
-    };
+    const puzzleData: any = puzzle;
     for (const tag of puzzle.tags) {
       if (tag.name.startsWith(metaPrefix)) {
         puzzleData.metaName = tag.name.substr(metaPrefix.length);
@@ -121,6 +115,7 @@ receiver.app.get("/metas", async(req, res) => {
   metas.sort((a: any, b: any) => a.name < b.name ? -1 : 1);
   return res.render("metas", {
     metas,
+    slackUrlPrefix: `https://app.slack.com/client/${process.env.SLACK_TEAM_ID}/`,
   });
 });
 

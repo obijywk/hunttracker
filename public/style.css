@@ -223,3 +223,9 @@ div.menu-header a,
 div.menu-header a:visited {
 	color: white;
 }
+
+div.meta-dashboard-icon {
+	display: inline-block;
+	width: 1.5em;
+	vertical-align: middle;
+}
