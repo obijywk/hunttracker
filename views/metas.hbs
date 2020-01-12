@@ -18,22 +18,24 @@
 				{{#each metas}}
 					<div class="meta-view">
 						<div class="meta-header title{{#if complete}} meta-complete{{/if}}">
-							{{#if url}}
-							  <a href="{{url}}" target="_blank">
-									<div class="meta-dashboard-icon icon-puzzle">&nbsp;</div>
-								</a>
-							{{/if}}
-							<a href="{{../slackUrlPrefix}}{{id}}" target="_blank">
-								<div class="meta-dashboard-icon icon-slack">&nbsp;</div>
-							</a>
-							<a href="{{sheetUrl}}" target="_blank">
-								<div class="meta-dashboard-icon icon-sheet">&nbsp;</div>
-							</a>
 							{{name}}
-							<a class="dash-link" href="puzzles?tags=in/{{metaName}}">[dashboard]</a>
+							<a class="dash-link" href="puzzles?tags=in/{{metaName}} meta/{{metaName}}">[dashboard]</a>
 						</div>
 						<div class="meta-header answer{{#if complete}} meta-complete{{/if}}">
 							{{#if answer}}<span class="answer">{{answer}}</span>{{/if}}
+							<div class="meta-header-icons">
+								{{#if url}}
+									<a href="{{url}}" target="_blank">
+										<div class="meta-dashboard-icon meta-icon-puzzle">&nbsp;</div>
+									</a>
+								{{/if}}
+								<a href="{{../slackUrlPrefix}}{{id}}" target="_blank">
+									<div class="meta-dashboard-icon meta-icon-slack">&nbsp;</div>
+								</a>
+								<a href="{{sheetUrl}}" target="_blank">
+									<div class="meta-dashboard-icon meta-icon-sheet">&nbsp;</div>
+								</a>
+							</div>
 						</div>
 						{{#each puzzles}}
 							<div class="meta-puzzle title{{#if complete}} puzzle-complete{{/if}}">
