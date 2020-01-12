@@ -227,6 +227,7 @@ div.menu-header a:visited {
 div.meta-header-icons {
 	padding-left: 1em;
 	float: right;
+	margin-right: -0.6em;
 }
 
 div.meta-dashboard-icon {
