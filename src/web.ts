@@ -133,7 +133,9 @@ receiver.app.get("/admin", async (req, res) => {
     res.redirect("puzzles");
     return;
   }
-  return res.render("admin");
+  return res.render("admin", {
+    allowResetDatabase: process.env.ALLOW_RESET_DATABASE !== undefined,
+  });
 });
 
 receiver.app.get("/admin/initdatabase", async (req, res) => {
@@ -153,6 +155,10 @@ receiver.app.post("/admin/resetdatabase", async (req, res) => {
   }
   if (!await checkAdmin(req)) {
     res.redirect("../puzzles");
+    return;
+  }
+  if (!process.env.ALLOW_RESET_DATABASE) {
+    res.redirect("../admin");
     return;
   }
   await db.applySchema();

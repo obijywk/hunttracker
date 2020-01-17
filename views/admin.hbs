@@ -25,16 +25,20 @@
         <input type="text" name="userId" placeholder="Slack user ID" />
         <input type="submit" value="Force Publish User Home" />
       </form>
-      <form action="admin/resetdatabase" method="post">
-        <button type="button" id="reset-database-check">I'm Sure I Want To Reset Database</button>
-        <input type="submit" id="reset-database" value="Reset Database" disabled />
-        <span>This will erase EVERYTHING!</span>
-      </form>
+      {{#if allowResetDatabase}}
+        <form action="admin/resetdatabase" method="post">
+          <button type="button" id="reset-database-check">I'm Sure I Want To Reset Database</button>
+          <input type="submit" id="reset-database" value="Reset Database" disabled />
+          <span>This will erase EVERYTHING!</span>
+        </form>
+      {{/if}}
     </div>
     <script>
-      $("#reset-database-check").click(function() {
-        $("#reset-database").attr("disabled", false);
-      });
+      {{#if allowResetDatabase}}
+        $("#reset-database-check").click(function() {
+          $("#reset-database").attr("disabled", false);
+        });
+      {{/if}}
     </script>
   </body>
 </html>
