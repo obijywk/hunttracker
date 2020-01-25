@@ -42,6 +42,7 @@ receiver.app.get("/", async (req, res) => {
     return;
   }
   return res.render("index", {
+    appName: process.env.APP_NAME,
     user: req.user,
     helpUrl: process.env.HELP_URL,
     isAdmin: await checkAdmin(req),
@@ -53,6 +54,7 @@ receiver.app.get("/puzzles", async (req, res) => {
     return;
   }
   return res.render("puzzles", {
+    appName: process.env.APP_NAME,
     slackUrlPrefix: `https://app.slack.com/client/${process.env.SLACK_TEAM_ID}/`,
     minimumIdleMinutes: process.env.MINIMUM_IDLE_MINUTES,
     initialSearch: req.query.search || "",
@@ -129,6 +131,7 @@ receiver.app.get("/metas", async(req, res) => {
   }
   metas.sort((a: any, b: any) => a.name < b.name ? -1 : 1);
   return res.render("metas", {
+    appName: process.env.APP_NAME,
     metas,
     slackUrlPrefix: `https://app.slack.com/client/${process.env.SLACK_TEAM_ID}/`,
   });
@@ -148,6 +151,7 @@ receiver.app.get("/admin", async (req, res) => {
     return;
   }
   return res.render("admin", {
+    appName: process.env.APP_NAME,
     allowResetDatabase: process.env.ALLOW_RESET_DATABASE !== undefined,
   });
 });
@@ -230,6 +234,7 @@ receiver.app.get("/taskqueue", async (req, res) => {
     error: t.error ? JSON.stringify(t.error) : null,
   }));
   return res.render("taskqueue", {
+    appName: process.env.APP_NAME,
     tasks: displayTasks,
   });
 });
@@ -293,6 +298,7 @@ receiver.app.get("/tagger", async (req, res) => {
   }));
 
   res.render("tagger", {
+    appName: process.env.APP_NAME,
     puzzleOptions: JSON.stringify(puzzleOptions),
     tagOptions: JSON.stringify(tagOptions),
   });

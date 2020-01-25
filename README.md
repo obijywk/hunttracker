@@ -5,6 +5,7 @@ This is a puzzle hunt status tracking Slack bot.
 Everything is configured using environment variables, and they need to be set for anything to work.
 
 - **PORT**: The server HTTP port. The default is 3000.
+- **APP_NAME**: The user-visible name of this deployment of this application.
 - **WEB_SERVER_URL**: The publicly accessible URL for this server, with trailing slash.
   Used to build links.
 - **HELP_URL**: A link to help instructions for how to use this.
