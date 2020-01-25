@@ -749,7 +749,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const url = payload.url;
   const selectedTagIds: Array<number> = payload.selectedTagIds;
   const newTagNames: Array<string> = payload.newTagNames;
-  const topic = payload.topic;
+  const topic = payload.topic ? payload.topic : "";
   const creatorUserId = payload.creatorUserId;
 
   const channelName = buildChannelName(name);
