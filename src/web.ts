@@ -81,26 +81,39 @@ receiver.app.get("/metas", async(req, res) => {
   const allPuzzles = await puzzles.list();
   const metaPrefix = "meta/";
   const inPrefix = "in/";
-  const metas = [];
-  const metaToPuzzles: { [key: string]: any } = {};
+  const tagSuffixes: Set<string> = new Set();
+  const tagSuffixToMeta: { [key: string]: any } = {};
+  const tagSuffixToPuzzles: { [key: string]: any } = {};
   for (const puzzle of allPuzzles) {
     const puzzleData: any = puzzle;
     for (const tag of puzzle.tags) {
       if (tag.name.startsWith(metaPrefix)) {
-        puzzleData.metaName = tag.name.substr(metaPrefix.length);
-        metas.push(puzzleData);
+        const tagSuffix = tag.name.substr(metaPrefix.length);
+        tagSuffixes.add(tagSuffix);
+        puzzleData.tagSuffix = tagSuffix;
+        tagSuffixToMeta[tagSuffix] = puzzleData;
       } else if (tag.name.startsWith(inPrefix)) {
-        const metaName = tag.name.substr(inPrefix.length);
-        if (metaName in metaToPuzzles) {
-          metaToPuzzles[metaName].push(puzzleData);
+        const tagSuffix = tag.name.substr(inPrefix.length);
+        tagSuffixes.add(tagSuffix);
+        if (tagSuffix in tagSuffixToPuzzles) {
+          tagSuffixToPuzzles[tagSuffix].push(puzzleData);
         } else {
-          metaToPuzzles[metaName] = [puzzleData];
+          tagSuffixToPuzzles[tagSuffix] = [puzzleData];
         }
       }
     }
   }
-  for (const meta of metas) {
-    meta.puzzles = metaToPuzzles[meta.metaName];
+  const metas: Array<any> = [];
+  for (const tagSuffix of tagSuffixes) {
+    let meta = tagSuffixToMeta[tagSuffix];
+    if (meta === undefined) {
+      meta = {
+        name: tagSuffix,
+        tagSuffix,
+        complete: false,
+      };
+    }
+    meta.puzzles = tagSuffixToPuzzles[tagSuffix];
     if (meta.puzzles === undefined) {
       meta.puzzles = [];
     }
@@ -112,6 +125,7 @@ receiver.app.get("/metas", async(req, res) => {
     meta.numCompletePuzzles = meta.puzzles
       .map((p: any) => p.complete ? 1 : 0)
       .reduce((a: number, b: number) => a + b, 0);
+    metas.push(meta);
   }
   metas.sort((a: any, b: any) => a.name < b.name ? -1 : 1);
   return res.render("metas", {
