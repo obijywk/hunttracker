@@ -36,6 +36,11 @@ export async function copySheet(url: string, name: string): Promise<string> {
   }
 }
 
+export async function renameSheet(url: string, name: string) {
+  const fileId = getSheetUrlFileId(url);
+  await drive.files.update({fileId, requestBody: {name}});
+}
+
 export async function getSheetModifiedTimestamp(url: string): Promise<moment.Moment | null> {
   if (rateLimitExceededTimestamp !== null &&
       moment().diff(rateLimitExceededTimestamp) < rateLimitExceededCooldown.asMilliseconds()) {

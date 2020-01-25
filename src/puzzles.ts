@@ -679,14 +679,7 @@ async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | nu
   return null;
 }
 
-export async function create(
-  name: string,
-  url: string,
-  selectedTagIds: Array<number>,
-  newTagNames: Array<string>,
-  topic: string,
-  creatorUserId: string,
-): Promise<string | null> {
+async function validateCreate(name: string, url: string): Promise<string | null> {
   const channelName = buildChannelName(name);
   const existsResult = await db.query(`
     SELECT EXISTS (
@@ -699,7 +692,22 @@ export async function create(
     )
   `, [name, channelName, url]);
   if (existsResult.rowCount > 0 && existsResult.rows[0].exists) {
-    return "This puzzle has already been registered.";
+    return "A puzzle with that name or URL has already been registered.";
+  }
+  return null;
+}
+
+export async function create(
+  name: string,
+  url: string,
+  selectedTagIds: Array<number>,
+  newTagNames: Array<string>,
+  topic: string,
+  creatorUserId: string,
+): Promise<string | null> {
+  const validateResult = await validateCreate(name, url);
+  if (validateResult !== null) {
+    return validateResult;
   }
   await taskQueue.scheduleTask("create_puzzle", {
     name,
@@ -710,6 +718,24 @@ export async function create(
     creatorUserId,
   });
   return null;
+}
+
+export async function rename(
+  id: string,
+  name: string,
+  url: string,
+  creatorUserId: string,
+): Promise<string | null> {
+  const validateResult = await validateCreate(name, url);
+  if (validateResult !== null) {
+    return validateResult;
+  }
+  await taskQueue.scheduleTask("rename_puzzle", {
+    id,
+    name,
+    url,
+    creatorUserId,
+  });
 }
 
 export async function refreshAll() {
@@ -821,6 +847,50 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
       text: `<#${id}> created for ${buildPuzzleNameMrkdwn(puzzle)}.`,
     });
   }
+
+  if (creatorUserId) {
+    await taskQueue.scheduleTask("publish_home", {
+      userId: creatorUserId,
+    });
+  }
+});
+
+taskQueue.registerHandler("rename_puzzle", async (client, payload) => {
+  const id = payload.id;
+  const name = payload.name;
+  let url = payload.url;
+  const creatorUserId = payload.creatorUserId;
+
+  const channelName = buildChannelName(name);
+
+  const puzzle = await get(id);
+  if (!url || url.length === 0) {
+    url = puzzle.url;
+  }
+
+  await app.client.conversations.rename({
+    token: process.env.SLACK_USER_TOKEN,
+    channel: id,
+    name: channelName,
+  });
+
+  await googleDrive.renameSheet(puzzle.sheetUrl, name);
+
+  await client.query(`
+    UPDATE puzzles
+    SET
+      name = $2,
+      url = $3,
+      channel_name = $4
+    WHERE id = $1`,
+    [
+      id,
+      name,
+      url,
+      channelName,
+    ]);
+
+  await taskQueue.scheduleTask("refresh_puzzle", {id});
 
   if (creatorUserId) {
     await taskQueue.scheduleTask("publish_home", {

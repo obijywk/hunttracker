@@ -1,5 +1,5 @@
 import { ButtonAction } from "@slack/bolt";
-import { Block, Button, KnownBlock } from "@slack/types";
+import { Block, Button, KnownBlock, Option } from "@slack/types";
 
 import { app } from "./app";
 import * as puzzles from "./puzzles";
@@ -143,6 +143,14 @@ async function buildHomeBlocks(userId: string) {
             text: ":sparkles: Register puzzle",
           },
           "action_id": "home_register_puzzle",
+        },
+        {
+          type: "button",
+          text: {
+            type: "plain_text",
+            text: ":pencil2: Rename puzzle",
+          },
+          "action_id": "home_rename_puzzle",
         },
         tags.buildRenameTagButton(),
         tags.buildDeleteTagsButton(),
@@ -316,6 +324,121 @@ app.view("home_register_puzzle_view", async ({ack, body, view}) => {
       channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
       text: `Registering ${values["puzzle_name_input"]}, please wait...`,
     });
+  }
+
+  ack();
+});
+
+app.action("home_rename_puzzle", async ({ ack, body }) => {
+  const allPuzzles = await puzzles.list();
+
+  const options = [];
+  for (const puzzle of allPuzzles) {
+    const option: Option = {
+      text: {
+        type: "plain_text",
+        text: puzzle.name,
+      },
+      value: String(puzzle.id),
+    };
+    options.push(option);
+  }
+
+  const blocks: Array<KnownBlock | Block> = [];
+  if (options.length > 0) {
+    blocks.push(
+      {
+        type: "input",
+        "block_id": "puzzle_id_input",
+        label: {
+          type: "plain_text",
+          text: "Puzzle",
+        },
+        element: {
+          type: "static_select",
+          options,
+          "initial_option": options[0],
+        },
+      },
+    );
+    blocks.push({
+      type: "input",
+      "block_id": "puzzle_name_input",
+      label: {
+        type: "plain_text",
+        text: "New puzzle name",
+      },
+      element: {
+        type: "plain_text_input",
+        placeholder: {
+          type: "plain_text",
+          text: "Enter puzzle name",
+        },
+      },
+    });
+    blocks.push({
+      type: "input",
+      "block_id": "puzzle_url_input",
+      optional: true,
+      label: {
+        type: "plain_text",
+        text: "Puzzle URL",
+      },
+      element: {
+        type: "plain_text_input",
+        placeholder: {
+          type: "plain_text",
+          text: "Enter puzzle URL (or omit to leave URL unchanged)",
+        },
+      },
+    });
+  } else {
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "No puzzles yet exist.",
+      },
+    });
+  }
+
+  await app.client.views.open({
+    token: process.env.SLACK_BOT_TOKEN,
+    "trigger_id": (body as any).trigger_id,
+    view: {
+      type: "modal",
+      "callback_id": "home_rename_puzzle_view",
+      title: {
+        type: "plain_text",
+        text: "Rename puzzle",
+      },
+      blocks,
+      submit: {
+        type: "plain_text",
+        text: "Rename puzzle",
+      },
+    },
+  });
+  ack();
+});
+
+app.view("home_rename_puzzle_view", async ({ack, body, view}) => {
+  const values = getViewStateValues(view);
+
+  const renameError = await puzzles.rename(
+    values["puzzle_id_input"],
+    values["puzzle_name_input"],
+    values["puzzle_url_input"],
+    body.user.id);
+
+  if (renameError) {
+    ack({
+      "response_action": "errors",
+      errors: {
+        "puzzle_name_input": renameError,
+      },
+    } as any);
+    return;
   }
 
   ack();
