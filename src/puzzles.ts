@@ -13,7 +13,7 @@ import {
   ChannelsInfoResult,
   ChatPostMessageResult,
 } from "./slack_results";
-import { findChannelIdForChannelName, getViewStateValues } from "./slack_util";
+import { getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
@@ -752,29 +752,15 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const topic = payload.topic;
   const creatorUserId = payload.creatorUserId;
 
-  const sheetUrl = await googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, name);
-
   const channelName = buildChannelName(name);
-  let id: string = undefined;
-  try {
-    const createChannelResult = await app.client.channels.create({
-      token: process.env.SLACK_USER_TOKEN,
-      name: channelName,
-    }) as ChannelsCreateResult;
-    id = createChannelResult.channel.id;
-  } catch (e) {
-    if (e.code === ErrorCode.PlatformError && e.data.error === "name_taken") {
-      // Maybe something went wrong with a previous attempt to create this
-      // puzzle? Try to adopt an existing channel with this name, instead of
-      // creating a new one.
-      id = await findChannelIdForChannelName(channelName);
-      if (!id) {
-        throw e;
-      }
-    } else {
-      throw e;
-    }
-  }
+
+  const createChannelResult = await app.client.channels.create({
+    token: process.env.SLACK_USER_TOKEN,
+    name: channelName,
+  }) as ChannelsCreateResult;
+  const id = createChannelResult.channel.id;
+
+  const sheetUrl = await googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, name);
 
   const now = moment();
   let puzzle: Puzzle = {
