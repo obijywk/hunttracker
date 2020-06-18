@@ -8,10 +8,10 @@ import { app } from "./app";
 import * as db from "./db";
 import * as googleDrive from "./google_drive";
 import {
-  ChannelsCreateResult,
-  ChannelsHistoryResult,
-  ChannelsInfoResult,
   ChatPostMessageResult,
+  ConversationsCreateResult,
+  ConversationsHistoryResult,
+  ConversationsInfoResult,
 } from "./slack_results";
 import { getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
@@ -402,16 +402,16 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
   const id = (payload as ButtonAction).value;
   const puzzlePromise = get(id);
 
-  const channelInfoResult = await app.client.conversations.info({
+  const conversationInfoResult = await app.client.conversations.info({
     token: process.env.SLACK_BOT_TOKEN,
     channel: id,
-  }) as ChannelsInfoResult;
+  }) as ConversationsInfoResult;
 
   const puzzle = await puzzlePromise;
 
   let topic = "";
-  if (channelInfoResult.channel.topic) {
-    topic = channelInfoResult.channel.topic.value;
+  if (conversationInfoResult.channel.topic) {
+    topic = conversationInfoResult.channel.topic.value;
   }
 
   await app.client.views.open({
@@ -478,7 +478,7 @@ app.view("puzzle_update_topic_view", async ({ack, view, body}) => {
     return;
   }
 
-  await app.client.channels.setTopic({
+  await app.client.conversations.setTopic({
     token: process.env.SLACK_USER_TOKEN,
     channel: id,
     topic,
@@ -610,7 +610,7 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
     }
     await updateStatusMessage(puzzle);
     if (process.env.AUTO_ARCHIVE) {
-      await app.client.channels.archive({
+      await app.client.conversations.archive({
         token: process.env.SLACK_USER_TOKEN,
         channel: id,
       });
@@ -625,7 +625,7 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
 app.action("puzzle_archive_channel", async ({ack, payload}) => {
   const buttonAction = payload as ButtonAction;
   const id = buttonAction.value;
-  await app.client.channels.archive({
+  await app.client.conversations.archive({
     token: process.env.SLACK_USER_TOKEN,
     channel: id,
   });
@@ -665,11 +665,11 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
 }
 
 async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | null> {
-  const channelHistoryResult = await app.client.channels.history({
+  const channelHistoryResult = await app.client.conversations.history({
     token: process.env.SLACK_USER_TOKEN,
     channel: id,
-    count: 100,
-  }) as ChannelsHistoryResult;
+    limit: 100,
+  }) as ConversationsHistoryResult;
   for (const message of channelHistoryResult.messages) {
     if (message.type === "message" && message.subtype === "channel_leave") {
       continue;
@@ -780,11 +780,11 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
 
   const channelName = buildChannelName(name);
 
-  const createChannelResult = await app.client.channels.create({
+  const createConversationResult = await app.client.conversations.create({
     token: process.env.SLACK_USER_TOKEN,
     name: channelName,
-  }) as ChannelsCreateResult;
-  const id = createChannelResult.channel.id;
+  }) as ConversationsCreateResult;
+  const id = createConversationResult.channel.id;
 
   const sheetUrl = await googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, name);
 
@@ -808,7 +808,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
 
   let setTopicPromise = undefined;
   if (topic) {
-    setTopicPromise = app.client.channels.setTopic({
+    setTopicPromise = app.client.conversations.setTopic({
       token: process.env.SLACK_USER_TOKEN,
       channel: id,
       topic,
@@ -902,12 +902,12 @@ taskQueue.registerHandler("rename_puzzle", async (client, payload) => {
 taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
   const id: string = payload.id;
 
-  const channelInfoResult = await app.client.conversations.info({
+  const conversationInfoResult = await app.client.conversations.info({
     token: process.env.SLACK_BOT_TOKEN,
     channel: id,
-  }) as ChannelsInfoResult;
+  }) as ConversationsInfoResult;
 
-  if (channelInfoResult.channel.is_archived) {
+  if (conversationInfoResult.channel.is_archived) {
     return;
   }
 
@@ -924,15 +924,15 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
   const latestMessageTimestamp = await latestMessageTimestampPromise;
 
   let dirty = false;
-  if (channelInfoResult.channel.topic) {
-    const topicUpdateTimestamp = moment.unix(channelInfoResult.channel.topic.last_set).utc();
+  if (conversationInfoResult.channel.topic) {
+    const topicUpdateTimestamp = moment.unix(conversationInfoResult.channel.topic.last_set).utc();
     if (puzzle.chatModifiedTimestamp.isBefore(topicUpdateTimestamp)) {
       dirty = true;
       puzzle.chatModifiedTimestamp = topicUpdateTimestamp;
     }
-    if (puzzle.channelTopic !== channelInfoResult.channel.topic.value) {
+    if (puzzle.channelTopic !== conversationInfoResult.channel.topic.value) {
       dirty = true;
-      puzzle.channelTopic = channelInfoResult.channel.topic.value;
+      puzzle.channelTopic = conversationInfoResult.channel.topic.value;
       if (puzzle.channelTopic && process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
         app.client.chat.postMessage({
           token: process.env.SLACK_USER_TOKEN,

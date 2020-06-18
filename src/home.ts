@@ -465,10 +465,10 @@ app.action("home_join_channel", async ({ ack, payload }) => {
   const puzzleId = value.puzzleId;
   const userId = value.userId;
 
-  await app.client.channels.invite({
+  await app.client.conversations.invite({
     token: process.env.SLACK_USER_TOKEN,
     channel: puzzleId,
-    user: userId,
+    users: userId,
   });
 
   ack();

@@ -1,12 +1,16 @@
 import { WebAPICallResult } from "@slack/web-api";
 
-export interface ChannelsCreateResult extends WebAPICallResult {
+export interface ChatPostMessageResult extends WebAPICallResult {
+  ts: string;
+}
+
+export interface ConversationsCreateResult extends WebAPICallResult {
   channel: {
     id: string;
   };
 }
 
-export interface ChannelsHistoryResult extends WebAPICallResult {
+export interface ConversationsHistoryResult extends WebAPICallResult {
   messages: Array<{
     ts: string;
     type: string;
@@ -15,7 +19,7 @@ export interface ChannelsHistoryResult extends WebAPICallResult {
   has_more: boolean;
 }
 
-export interface ChannelsInfoResult extends WebAPICallResult {
+export interface ConversationsInfoResult extends WebAPICallResult {
   channel: {
     is_archived: boolean;
     latest: {
@@ -26,10 +30,6 @@ export interface ChannelsInfoResult extends WebAPICallResult {
       last_set: number;
     };
   };
-}
-
-export interface ChatPostMessageResult extends WebAPICallResult {
-  ts: string;
 }
 
 export interface ConversationsListResult extends WebAPICallResult {
