@@ -49,6 +49,11 @@ Everything is configured using environment variables, and they need to be set fo
 - **PUZZLE_SHEET_TEMPLATE_URL**: A link to a Google Sheet that will be copied to create
   per-puzzle spreadsheets. It should be in a folder editable by the Google Cloud Platform
   service account, and this folder is where the spreadsheets will be created as well.
+- **ENABLE_GOOGLE_MEET**: If set, creates a calendar event with a Google Meet entry point
+  for each puzzle.
+- **GOOGLE_MEET_CALENDAR_ID**: The Google Calendar ID of the calendar where per-puzzle events
+  should be created. The Google service account must have permissions to make changes to
+  this calendar.
 - **AUTO_ARCHIVE**: If set, then puzzle channels will be automatically archived as they become
   solved.
 - **ALLOW_RESET_DATABASE**: If set, then the admin page will have an option to reset the database.
@@ -84,12 +89,15 @@ section of https://api.slack.com/. Your web server URL plus "/auth/slack/callbac
 - groups:read
 - pins:write
 - users:read
+- users:read.email
 
 The following workspace events need to be added on the "Event Subscriptions" page in the "Your Apps"
 section of https://api.slack.com/. The "Request URL" on the "Event Subscriptions" page should be set to
 your web server URL plus "/slack/events".
 
 - app_home_opened
+- channel_archive
+- channel_unarchive
 - member_joined_channel
 - member_left_channel
 - message.channels

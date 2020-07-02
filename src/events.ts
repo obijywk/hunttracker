@@ -1,4 +1,6 @@
 import {
+  ChannelArchiveEvent,
+  ChannelUnarchiveEvent,
   MemberJoinedChannelEvent,
   MemberLeftChannelEvent,
   MessageEvent,
@@ -40,7 +42,7 @@ app.event("message", async ({ event, body }) => {
   }
 });
 
-app.event("member_joined_channel", async ({ event, body}) => {
+app.event("member_joined_channel", async ({ event, body }) => {
   const memberJoinedChannelEvent = event as unknown as MemberJoinedChannelEvent;
   if (await puzzles.isPuzzleChannel(memberJoinedChannelEvent.channel)) {
     await taskQueue.scheduleTask("refresh_puzzle", {
@@ -55,7 +57,7 @@ app.event("member_joined_channel", async ({ event, body}) => {
   }
 });
 
-app.event("member_left_channel", async ({ event, body}) => {
+app.event("member_left_channel", async ({ event, body }) => {
   const memberLeftChannelEvent = event as unknown as MemberLeftChannelEvent;
   if (await puzzles.isPuzzleChannel(memberLeftChannelEvent.channel)) {
     await taskQueue.scheduleTask("refresh_puzzle", {
@@ -64,6 +66,26 @@ app.event("member_left_channel", async ({ event, body}) => {
   }
   if (memberLeftChannelEvent.channel === process.env.SLACK_ADMIN_CHANNEL_ID) {
     await taskQueue.scheduleTask("refresh_users", {});
+  }
+  if (body.eventAck) {
+    body.eventAck();
+  }
+});
+
+app.event("channel_archive", async({ event, body }) => {
+  const channelArchiveEvent = event as unknown as ChannelArchiveEvent;
+  if (await puzzles.isPuzzleChannel(channelArchiveEvent.channel)) {
+    await puzzles.clearEventUsers(channelArchiveEvent.channel);
+  }
+  if (body.eventAck) {
+    body.eventAck();
+  }
+});
+
+app.event("channel_unarchive", async({ event, body }) => {
+  const channelUnarchiveEvent = event as unknown as ChannelUnarchiveEvent;
+  if (await puzzles.isPuzzleChannel(channelUnarchiveEvent.channel)) {
+    await puzzles.refreshEventUsers(channelUnarchiveEvent.channel);
   }
   if (body.eventAck) {
     body.eventAck();

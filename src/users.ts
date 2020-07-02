@@ -9,6 +9,7 @@ import * as taskQueue from "./task_queue";
 export interface User {
   id: string;
   name: string;
+  email: string;
   admin: boolean;
 }
 
@@ -66,7 +67,7 @@ async function refreshAllInternal(client: PoolClient) {
     cursor = userListResult.response_metadata.next_cursor;
   } while (cursor);
 
-  const dbUsers = await client.query("SELECT id, name, admin FROM users") as QueryResult<User>;
+  const dbUsers = await client.query("SELECT id, name, email, admin FROM users") as QueryResult<User>;
   const idToDbUser: { [key: string]: User } = {};
   for (const dbUser of dbUsers.rows) {
     idToDbUser[dbUser.id] = dbUser;
@@ -82,8 +83,8 @@ async function refreshAllInternal(client: PoolClient) {
     if (dbUser === undefined) {
       if (!acceptMember) continue;
       await client.query(
-        "INSERT INTO users(id, name, admin) VALUES ($1, $2, $3)",
-        [member.id, memberName, isAdminUser]);
+        "INSERT INTO users(id, name, email, admin) VALUES ($1, $2, $3, $4)",
+        [member.id, memberName, member.profile.email, isAdminUser]);
     } else {
       if (!acceptMember) {
         await client.query("DELETE FROM users WHERE id = $1", [dbUser.id]);
@@ -97,6 +98,11 @@ async function refreshAllInternal(client: PoolClient) {
           await client.query(
             "UPDATE users SET admin = $2 WHERE id = $1",
             [dbUser.id, isAdminUser]);
+        }
+        if (dbUser.email != member.profile.email) {
+          await client.query(
+            "UPDATE users SET email = $2 WHERE id = $1",
+            [dbUser.id, member.profile.email]);
         }
       }
     }
@@ -194,8 +200,8 @@ app.event("user_change", async ({ event, body }) => {
     const isAdminUser = adminUserIds !== null ? adminUserIds.has(member.id) : true;
     if (dbUserResult.rowCount === 0) {
       await db.query(
-        "INSERT INTO users(id, name, admin) VALUES ($1, $2, $3)",
-        [member.id, memberName, isAdminUser]);
+        "INSERT INTO users(id, name, email, admin) VALUES ($1, $2, $3, $4)",
+        [member.id, memberName, member.profile.email, isAdminUser]);
     } else {
       const dbUser = dbUserResult.rows[0] as User;
       if (dbUser.name != memberName) {
@@ -207,6 +213,11 @@ app.event("user_change", async ({ event, body }) => {
         await db.query(
           "UPDATE users SET admin = $2 WHERE id = $1",
           [dbUser.id, isAdminUser]);
+      }
+      if (dbUser.email != member.profile.email) {
+        await db.query(
+          "UPDATE users SET email = $2 WHERE id = $1",
+          [dbUser.id, member.profile.email]);
       }
     }
   } finally {

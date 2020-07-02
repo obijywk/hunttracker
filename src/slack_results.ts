@@ -50,6 +50,7 @@ export interface UserResult {
   profile: {
     real_name_normalized: string;
     display_name_normalized: string;
+    email: string;
   };
   is_bot: boolean;
 }

@@ -2,11 +2,11 @@ import moment = require("moment");
 import * as diacritics from "diacritics";
 import { PoolClient } from "pg";
 import { ButtonAction } from "@slack/bolt";
-import { ErrorCode } from "@slack/web-api";
 
 import { app } from "./app";
 import * as db from "./db";
 import * as googleDrive from "./google_drive";
+import * as googleCalendar from "./google_calendar";
 import {
   ChatPostMessageResult,
   ConversationsCreateResult,
@@ -30,6 +30,8 @@ export interface Puzzle {
   users: Array<users.User>;
   tags: Array<tags.Tag>;
   sheetUrl: string;
+  calendarEventId: string;
+  googleMeetUrl: string;
   chatModifiedTimestamp: moment.Moment;
   sheetModifiedTimestamp: moment.Moment;
   manualPokeTimestamp: moment.Moment;
@@ -82,6 +84,8 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       channel_topic,
       channel_topic_modified_timestamp,
       sheet_url,
+      calendar_event_id,
+      google_meet_url,
       (
         SELECT json_agg(row_to_json(users))
         FROM users
@@ -143,6 +147,8 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       users: row.users || [],
       tags: row.tags || [],
       sheetUrl: row.sheet_url,
+      calendarEventId: row.calendar_event_id,
+      googleMeetUrl: row.google_meet_url,
       chatModifiedTimestamp: moment(row.chat_modified_timestamp),
       sheetModifiedTimestamp: moment(row.sheet_modified_timestamp),
       manualPokeTimestamp: moment(row.manual_poke_timestamp),
@@ -288,7 +294,21 @@ function buildIdleStatusBlock(puzzle: Puzzle) {
 }
 
 function buildStatusMessageBlocks(puzzle: Puzzle): any {
-  const actionButtons = [tags.buildUpdateTagsButton(puzzle.id)];
+  const actionButtons = [];
+
+  if (puzzle.googleMeetUrl.length > 0) {
+    actionButtons.push({
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":movie_camera: Video chat",
+      },
+      "action_id": "puzzle_video_chat",
+      url: puzzle.googleMeetUrl,
+    });
+  }
+
+  actionButtons.push(tags.buildUpdateTagsButton(puzzle.id));
 
   const linksBlock = {
     type: "section",
@@ -382,6 +402,10 @@ async function updateStatusMessage(puzzle: Puzzle) {
 }
 
 app.action("puzzle_open_spreadsheet", async ({ack}) => {
+  ack();
+});
+
+app.action("puzzle_video_chat", async ({ack}) => {
   ack();
 });
 
@@ -643,11 +667,13 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       channel_name,
       channel_topic,
       sheet_url,
+      calendar_event_id,
+      google_meet_url,
       chat_modified_timestamp,
       sheet_modified_timestamp,
       manual_poke_timestamp,
       status_message_ts
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
     [
       puzzle.id,
       puzzle.name,
@@ -657,6 +683,8 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       puzzle.channelName,
       puzzle.channelTopic,
       puzzle.sheetUrl,
+      puzzle.calendarEventId,
+      puzzle.googleMeetUrl,
       puzzle.chatModifiedTimestamp.format(),
       puzzle.sheetModifiedTimestamp.format(),
       puzzle.manualPokeTimestamp.format(),
@@ -770,6 +798,24 @@ export async function refreshStale() {
   await taskQueue.notifyQueue();
 }
 
+export async function refreshEventUsers(channelId: string, client?: PoolClient) {
+  if (process.env.ENABLE_GOOGLE_MEET) {
+    const puzzle = await get(channelId, client);
+    if (puzzle.calendarEventId.length > 0) {
+      await googleCalendar.updateEventUsers(puzzle.calendarEventId, puzzle.users);
+    }
+  }
+}
+
+export async function clearEventUsers(channelId: string) {
+  if (process.env.ENABLE_GOOGLE_MEET) {
+    const puzzle = await get(channelId);
+    if (puzzle.calendarEventId.length > 0) {
+      await googleCalendar.updateEventUsers(puzzle.calendarEventId, []);
+    }
+  }
+}
+
 taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const name = payload.name;
   const url = payload.url;
@@ -786,7 +832,17 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   }) as ConversationsCreateResult;
   const id = createConversationResult.channel.id;
 
-  const sheetUrl = await googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, name);
+  const sheetUrlPromise = googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, name);
+  const calendarEventPromise =
+      process.env.ENABLE_GOOGLE_MEET ?
+      googleCalendar.createEvent(name) :
+      Promise.resolve({
+        eventId: "",
+        googleMeetUrl: "",
+      });
+
+  const sheetUrl = await sheetUrlPromise;
+  const calendarEvent = await calendarEventPromise;
 
   const now = moment();
   let puzzle: Puzzle = {
@@ -801,6 +857,8 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     users: [],
     tags: [],
     sheetUrl,
+    calendarEventId: calendarEvent.eventId,
+    googleMeetUrl: calendarEvent.googleMeetUrl,
     chatModifiedTimestamp: now,
     sheetModifiedTimestamp: now,
     manualPokeTimestamp: now,
@@ -990,6 +1048,7 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
     );
   }
   if (affectedUserIds.length > 0) {
+    refreshEventUsers(id, client);
     await taskQueue.notifyQueue();
   }
 });
