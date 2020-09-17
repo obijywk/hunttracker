@@ -22,7 +22,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.0",
     "googleapis": "^45.0.0",
-    "hbs": "^4.0.6",
+    "hbs": "^4.1.1",
     "moment": "^2.24.0",
     "passport": "^0.4.0",
     "passport-slack": "0.0.7",
