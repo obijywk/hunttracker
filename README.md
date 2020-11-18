@@ -26,6 +26,7 @@ To set up this app, you'll need:
  * Your own new Slack app to configure and install in your workspace
  * A PostgreSQL database
  * A Javascript serving solution (I've successfully set this up with AWS Lambda and with Google App Engine)
+ * A Google Cloud Platform service account for accessing the Google Drive and Calendar (for Google Meet creation) APIs
 
 ## Environment variables
 
@@ -52,8 +53,8 @@ Everything is configured using environment variables, and they need to be set fo
   So far, I have been somewhat cavalier about whether to use the bot token or the user
   token in various calls, we can clean this up later.
 - **GOOGLE_SERVICE_ACCOUNT_EMAIL**: This is the e-mail address of a Google Cloud Platform
-  service account used to access the Google Drive API for managing spreadsheets. You can create
-  a service account for a GCP project
+  service account used to access the Google Drive API for managing spreadsheets and the Google
+  Calendar API for creating Google Meets. You can create a service account for a GCP project
   [here](https://console.cloud.google.com/iam-admin/serviceaccounts). The Google Drive folder
   storing the spreadsheets should be shared with this account.
 - **GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY**: This is the private_key associated with the Google
