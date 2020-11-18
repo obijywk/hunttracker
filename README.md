@@ -1,4 +1,31 @@
-This is a puzzle hunt status tracking Slack bot.
+This is a puzzle hunt status tracking Slack app. Its user interface is implemented within Slack as much as possible, with a few external web views for features that are awkward or impossible to present within Slack itself. If your puzzle hunting team is really into Slack, this might be a good solution for you! If not, check out some of the other solutions tagged with [#puzzle-hunt](https://github.com/topics/puzzle-hunt) on Github.
+
+## Features
+
+The app's [Home tab](https://api.slack.com/surfaces/tabs) is its main entry point. It contains a few buttons to access app functionality, as well as information about puzzles that are currently unsolved.
+
+A "puzzle" may be used to represent a normal puzzle, a metapuzzle, an event, or any other solvable thing you want to track. This app maintains a Slack channel per puzzle. For each unsolved puzzle, the Home tab lists the puzzle channel's topic (useful as a quick summary of the puzzle content and current status of the solve), which team members are working on it, and any tags associated with the puzzle. It provides _Join channel_ buttons to make it easy to start working on a puzzle from this view, but it's also OK for a user to join a puzzle's channel via normal Slack features.
+
+The _Register puzzle_ button on the Home tab is used to create a Slack channel, Google Sheet, and (if configured) a Google Meet for a puzzle. It presents a dialog for entering information about the puzzle including its name, a URL for the puzzle content, tags to associate with the puzzle, and an initial topic. All fields are optional other than a unique puzzle name, and tags and a topic can be set and changed later. The puzzle registration feature may be optionally configured only for "admin" users who are members of a private admin channel.
+
+This app pins and maintains a _status message_ at the top of each puzzle channel. This message contains links to the puzzle content and the Google Sheet for the puzzle, as well as tracking for how long the puzzle's been "idle" (no activity in its channel or spreadsheet, or no manual indication that its still being worked on), its tags and functionality to edit them, and functionality for recording the puzzle as solved and providing its answer. The _status message_ is continuously updated by the app.
+
+There are many more features that have not yet been thoroughly documented here:
+ * the puzzles dashboard
+ * details about how tagging works, and the metas dashboard
+ * the tagger page
+ * archiving channels of solved puzzles
+ * the activity log channel
+ * the admin channel
+ * Google Meet integration
+
+## Serving requirements
+
+To set up this app, you'll need:
+ * A Slack workspace
+ * Your own new Slack app to configure and install in your workspace
+ * A PostgreSQL database
+ * A Javascript serving solution (I've successfully set this up with AWS Lambda and with Google App Engine)
 
 ## Environment variables
 
