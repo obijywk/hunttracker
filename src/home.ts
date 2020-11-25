@@ -330,7 +330,13 @@ app.view("home_register_puzzle_view", async ({ack, body, view}) => {
 });
 
 app.action("home_rename_puzzle", async ({ ack, body }) => {
-  const allPuzzles = await puzzles.list();
+  let allPuzzles = await puzzles.list();
+  if (allPuzzles.length > 100) {
+    allPuzzles = allPuzzles.filter(puzzle => !puzzle.complete);
+  }
+  if (allPuzzles.length > 100) {
+    allPuzzles = allPuzzles.slice(0, 100);
+  }
 
   const options = [];
   for (const puzzle of allPuzzles) {
