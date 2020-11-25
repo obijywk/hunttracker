@@ -490,7 +490,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
 app.view("puzzle_update_topic_view", async ({ack, view, body}) => {
   const id = JSON.parse(body.view.private_metadata)["id"] as string;
   const values = getViewStateValues(view);
-  const topic: string = values["puzzle_topic_input"];
+  const topic: string = values["puzzle_topic_input"] || "";
 
   if (topic.length > 250) {
     ack({
