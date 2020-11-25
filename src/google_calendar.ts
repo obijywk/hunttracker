@@ -82,3 +82,18 @@ export async function updateEventUsers(eventId: string, users: Array<users.User>
     throw e;
   }
 }
+
+export async function renameEvent(eventId: string, name: string): Promise<void> {
+  try {
+    await calendar.events.patch({
+      calendarId: getCalendarId(),
+      eventId,
+      requestBody: {
+        summary: name,
+      },
+    });
+  } catch (e) {
+    console.error("calendar.events.patch failed", e);
+    throw e;
+  }
+}

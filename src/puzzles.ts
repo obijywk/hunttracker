@@ -937,6 +937,12 @@ taskQueue.registerHandler("rename_puzzle", async (client, payload) => {
 
   await googleDrive.renameSheet(puzzle.sheetUrl, name);
 
+  if (process.env.ENABLE_GOOGLE_MEET) {
+    if (puzzle.calendarEventId.length > 0) {
+      await googleCalendar.renameEvent(puzzle.calendarEventId, name);
+    }
+  }
+
   await client.query(`
     UPDATE puzzles
     SET
