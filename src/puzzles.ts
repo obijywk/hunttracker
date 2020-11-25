@@ -234,6 +234,9 @@ function buildChannelName(puzzleName: string): string {
     channelName += "-";
   }
   channelName += normalizeStringForChannelName(puzzleName);
+  if (channelName.length > 79) {
+    channelName = channelName.substring(0, 79);
+  }
   return channelName;
 }
 
