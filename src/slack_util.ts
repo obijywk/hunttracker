@@ -3,6 +3,8 @@ import { ViewOutput } from "@slack/bolt";
 import { app } from "./app";
 import { ConversationsListResult } from "./slack_results";
 
+export const MAX_NUM_OPTIONS: number = 100;
+
 export async function findChannelIdForChannelName(channelName: string): Promise<string | null> {
   let cursor = undefined;
   do {

@@ -5,7 +5,7 @@ import { Block, KnownBlock, Option } from "@slack/types";
 
 import { app } from "./app";
 import * as db from "./db";
-import { getViewStateValues } from "./slack_util";
+import { MAX_NUM_OPTIONS, getViewStateValues } from "./slack_util";
 import * as taskQueue from "./task_queue";
 
 export interface Tag {
@@ -82,7 +82,7 @@ export function buildDeleteTagsButton() {
 }
 
 export async function buildUpdateTagsBlocks(puzzleId: string) {
-  const tags = await db.query(`
+  const tagsResult = await db.query(`
     SELECT
       id,
       name,
@@ -96,9 +96,26 @@ export async function buildUpdateTagsBlocks(puzzleId: string) {
     ORDER BY name ASC
   `, [puzzleId]);
 
+  let tags = tagsResult.rows;
+  let tagsOmitted: boolean = false;
+  if (tags.length > MAX_NUM_OPTIONS) {
+    tagsOmitted = true;
+    let i = 0;
+    while (i < tags.length && tags.length > MAX_NUM_OPTIONS) {
+      if (tags[i].selected) {
+        i++;
+      } else {
+        tags.splice(i, 1);
+      }
+    }
+    if (tags.length > MAX_NUM_OPTIONS) {
+      tags = tags.slice(0, MAX_NUM_OPTIONS);
+    }
+  }
+
   const options = [];
   const initialOptions = [];
-  for (const tag of tags.rows) {
+  for (const tag of tags) {
     const option: Option = {
       text: {
         type: "plain_text",
@@ -134,6 +151,19 @@ export async function buildUpdateTagsBlocks(puzzleId: string) {
         },
       },
     );
+    if (tagsOmitted) {
+      blocks.push(
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text:
+              `Tag options have been omitted because more than ${MAX_NUM_OPTIONS} tags exist. Use ` +
+              `the ${process.env.WEB_SERVER_URL}tagger interface for more robust tagging.`,
+          },
+        },
+      );
+    }
   }
   blocks.push({
     type: "input",
@@ -323,7 +353,7 @@ app.view("tags_update_view", async ({ack, view, body}) => {
 });
 
 async function buildRenameTagBlocks() {
-  const tags = await db.query(`
+  const tagsResult = await db.query(`
     SELECT
       id,
       name
@@ -331,8 +361,15 @@ async function buildRenameTagBlocks() {
     ORDER BY name ASC
   `);
 
+  let tags = tagsResult.rows;
+  let tagsOmitted: boolean = false;
+  if (tags.length > MAX_NUM_OPTIONS) {
+    tagsOmitted = true;
+    tags = tags.slice(0, MAX_NUM_OPTIONS);
+  }
+
   const options = [];
-  for (const tag of tags.rows) {
+  for (const tag of tags) {
     const option: Option = {
       text: {
         type: "plain_text",
@@ -345,6 +382,17 @@ async function buildRenameTagBlocks() {
 
   const blocks: Array<KnownBlock | Block> = [];
   if (options.length > 0) {
+    if (tagsOmitted) {
+      blocks.push(
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `Tag options have been omitted because more than ${MAX_NUM_OPTIONS} tags exist.`,
+          },
+        },
+      );
+    }
     blocks.push(
       {
         type: "input",
@@ -477,7 +525,7 @@ app.view("tags_rename_view", async ({ack, body, view}) => {
 });
 
 async function buildDeleteTagsBlocks() {
-  const tags = await db.query(`
+  const tagsResult = await db.query(`
     SELECT
       id,
       name
@@ -485,8 +533,15 @@ async function buildDeleteTagsBlocks() {
     ORDER BY name ASC
   `);
 
+  let tags = tagsResult.rows;
+  let tagsOmitted: boolean = false;
+  if (tags.length > MAX_NUM_OPTIONS) {
+    tagsOmitted = true;
+    tags = tags.slice(0, MAX_NUM_OPTIONS);
+  }
+
   const options = [];
-  for (const tag of tags.rows) {
+  for (const tag of tags) {
     const option: Option = {
       text: {
         type: "plain_text",
@@ -499,6 +554,17 @@ async function buildDeleteTagsBlocks() {
 
   const blocks: Array<KnownBlock | Block> = [];
   if (options.length > 0) {
+    if (tagsOmitted) {
+      blocks.push(
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `Tag options have been omitted because more than ${MAX_NUM_OPTIONS} tags exist.`,
+          },
+        },
+      );
+    }
     blocks.push(
       {
         type: "input",
