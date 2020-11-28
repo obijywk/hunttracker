@@ -5,7 +5,7 @@ import { Block, KnownBlock, Option } from "@slack/types";
 
 import { app } from "./app";
 import * as db from "./db";
-import { MAX_NUM_OPTIONS, getViewStateValues } from "./slack_util";
+import { MAX_NUM_OPTIONS, MAX_OPTION_LENGTH, getViewStateValues } from "./slack_util";
 import * as taskQueue from "./task_queue";
 
 export interface Tag {
@@ -316,6 +316,13 @@ export function getUpdateTagsViewStateValues(viewStateValues: any): UpdateTagsVi
       .map((s: string) => s.trim());
   }
   for (const tagName of newTagNames) {
+    if (tagName.length > MAX_OPTION_LENGTH) {
+      return {
+        errors: {
+          "new_tags_input": "Tags may only contain a maximum of 75 characters.",
+        },
+      };
+    }
     if (tagName.match(/[^a-z0-9-/]/g)) {
       return {
         errors: {
@@ -470,6 +477,15 @@ app.view("tags_rename_view", async ({ack, body, view}) => {
     return;
   }
   const newTagName = values["new_tag_name_input"].trim();
+  if (newTagName.length > MAX_OPTION_LENGTH) {
+    ack({
+      "response_action": "errors",
+      errors: {
+        "new_tag_name_input": "Tags may only contain a maximum of 75 characters.",
+      },
+    } as any);
+    return;
+  }
   if (newTagName.match(/[^a-z0-9-/]/g)) {
     ack({
       "response_action": "errors",

@@ -13,7 +13,11 @@ import {
   ConversationsHistoryResult,
   ConversationsInfoResult,
 } from "./slack_results";
-import { getViewStateValues } from "./slack_util";
+import {
+  MAX_CHANNEL_NAME_LENGTH,
+  MAX_OPTION_LENGTH,
+  getViewStateValues,
+} from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
@@ -234,8 +238,8 @@ function buildChannelName(puzzleName: string): string {
     channelName += "-";
   }
   channelName += normalizeStringForChannelName(puzzleName);
-  if (channelName.length > 79) {
-    channelName = channelName.substring(0, 79);
+  if (channelName.length > MAX_CHANNEL_NAME_LENGTH) {
+    channelName = channelName.substring(0, MAX_CHANNEL_NAME_LENGTH);
   }
   return channelName;
 }
@@ -711,6 +715,9 @@ async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | nu
 }
 
 async function validateCreate(name: string, url: string): Promise<string | null> {
+  if (name.length > MAX_OPTION_LENGTH) {
+    return "A puzzle name may only contain a maximum of 75 characters.";
+  }
   const channelName = buildChannelName(name);
   const existsResult = await db.query(`
     SELECT EXISTS (
