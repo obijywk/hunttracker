@@ -3,7 +3,7 @@ import { Block, Button, KnownBlock, Option } from "@slack/types";
 
 import { app } from "./app";
 import * as puzzles from "./puzzles";
-import { getViewStateValues } from "./slack_util";
+import { MAX_NUM_OPTIONS, getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
@@ -331,10 +331,12 @@ app.view("home_register_puzzle_view", async ({ack, body, view}) => {
 
 app.action("home_rename_puzzle", async ({ ack, body }) => {
   let allPuzzles = await puzzles.list();
-  if (allPuzzles.length > 100) {
+  let puzzlesOmitted = false;
+  if (allPuzzles.length > MAX_NUM_OPTIONS) {
+    puzzlesOmitted = true;
     allPuzzles = allPuzzles.filter(puzzle => !puzzle.complete);
   }
-  if (allPuzzles.length > 100) {
+  if (allPuzzles.length > MAX_NUM_OPTIONS) {
     allPuzzles = allPuzzles.slice(0, 100);
   }
 
@@ -352,6 +354,17 @@ app.action("home_rename_puzzle", async ({ ack, body }) => {
 
   const blocks: Array<KnownBlock | Block> = [];
   if (options.length > 0) {
+    if (puzzlesOmitted) {
+      blocks.push(
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `Puzzle options have been omitted because more than ${MAX_NUM_OPTIONS} puzzles exist.`,
+          },
+        },
+      );
+    }
     blocks.push(
       {
         type: "input",
