@@ -22,10 +22,12 @@ CREATE TABLE puzzles (
   channel_topic text,
   channel_topic_modified_timestamp timestamp,
   sheet_url text,
+  drawing_url text,
   calendar_event_id text,
   google_meet_url text,
   chat_modified_timestamp timestamp,
   sheet_modified_timestamp timestamp,
+  drawing_modified_timestamp timestamp,
   manual_poke_timestamp timestamp,
   status_message_ts text
 );

@@ -34,10 +34,12 @@ export interface Puzzle {
   users: Array<users.User>;
   tags: Array<tags.Tag>;
   sheetUrl: string;
+  drawingUrl: string;
   calendarEventId: string;
   googleMeetUrl: string;
   chatModifiedTimestamp: moment.Moment;
   sheetModifiedTimestamp: moment.Moment;
+  drawingModifiedTimestamp: moment.Moment;
   manualPokeTimestamp: moment.Moment;
   statusMessageTs?: string;
 }
@@ -49,6 +51,7 @@ export function getIdleDuration(puzzle: Puzzle): moment.Duration {
   const latestTimestamp = moment.max(
     puzzle.chatModifiedTimestamp,
     puzzle.sheetModifiedTimestamp,
+    puzzle.drawingModifiedTimestamp,
     puzzle.manualPokeTimestamp,
   );
   return moment.duration(moment().diff(latestTimestamp));
@@ -88,6 +91,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       channel_topic,
       channel_topic_modified_timestamp,
       sheet_url,
+      drawing_url,
       calendar_event_id,
       google_meet_url,
       (
@@ -112,6 +116,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       ) tags,
       chat_modified_timestamp,
       sheet_modified_timestamp,
+      drawing_modified_timestamp,
       manual_poke_timestamp,
       status_message_ts
     FROM puzzles`;
@@ -151,10 +156,12 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       users: row.users || [],
       tags: row.tags || [],
       sheetUrl: row.sheet_url,
+      drawingUrl: row.drawing_url,
       calendarEventId: row.calendar_event_id,
       googleMeetUrl: row.google_meet_url,
       chatModifiedTimestamp: moment(row.chat_modified_timestamp),
       sheetModifiedTimestamp: moment(row.sheet_modified_timestamp),
+      drawingModifiedTimestamp: moment(row.drawing_modified_timestamp),
       manualPokeTimestamp: moment(row.manual_poke_timestamp),
       statusMessageTs: row.status_message_ts,
     });
@@ -198,6 +205,7 @@ export async function isIdlePuzzleChannel(channelId: string): Promise<boolean> {
       complete,
       chat_modified_timestamp,
       sheet_modified_timestamp,
+      drawing_modified_timestamp,
       manual_poke_timestamp
     FROM puzzles
     WHERE id = $1
@@ -212,6 +220,7 @@ export async function isIdlePuzzleChannel(channelId: string): Promise<boolean> {
   const latestTimestamp = moment.max(
     moment(row.chat_modified_timestamp),
     moment(row.sheet_modified_timestamp),
+    moment(row.drawing_modified_timestamp),
     moment(row.manual_poke_timestamp),
   );
   return moment.duration(moment().diff(latestTimestamp)).asMinutes() >= Number(process.env.MINIMUM_IDLE_MINUTES);
@@ -317,13 +326,18 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
 
   actionButtons.push(tags.buildUpdateTagsButton(puzzle.id));
 
-  const linksBlock = {
+  const puzzleLinkBlock = {
     type: "section",
     text: {
       type: "mrkdwn",
       text: `${puzzle.complete ? ":notebook:" : ":book:"} ${buildPuzzleNameMrkdwn(puzzle)}`,
     },
-    accessory: {
+  };
+
+  const fileButtons = [];
+
+  if (puzzle.sheetUrl.length > 0) {
+    fileButtons.push({
       type: "button",
       text: {
         type: "plain_text",
@@ -331,11 +345,29 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
       },
       "action_id": "puzzle_open_spreadsheet",
       url: puzzle.sheetUrl,
-    },
+    });
+  }
+
+  if (puzzle.drawingUrl.length > 0) {
+    fileButtons.push({
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":pencil2: Drawing",
+      },
+      "action_id": "puzzle_open_drawing",
+      url: puzzle.drawingUrl,
+    });
+  }
+
+  const fileLinksBlock = {
+    type: "actions",
+    elements: fileButtons,
   };
 
   const blocks: Array<any> = [
-    linksBlock,
+    puzzleLinkBlock,
+    fileLinksBlock,
   ];
 
   if (puzzle.answer) {
@@ -409,6 +441,10 @@ async function updateStatusMessage(puzzle: Puzzle) {
 }
 
 app.action("puzzle_open_spreadsheet", async ({ack}) => {
+  ack();
+});
+
+app.action("puzzle_open_drawing", async ({ack}) => {
   ack();
 });
 
@@ -674,13 +710,15 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       channel_name,
       channel_topic,
       sheet_url,
+      drawing_url,
       calendar_event_id,
       google_meet_url,
       chat_modified_timestamp,
       sheet_modified_timestamp,
+      drawing_modified_timestamp,
       manual_poke_timestamp,
       status_message_ts
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
     [
       puzzle.id,
       puzzle.name,
@@ -690,10 +728,12 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       puzzle.channelName,
       puzzle.channelTopic,
       puzzle.sheetUrl,
+      puzzle.drawingUrl,
       puzzle.calendarEventId,
       puzzle.googleMeetUrl,
       puzzle.chatModifiedTimestamp.format(),
       puzzle.sheetModifiedTimestamp.format(),
+      puzzle.drawingModifiedTimestamp.format(),
       puzzle.manualPokeTimestamp.format(),
       puzzle.statusMessageTs || "",
     ]);
@@ -843,6 +883,12 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const id = createConversationResult.channel.id;
 
   const sheetUrlPromise = googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, name);
+
+  const drawingUrlPromise =
+      process.env.PUZZLE_DRAWING_TEMPLATE_URL ?
+      googleDrive.copyDrawing(process.env.PUZZLE_DRAWING_TEMPLATE_URL, name) :
+      Promise.resolve("");
+
   const calendarEventPromise =
       process.env.ENABLE_GOOGLE_MEET ?
       googleCalendar.createEvent(name) :
@@ -852,6 +898,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
       });
 
   const sheetUrl = await sheetUrlPromise;
+  const drawingUrl = await drawingUrlPromise;
   const calendarEvent = await calendarEventPromise;
 
   const now = moment();
@@ -867,10 +914,12 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     users: [],
     tags: [],
     sheetUrl,
+    drawingUrl,
     calendarEventId: calendarEvent.eventId,
     googleMeetUrl: calendarEvent.googleMeetUrl,
     chatModifiedTimestamp: now,
     sheetModifiedTimestamp: now,
+    drawingModifiedTimestamp: now,
     manualPokeTimestamp: now,
   };
 
@@ -943,6 +992,9 @@ taskQueue.registerHandler("rename_puzzle", async (client, payload) => {
   });
 
   await googleDrive.renameSheet(puzzle.sheetUrl, name);
+  if (puzzle.drawingUrl) {
+    await googleDrive.renameDrawing(puzzle.drawingUrl, name);
+  }
 
   if (process.env.ENABLE_GOOGLE_MEET) {
     if (puzzle.calendarEventId.length > 0) {
@@ -995,6 +1047,12 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
     sheetModifiedTimestamp = await googleDrive.getSheetModifiedTimestamp(puzzle.sheetUrl);
   }
 
+  let drawingModifiedTimestamp = null;
+  if (moment.duration(moment().diff(puzzle.drawingModifiedTimestamp)).asMinutes() >=
+      Number(process.env.MINIMUM_IDLE_MINUTES)) {
+    drawingModifiedTimestamp = await googleDrive.getDrawingModifiedTimestamp(puzzle.drawingUrl);
+  }
+
   const latestMessageTimestamp = await latestMessageTimestampPromise;
 
   let dirty = false;
@@ -1030,6 +1088,11 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
     dirty = true;
     puzzle.sheetModifiedTimestamp = sheetModifiedTimestamp;
   }
+  if (drawingModifiedTimestamp !== null &&
+      puzzle.drawingModifiedTimestamp.isBefore(drawingModifiedTimestamp)) {
+    dirty = true;
+    puzzle.drawingModifiedTimestamp = drawingModifiedTimestamp;
+  }
 
   const updateStatusMessagePromise = updateStatusMessage(puzzle);
 
@@ -1042,7 +1105,8 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
         channel_topic = $2,
         channel_topic_modified_timestamp = $3,
         chat_modified_timestamp = $4,
-        sheet_modified_timestamp = $5
+        sheet_modified_timestamp = $5,
+        drawing_modified_timestamp = $6
       WHERE id = $1`,
       [
         id,
@@ -1050,6 +1114,7 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
         puzzle.channelTopicModifiedTimestamp,
         puzzle.chatModifiedTimestamp,
         puzzle.sheetModifiedTimestamp,
+        puzzle.drawingModifiedTimestamp,
       ]);
   }
 

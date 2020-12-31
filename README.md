@@ -77,6 +77,9 @@ Everything is configured using environment variables, and they need to be set fo
 - **PUZZLE_SHEET_TEMPLATE_URL**: A link to a Google Sheet that will be copied to create
   per-puzzle spreadsheets. It should be in a folder editable by the Google Cloud Platform
   service account, and this folder is where the spreadsheets will be created as well.
+- **PUZZLE_DRAWING_TEMPLATE_URL**: If set, a link to a Google Drawing that will be copied
+  to create per-puzzle drawings. It should be in a folder editable by the Google Cloud
+  Platform service account, and this folder is where the drawings will be created as well.
 - **ENABLE_GOOGLE_MEET**: If set, creates a calendar event with a Google Meet entry point
   for each puzzle.
 - **GOOGLE_MEET_CALENDAR_ID**: The Google Calendar ID of the calendar where per-puzzle events
