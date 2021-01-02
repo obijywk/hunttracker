@@ -22,7 +22,7 @@ receiver.app.use(expressSession({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: moment.duration(7, "days").asMilliseconds(),
+    maxAge: moment.duration(14, "days").asMilliseconds(),
   },
 }));
 
