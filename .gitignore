@@ -1,4 +1,4 @@
-/app.yaml
+/app*.yaml
 /config.env
 /cron.yaml
 /dist
