@@ -432,7 +432,7 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
 
 async function updateStatusMessage(puzzle: Puzzle) {
   const postStatusMessageResult = await app.client.chat.update({
-    token: process.env.SLACK_BOT_TOKEN,
+    token: process.env.SLACK_USER_TOKEN,
     channel: puzzle.id,
     text: "",
     ts: puzzle.statusMessageTs,
@@ -470,7 +470,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
   const puzzlePromise = get(id);
 
   const conversationInfoResult = await app.client.conversations.info({
-    token: process.env.SLACK_BOT_TOKEN,
+    token: process.env.SLACK_USER_TOKEN,
     channel: id,
   }) as ConversationsInfoResult;
 
@@ -933,7 +933,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   }
 
   const postStatusMessageResult = await app.client.chat.postMessage({
-    token: process.env.SLACK_BOT_TOKEN,
+    token: process.env.SLACK_USER_TOKEN,
     channel: `#${puzzle.channelName}`,
     text: "",
     blocks: buildStatusMessageBlocks(puzzle),
@@ -941,7 +941,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   puzzle.statusMessageTs = postStatusMessageResult.ts;
 
   const pinPromise = app.client.pins.add({
-    token: process.env.SLACK_BOT_TOKEN,
+    token: process.env.SLACK_USER_TOKEN,
     channel: puzzle.id,
     timestamp: puzzle.statusMessageTs,
   });
@@ -1029,7 +1029,7 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
   const id: string = payload.id;
 
   const conversationInfoResult = await app.client.conversations.info({
-    token: process.env.SLACK_BOT_TOKEN,
+    token: process.env.SLACK_USER_TOKEN,
     channel: id,
   }) as ConversationsInfoResult;
 
