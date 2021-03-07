@@ -51,10 +51,10 @@ function cacheClient(client: Client) {
   }
 }
 
-export async function connect(): Promise<PoolClient> {
+export async function connect(): Promise<Client & PoolClient> {
   const client: any = await getClient();
   client.release = () => cacheClient(client);
-  const poolClient: PoolClient = client;
+  const poolClient: Client & PoolClient = client;
   return poolClient;
 }
 

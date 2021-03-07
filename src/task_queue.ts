@@ -1,5 +1,5 @@
 import moment = require("moment");
-import { PoolClient } from "pg";
+import { Client, PoolClient } from "pg";
 
 import { SNSClient } from "@aws-sdk/client-sns-node/SNSClient";
 import { PublishCommand } from "@aws-sdk/client-sns-node/commands/PublishCommand";
@@ -94,11 +94,23 @@ export async function processTaskQueue() {
   await db.query("NOTIFY task_queue_add");
 }
 
+let listenClient: Client & PoolClient | null = null;
+
 export async function startListening() {
-  const listenClient = await db.connect();
+  if (listenClient) {
+    await listenClient.end();
+    listenClient = null;
+  }
+  listenClient = await db.connect();
   listenClient.query("LISTEN task_queue_add");
   listenClient.on("notification", async (data) => {
     processTaskQueue();
+  });
+  listenClient.on("error", async (e) => {
+    console.log("Notification listener DB client error", e);
+    await listenClient.end();
+    listenClient = null;
+    await startListening();
   });
   processTaskQueue();
 }

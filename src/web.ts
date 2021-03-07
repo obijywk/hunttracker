@@ -251,6 +251,18 @@ receiver.app.post("/taskqueue/process", async (req, res) => {
   return res.redirect("../taskqueue");
 });
 
+receiver.app.post("/taskqueue/startlistening", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+  if (!await checkAdmin(req)) {
+    res.redirect("../puzzles");
+    return;
+  }
+  await taskQueue.startListening();
+  return res.redirect("../taskqueue");
+});
+
 receiver.app.post("/taskqueue/clearerror", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
