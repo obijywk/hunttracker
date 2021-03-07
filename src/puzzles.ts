@@ -658,22 +658,33 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
   if (complete) {
     const puzzle = await get(id);
     let text;
+    let spoilerText;
     if (answer) {
-      text = `${buildPuzzleNameMrkdwn(puzzle)} solved with answer *${puzzle.answer}*.`;
+      text = `${buildPuzzleNameMrkdwn(puzzle)} solved!`;
+      spoilerText = `${buildPuzzleNameMrkdwn(puzzle)} solved with answer *${puzzle.answer}*.`;
     } else {
       text = `${buildPuzzleNameMrkdwn(puzzle)} completed.`;
+      spoilerText = text;
     }
     await app.client.chat.postMessage({
       token: process.env.SLACK_USER_TOKEN,
       channel: `#${channelName}`,
-      text,
+      text: spoilerText,
     });
     if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
-      await app.client.chat.postMessage({
+      const logChannelPostMessageResult = await app.client.chat.postMessage({
         token: process.env.SLACK_USER_TOKEN,
         channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
         text,
-      });
+      }) as ChatPostMessageResult;
+      if (text !== spoilerText) {
+        await app.client.chat.postMessage({
+          token: process.env.SLACK_USER_TOKEN,
+          channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
+          "thread_ts": logChannelPostMessageResult.ts,
+          text: spoilerText,
+        });
+      }
     }
     await updateStatusMessage(puzzle);
     if (process.env.AUTO_ARCHIVE) {
