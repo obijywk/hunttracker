@@ -767,7 +767,10 @@ async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | nu
   return null;
 }
 
-async function validateCreate(name: string, url: string): Promise<string | null> {
+async function validatePuzzleName(name: string): Promise<string | null> {
+  if (!name || name.length === 0) {
+    return "A puzzle name must not be empty.";
+  }
   if (name.length > MAX_OPTION_LENGTH) {
     return "A puzzle name may only contain a maximum of 75 characters.";
   }
@@ -778,12 +781,25 @@ async function validateCreate(name: string, url: string): Promise<string | null>
       FROM puzzles
       WHERE
         name = $1 OR
-        channel_name = $2 OR
-        (char_length(url) > 0 AND url = $3)
+        channel_name = $2
     )
-  `, [name, channelName, url]);
+  `, [name, channelName]);
   if (existsResult.rowCount > 0 && existsResult.rows[0].exists) {
-    return "A puzzle with that name or URL has already been registered.";
+    return "A puzzle with the same name or channel has already been registered.";
+  }
+  return null;
+}
+
+async function validatePuzzleUrl(url: string): Promise<string | null> {
+  const existsResult = await db.query(`
+    SELECT EXISTS (
+      SELECT 1
+      FROM puzzles
+      WHERE url = $1
+    )
+  `, [url]);
+  if (existsResult.rowCount > 0 && existsResult.rows[0].exists) {
+    return "A puzzle with that URL has already been registered.";
   }
   return null;
 }
@@ -796,10 +812,26 @@ export async function create(
   topic: string,
   creatorUserId: string,
 ): Promise<string | null> {
-  const validateResult = await validateCreate(name, url);
-  if (validateResult !== null) {
-    return validateResult;
+  const validateName = validatePuzzleName(name);
+
+  let validateUrl = null;
+  if (url && url.length > 0) {
+    validateUrl = validatePuzzleUrl(url);
   }
+
+  const validateNameResult = await validateName;
+  if (validateNameResult !== null) {
+    return validateNameResult;
+  }
+
+  let validateUrlResult = null;
+  if (validateUrl !== null) {
+    validateUrlResult = await validateUrl;
+    if (validateUrlResult !== null) {
+      return validateUrlResult;
+    }
+  }
+
   await taskQueue.scheduleTask("create_puzzle", {
     name,
     url,
@@ -811,22 +843,45 @@ export async function create(
   return null;
 }
 
-export async function rename(
+export async function edit(
   id: string,
   name: string,
   url: string,
   creatorUserId: string,
 ): Promise<string | null> {
-  const validateResult = await validateCreate(name, url);
-  if (validateResult !== null) {
-    return validateResult;
+  let validateName = null;
+  if (name && name.length > 0) {
+    validateName = validatePuzzleName(name);
   }
-  await taskQueue.scheduleTask("rename_puzzle", {
+
+  let validateUrl = null;
+  if (url && url.length > 0) {
+    validateUrl = validatePuzzleUrl(url);
+  }
+
+  let validateNameResult = null;
+  if (validateName !== null) {
+    validateNameResult = await validateName;
+    if (validateNameResult !== null) {
+      return validateNameResult;
+    }
+  }
+
+  let validateUrlResult = null;
+  if (validateUrl !== null) {
+    validateUrlResult = await validateUrl;
+    if (validateUrlResult !== null) {
+      return validateUrlResult;
+    }
+  }
+
+  await taskQueue.scheduleTask("edit_puzzle", {
     id,
     name,
     url,
     creatorUserId,
   });
+  return null;
 }
 
 export async function refreshAll() {
@@ -985,51 +1040,57 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   }
 });
 
-taskQueue.registerHandler("rename_puzzle", async (client, payload) => {
+taskQueue.registerHandler("edit_puzzle", async (client, payload) => {
   const id = payload.id;
-  const name = payload.name;
+  let name = payload.name;
   let url = payload.url;
   const creatorUserId = payload.creatorUserId;
 
-  const channelName = buildChannelName(name);
-
   const puzzle = await get(id);
+  if (!name || name.length == 0) {
+    name = puzzle.name;
+  }
   if (!url || url.length === 0) {
     url = puzzle.url;
   }
 
-  await app.client.conversations.rename({
-    token: process.env.SLACK_USER_TOKEN,
-    channel: id,
-    name: channelName,
-  });
-
-  await googleDrive.renameSheet(puzzle.sheetUrl, name);
-  if (puzzle.drawingUrl) {
-    await googleDrive.renameDrawing(puzzle.drawingUrl, name);
+  const channelName = buildChannelName(name);
+  if (channelName !== puzzle.channelName) {
+    await app.client.conversations.rename({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: id,
+      name: channelName,
+    });
   }
 
-  if (process.env.ENABLE_GOOGLE_MEET) {
-    if (puzzle.calendarEventId.length > 0) {
-      await googleCalendar.renameEvent(puzzle.calendarEventId, name);
+  if (name !== puzzle.name) {
+    await googleDrive.renameSheet(puzzle.sheetUrl, name);
+    if (puzzle.drawingUrl) {
+      await googleDrive.renameDrawing(puzzle.drawingUrl, name);
+    }
+    if (process.env.ENABLE_GOOGLE_MEET) {
+      if (puzzle.calendarEventId.length > 0) {
+        await googleCalendar.renameEvent(puzzle.calendarEventId, name);
+      }
     }
   }
 
-  await client.query(`
-    UPDATE puzzles
-    SET
-      name = $2,
-      url = $3,
-      channel_name = $4
-    WHERE id = $1`,
-    [
-      id,
-      name,
-      url,
-      channelName,
-    ]);
-
-  await taskQueue.scheduleTask("refresh_puzzle", {id});
+  if (name !== puzzle.name || url !== puzzle.url) {
+    await client.query(`
+      UPDATE puzzles
+      SET
+        name = $2,
+        url = $3,
+        channel_name = $4
+      WHERE id = $1`,
+      [
+        id,
+        name,
+        url,
+        channelName,
+      ]);
+    await taskQueue.scheduleTask("refresh_puzzle", {id});
+  }
 
   if (creatorUserId) {
     await taskQueue.scheduleTask("publish_home", {

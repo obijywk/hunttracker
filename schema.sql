@@ -59,7 +59,7 @@ CREATE TABLE puzzle_user (
 
 CREATE TYPE task_type AS ENUM (
   'create_puzzle',
-  'rename_puzzle',
+  'edit_puzzle',
   'refresh_puzzle',
   'publish_home',
   'refresh_users'

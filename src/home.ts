@@ -148,9 +148,9 @@ async function buildHomeBlocks(userId: string) {
           type: "button",
           text: {
             type: "plain_text",
-            text: ":pencil2: Rename puzzle",
+            text: ":pencil2: Edit puzzle",
           },
-          "action_id": "home_rename_puzzle",
+          "action_id": "home_edit_puzzle",
         },
         tags.buildRenameTagButton(),
         tags.buildDeleteTagsButton(),
@@ -329,7 +329,7 @@ app.view("home_register_puzzle_view", async ({ack, body, view}) => {
   ack();
 });
 
-app.action("home_rename_puzzle", async ({ ack, body }) => {
+app.action("home_edit_puzzle", async ({ ack, body }) => {
   let allPuzzles = await puzzles.list();
   let puzzlesOmitted = false;
   if (allPuzzles.length > MAX_NUM_OPTIONS) {
@@ -383,15 +383,16 @@ app.action("home_rename_puzzle", async ({ ack, body }) => {
     blocks.push({
       type: "input",
       "block_id": "puzzle_name_input",
+      optional: true,
       label: {
         type: "plain_text",
-        text: "New puzzle name",
+        text: "Puzzle name",
       },
       element: {
         type: "plain_text_input",
         placeholder: {
           type: "plain_text",
-          text: "Enter puzzle name",
+          text: "Enter puzzle name (or omit to leave name unchanged)",
         },
       },
     });
@@ -426,35 +427,35 @@ app.action("home_rename_puzzle", async ({ ack, body }) => {
     "trigger_id": (body as any).trigger_id,
     view: {
       type: "modal",
-      "callback_id": "home_rename_puzzle_view",
+      "callback_id": "home_edit_puzzle_view",
       title: {
         type: "plain_text",
-        text: "Rename puzzle",
+        text: "Edit puzzle",
       },
       blocks,
       submit: {
         type: "plain_text",
-        text: "Rename puzzle",
+        text: "Edit puzzle",
       },
     },
   });
   ack();
 });
 
-app.view("home_rename_puzzle_view", async ({ack, body, view}) => {
+app.view("home_edit_puzzle_view", async ({ack, body, view}) => {
   const values = getViewStateValues(view);
 
-  const renameError = await puzzles.rename(
+  const editError = await puzzles.edit(
     values["puzzle_id_input"],
     values["puzzle_name_input"],
     values["puzzle_url_input"],
     body.user.id);
 
-  if (renameError) {
+  if (editError) {
     ack({
       "response_action": "errors",
       errors: {
-        "puzzle_name_input": renameError,
+        "puzzle_name_input": editError,
       },
     } as any);
     return;
