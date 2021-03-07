@@ -1014,6 +1014,9 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     timestamp: puzzle.statusMessageTs,
   });
 
+  const appendPuzzleRowToTrackingSheetPromise =
+      googleDrive.appendPuzzleRowToTrackingSheet(name);
+
   await insert(puzzle, client);
   await tags.updateTags(id, selectedTagIds, newTagNames, client);
   puzzle = await get(id, client);
@@ -1024,6 +1027,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     await setTopicPromise;
   }
   await pinPromise;
+  await appendPuzzleRowToTrackingSheetPromise;
 
   if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
     await app.client.chat.postMessage({

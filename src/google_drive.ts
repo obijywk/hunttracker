@@ -10,6 +10,7 @@ const auth = new google.auth.JWT({
 });
 
 const drive = google.drive({version: "v3", auth: auth});
+const sheets = google.sheets({version: "v4", auth: auth});
 
 const SHEET_URL_PREFIX = "https://docs.google.com/spreadsheets/d/";
 const SHEET_URL_FILE_ID_REGEX = RegExp("^" + SHEET_URL_PREFIX + "([^/]+).*$");
@@ -101,4 +102,24 @@ export async function getSheetModifiedTimestamp(url: string): Promise<moment.Mom
 export async function getDrawingModifiedTimestamp(url: string): Promise<moment.Moment | null> {
   const fileId = getDrawingUrlFileId(url);
   return getFileModifiedTimestamp(fileId);
+}
+
+export async function appendPuzzleRowToTrackingSheet(name: string) {
+  if (!process.env.PUZZLE_TRACKING_SHEET_ID) {
+    return;
+  }
+  const spreadsheet = await sheets.spreadsheets.get({
+    spreadsheetId: process.env.PUZZLE_TRACKING_SHEET_ID,
+    fields: "sheets.properties",
+  });
+  const sheetTitle = spreadsheet.data.sheets[0].properties.title;
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: process.env.PUZZLE_TRACKING_SHEET_ID,
+    range: sheetTitle + "!A1:A1",
+    valueInputOption: "RAW",
+    requestBody: {
+      majorDimension: "ROWS",
+      values: [[name]],
+    },
+  });
 }
