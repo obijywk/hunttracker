@@ -25,7 +25,7 @@
     "hbs": "^4.1.1",
     "moment": "^2.24.0",
     "passport": "^0.4.0",
-    "passport-slack": "0.0.7",
+    "passport-slack-oauth2": "^1.1.0",
     "pg": "^7.12.1",
     "serverless-http": "^2.3.0",
     "uuid": "^8.2.0"

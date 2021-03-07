@@ -3,7 +3,7 @@ import * as express from "express";
 import expressSession from "express-session";
 import moment = require("moment");
 import passport from "passport";
-import { Strategy as SlackStrategy } from "passport-slack";
+import { Strategy as SlackStrategy } from "passport-slack-oauth2";
 import { App, ExpressReceiver } from "@slack/bolt";
 import { ErrorCode, WebAPIPlatformError } from "@slack/web-api";
 
@@ -30,7 +30,6 @@ passport.use(new SlackStrategy({
   team: process.env.SLACK_TEAM_ID,
   clientID: process.env.SLACK_CLIENT_ID,
   clientSecret: process.env.SLACK_CLIENT_SECRET,
-  scope: ["identity.basic"],
   skipUserProfile: false,
 }, (accessToken: any, refreshToken: any, profile: any, done: any) => {
   done(null, profile);
@@ -43,10 +42,10 @@ passport.deserializeUser((id: string, cb) => {
 });
 receiver.app.use(passport.initialize());
 receiver.app.use(passport.session());
-receiver.app.get("/auth/slack", passport.authenticate("slack"));
+receiver.app.get("/auth/slack", passport.authenticate("Slack"));
 receiver.app.get(
   "/auth/slack/callback",
-  passport.authenticate("slack", { failureRedirect: "/login" }),
+  passport.authenticate("Slack", { failureRedirect: "/login" }),
   (req, res) => {
     if (req.session.postLoginUrl) {
       const redirectUrl = req.session.postLoginUrl;
