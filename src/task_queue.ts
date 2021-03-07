@@ -26,6 +26,18 @@ export async function notifyQueue() {
 }
 
 export async function scheduleTask(taskType: string, payload: any, client?: PoolClient, notify: boolean = true) {
+  const existsResult = await db.query(`
+    SELECT EXISTS (
+      SELECT 1
+      FROM task_queue
+      WHERE
+        task_type = $1 AND
+        payload = $2
+    )
+  `, [taskType, payload], client);
+  if (existsResult.rowCount > 0 && existsResult.rows[0].exists) {
+    return;
+  }
   await db.query(
     "INSERT INTO task_queue (task_type, payload) VALUES ($1, $2)",
     [taskType, payload],
