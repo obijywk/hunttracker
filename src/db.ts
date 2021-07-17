@@ -6,7 +6,7 @@ import { Client, Pool, PoolClient, QueryResult } from "pg";
 import { promisify } from "util";
 
 const maxIdleClients = 10;
-const maxClientAge = moment.duration(10, "seconds");
+const maxClientAge = moment.duration(10, "minutes");
 
 interface TrackedClient {
   client: Client;
