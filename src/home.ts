@@ -213,6 +213,30 @@ app.action("home_refresh", async ({ ack, body }) => {
   ack();
 });
 
+function buildAllowDuplicatePuzzleURLBlock() {
+  return {
+    type: "input",
+    "block_id": "puzzle_url_allow_duplicate_input",
+    optional: true,
+    label: {
+      type: "plain_text",
+      text: "Puzzle URL options",
+    },
+    element: {
+      type: "checkboxes",
+      options: [
+        {
+          text: {
+            type: "plain_text",
+            text: "Allow this to be a puzzle URL that's already been used",
+          },
+          value: "puzzle_url_allow_duplicate",
+        },
+      ],
+    },
+  };
+}
+
 app.action("home_register_puzzle", async ({ ack, body }) => {
   await app.client.views.open({
     token: process.env.SLACK_BOT_TOKEN,
@@ -256,6 +280,7 @@ app.action("home_register_puzzle", async ({ ack, body }) => {
             },
           },
         },
+        buildAllowDuplicatePuzzleURLBlock(),
         ...await tags.buildUpdateTagsBlocks("" /* no puzzle ID assigned yet */),
         {
           type: "input",
@@ -303,6 +328,7 @@ app.view("home_register_puzzle_view", async ({ack, body, view}) => {
   const createError = await puzzles.create(
     values["puzzle_name_input"],
     values["puzzle_url_input"],
+    values["puzzle_url_allow_duplicate_input"].length > 0,
     selectedTags.selectedTagIds,
     selectedTags.newTagNames,
     values["puzzle_topic_input"],
@@ -412,6 +438,7 @@ app.action("home_edit_puzzle", async ({ ack, body }) => {
         },
       },
     });
+    blocks.push(buildAllowDuplicatePuzzleURLBlock());
   } else {
     blocks.push({
       type: "section",
@@ -449,6 +476,7 @@ app.view("home_edit_puzzle_view", async ({ack, body, view}) => {
     values["puzzle_id_input"],
     values["puzzle_name_input"],
     values["puzzle_url_input"],
+    values["puzzle_url_allow_duplicate_input"].length > 0,
     body.user.id);
 
   if (editError) {

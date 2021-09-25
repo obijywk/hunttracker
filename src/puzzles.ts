@@ -807,6 +807,7 @@ async function validatePuzzleUrl(url: string): Promise<string | null> {
 export async function create(
   name: string,
   url: string,
+  allowDuplicatePuzzleUrl: boolean,
   selectedTagIds: Array<number>,
   newTagNames: Array<string>,
   topic: string,
@@ -815,7 +816,7 @@ export async function create(
   const validateName = validatePuzzleName(name);
 
   let validateUrl = null;
-  if (url && url.length > 0) {
+  if (url && url.length > 0 && !allowDuplicatePuzzleUrl) {
     validateUrl = validatePuzzleUrl(url);
   }
 
@@ -847,6 +848,7 @@ export async function edit(
   id: string,
   name: string,
   url: string,
+  allowDuplicatePuzzleUrl: boolean,
   creatorUserId: string,
 ): Promise<string | null> {
   let validateName = null;
@@ -855,7 +857,7 @@ export async function edit(
   }
 
   let validateUrl = null;
-  if (url && url.length > 0) {
+  if (url && url.length > 0 && !allowDuplicatePuzzleUrl) {
     validateUrl = validatePuzzleUrl(url);
   }
 
