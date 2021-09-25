@@ -1,9 +1,10 @@
 import {
   ChannelArchiveEvent,
   ChannelUnarchiveEvent,
+  GenericMessageEvent,
   MemberJoinedChannelEvent,
   MemberLeftChannelEvent,
-  MessageEvent,
+  MessageChangedEvent,
 } from "@slack/bolt";
 
 import { app } from "./app";
@@ -16,24 +17,23 @@ const refreshPuzzleSubtypes = new Set([
 ]);
 
 app.event("message", async ({ event, body }) => {
-  const messageEvent = event as unknown as MessageEvent;
-  let isBotMessage = messageEvent.subtype === "bot_message";
-  if (messageEvent.message) {
-    isBotMessage = isBotMessage || messageEvent.message.subtype === "bot_message";
+  let isBotMessage = event.subtype === "bot_message";
+  if (event.subtype === "message_changed") {
+    isBotMessage = (event as MessageChangedEvent).message.subtype === "bot_message";
   }
-  if (refreshPuzzleSubtypes.has(messageEvent.subtype) &&
-      await puzzles.isPuzzleChannel(messageEvent.channel)) {
+  if (refreshPuzzleSubtypes.has(event.subtype) &&
+      await puzzles.isPuzzleChannel(event.channel)) {
     await taskQueue.scheduleTask("refresh_puzzle", {
-      id: messageEvent.channel,
+      id: event.channel,
     });
   } else if (!isBotMessage) {
-    const userExistsPromise = users.exists(messageEvent.user);
-    const isIdlePuzzleChannelPromise = puzzles.isIdlePuzzleChannel(messageEvent.channel);
+    const userExistsPromise = users.exists((event as GenericMessageEvent).user);
+    const isIdlePuzzleChannelPromise = puzzles.isIdlePuzzleChannel(event.channel);
     const userExists = await userExistsPromise;
     const isIdlePuzzleChannel = await isIdlePuzzleChannelPromise;
     if (userExists && isIdlePuzzleChannel) {
       await taskQueue.scheduleTask("refresh_puzzle", {
-        id: messageEvent.channel,
+        id: event.channel,
       });
     }
   }

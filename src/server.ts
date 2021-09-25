@@ -8,7 +8,7 @@ require("./refresh_polling");
 require("./web");
 
 (async () => {
-  const port = process.env.PORT || 3000;
+  const port = parseInt(process.env.PORT) || 3000;
   if (await db.applySchemaIfDatabaseNotInitialized()) {
     await users.refreshAll();
   }

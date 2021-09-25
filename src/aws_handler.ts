@@ -14,6 +14,10 @@ require("./web");
 // This hack adds an additional ack function to the body that's passed to the
 // event handler, and prevents the Lambda handler from returning until this ack
 // function is executed.
+//
+// This hack is now broken after upgrading Bolt to version 3... if anyone wants to
+// run this on AWS, this will need to be rewritten and reintroduced.
+/*
 const logMessageEvents = process.env.LOG_MESSAGE_EVENTS !== undefined;
 const messageEventListeners = receiver.listeners("message");
 for (const messageEventListener of messageEventListeners) {
@@ -39,6 +43,7 @@ for (const messageEventListener of messageEventListeners) {
     originalAck(...ackArgs);
   });
 }
+*/
 
 export const handler = serverlessHttp(receiver.app);
 
