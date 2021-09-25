@@ -302,7 +302,7 @@ receiver.app.get("/tagger", async (req, res) => {
   }));
 
   const allPuzzles = await puzzlesPromise;
-  const selectedPuzzles = new Set(req.query.p || []);
+  const selectedPuzzles = new Set((req.query as any).p || []);
   const puzzleOptions = allPuzzles.map(p => ({
     id: p.id,
     text: p.name,
