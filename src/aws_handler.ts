@@ -30,7 +30,7 @@ for (const messageEventListener of messageEventListeners) {
       if (message.body.event !== undefined) {
         message.body.eventAck = resolve;
       } else {
-        resolve();
+        resolve(undefined);
       }
     });
     await messageEventListener(message);
