@@ -70,10 +70,14 @@ export async function query(text: string, params: Array<any> = [], poolClient?: 
 
 export const sessionStore = new (connectPgSimple(expressSession))({
   pool: {
-    query: (text: string, params: Array<any>, cb: (err: string, res?: QueryResult<any>) => void) => {
-      query(text, params)
-      .then(res => cb(null, res))
-      .catch(err => cb(err));
+    query: (text: string, params: Array<any>, cb?: (err: string, res?: QueryResult<any>) => void) => {
+      if (cb) {
+        query(text, params)
+        .then(res => cb(null, res))
+        .catch(err => cb(err));
+      } else {
+        return query(text, params);
+      }
     },
   } as Pool,
   tableName: "sessions",

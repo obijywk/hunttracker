@@ -9,6 +9,12 @@ import { ErrorCode, WebAPIPlatformError } from "@slack/web-api";
 
 import { sessionStore } from "./db";
 
+declare module "express-session" {
+  interface Session {
+    postLoginUrl?: string;
+  }
+}
+
 export const receiver = new ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   endpoints: "/slack/events",
