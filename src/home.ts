@@ -3,6 +3,7 @@ import { Block, Button, KnownBlock, Option } from "@slack/types";
 
 import { app } from "./app";
 import * as puzzles from "./puzzles";
+import { PuzzleMetadataErrorField } from "./puzzles";
 import { MAX_NUM_OPTIONS, getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
@@ -335,11 +336,18 @@ app.view("home_register_puzzle_view", async ({ack, body, view}) => {
     body.user.id);
 
   if (createError) {
+    const errors: any = {};
+    switch (createError.field) {
+      case PuzzleMetadataErrorField.Name:
+        errors["puzzle_name_input"] = createError.message;
+        break;
+      case PuzzleMetadataErrorField.Url:
+        errors["puzzle_url_input"] = createError.message;
+        break;
+    }
     ack({
       "response_action": "errors",
-      errors: {
-        "puzzle_name_input": createError,
-      },
+      errors,
     } as any);
     return;
   }
@@ -480,11 +488,18 @@ app.view("home_edit_puzzle_view", async ({ack, body, view}) => {
     body.user.id);
 
   if (editError) {
+    const errors: any = {};
+    switch (editError.field) {
+      case PuzzleMetadataErrorField.Name:
+        errors["puzzle_name_input"] = editError.message;
+        break;
+      case PuzzleMetadataErrorField.Url:
+        errors["puzzle_url_input"] = editError.message;
+        break;
+    }
     ack({
       "response_action": "errors",
-      errors: {
-        "puzzle_name_input": editError,
-      },
+      errors,
     } as any);
     return;
   }

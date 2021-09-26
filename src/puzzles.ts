@@ -804,6 +804,16 @@ async function validatePuzzleUrl(url: string): Promise<string | null> {
   return null;
 }
 
+export enum PuzzleMetadataErrorField {
+  Name,
+  Url,
+}
+
+export interface PuzzleMetadataError {
+  field: PuzzleMetadataErrorField;
+  message: string;
+}
+
 export async function create(
   name: string,
   url: string,
@@ -812,7 +822,7 @@ export async function create(
   newTagNames: Array<string>,
   topic: string,
   creatorUserId: string,
-): Promise<string | null> {
+): Promise<PuzzleMetadataError | null> {
   const validateName = validatePuzzleName(name);
 
   let validateUrl = null;
@@ -822,14 +832,20 @@ export async function create(
 
   const validateNameResult = await validateName;
   if (validateNameResult !== null) {
-    return validateNameResult;
+    return {
+      field: PuzzleMetadataErrorField.Name,
+      message: validateNameResult,
+    };
   }
 
   let validateUrlResult = null;
   if (validateUrl !== null) {
     validateUrlResult = await validateUrl;
     if (validateUrlResult !== null) {
-      return validateUrlResult;
+      return {
+        field: PuzzleMetadataErrorField.Url,
+        message: validateUrlResult,
+      };
     }
   }
 
@@ -850,7 +866,7 @@ export async function edit(
   url: string,
   allowDuplicatePuzzleUrl: boolean,
   creatorUserId: string,
-): Promise<string | null> {
+): Promise<PuzzleMetadataError | null> {
   let validateName = null;
   if (name && name.length > 0) {
     validateName = validatePuzzleName(name);
@@ -865,7 +881,10 @@ export async function edit(
   if (validateName !== null) {
     validateNameResult = await validateName;
     if (validateNameResult !== null) {
-      return validateNameResult;
+      return {
+        field: PuzzleMetadataErrorField.Name,
+        message: validateNameResult,
+      };
     }
   }
 
@@ -873,7 +892,10 @@ export async function edit(
   if (validateUrl !== null) {
     validateUrlResult = await validateUrl;
     if (validateUrlResult !== null) {
-      return validateUrlResult;
+      return {
+        field: PuzzleMetadataErrorField.Url,
+        message: validateUrlResult,
+      };
     }
   }
 
