@@ -55,7 +55,7 @@ receiver.app.get("/puzzles", async (req, res) => {
   }
   return res.render("puzzles", {
     appName: process.env.APP_NAME,
-    slackUrlPrefix: `https://app.slack.com/client/${process.env.SLACK_TEAM_ID}/`,
+    slackUrlPrefix: `slack://channel?team=${process.env.SLACK_TEAM_ID}&id=`,
     minimumIdleMinutes: process.env.MINIMUM_IDLE_MINUTES,
     initialSearch: req.query.search || "",
     initialTags: req.query.tags || "",
@@ -133,7 +133,7 @@ receiver.app.get("/metas", async(req, res) => {
   return res.render("metas", {
     appName: process.env.APP_NAME,
     metas,
-    slackUrlPrefix: `https://app.slack.com/client/${process.env.SLACK_TEAM_ID}/`,
+    slackUrlPrefix: `slack://channel?team=${process.env.SLACK_TEAM_ID}&id=`,
   });
 });
 
