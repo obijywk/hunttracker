@@ -436,7 +436,7 @@ async function updateStatusMessage(puzzle: Puzzle) {
   const postStatusMessageResult = await app.client.chat.update({
     token: process.env.SLACK_USER_TOKEN,
     channel: puzzle.id,
-    text: "",
+    text: "[status message]",
     ts: puzzle.statusMessageTs,
     blocks: buildStatusMessageBlocks(puzzle),
   }) as ChatPostMessageResult;
@@ -1027,7 +1027,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const postStatusMessageResult = await app.client.chat.postMessage({
     token: process.env.SLACK_USER_TOKEN,
     channel: `#${puzzle.channelName}`,
-    text: "",
+    text: "[status message]",
     blocks: buildStatusMessageBlocks(puzzle),
   }) as ChatPostMessageResult;
   puzzle.statusMessageTs = postStatusMessageResult.ts;
