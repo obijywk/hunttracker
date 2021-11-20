@@ -43,6 +43,15 @@ export function buildTagsBlock(puzzleId: string, tags: Array<Tag>) {
   };
 }
 
+export function buildTagLinks(tags: Array<Tag>): string {
+  const tagLinks = [];
+  for (const tag of tags) {
+    const tagUrl = encodeURI(process.env.WEB_SERVER_URL + "puzzles?tags=" + tag.name);
+    tagLinks.push(`<${tagUrl}|:label: ${tag.name}>`);
+  }
+  return tagLinks.join("   ");
+}
+
 app.action(/tags_click_.*/, async({ ack, payload, say }) => {
   ack();
 });

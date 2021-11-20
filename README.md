@@ -90,6 +90,8 @@ Everything is configured using environment variables, and they need to be set fo
 - **AUTO_ARCHIVE**: If set, then puzzle channels will be automatically archived as they become
   solved.
 - **ALLOW_RESET_DATABASE**: If set, then the admin page will have an option to reset the database.
+- **NEW_PUZZLE_MINUTES**: The maximum number of minutes for which a puzzle is considered
+  to be new.
 - **MINIMUM_IDLE_MINUTES**: The number of minutes of inactivity on a puzzle for it to be
   considered idle.
 - **MINIMUM_TOPIC_IDLE_MINUTES**: The number of minutes for which a topic may be unmodified

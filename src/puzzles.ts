@@ -46,6 +46,30 @@ export interface Puzzle {
   statusMessageTs?: string;
 }
 
+export function isNew(puzzle: Puzzle): boolean {
+  const now = moment().utc();
+  const newPuzzleMinutes =
+      process.env.NEW_PUZZLE_MINUTES ?
+      Number(process.env.NEW_PUZZLE_MINUTES) :
+      60;
+  return moment.duration(now.diff(puzzle.registrationTimestamp)).asMinutes() <=
+      newPuzzleMinutes;
+}
+
+export function getPriority(puzzle: Puzzle): number {
+  for (const tag of puzzle.tags) {
+    if (!tag.name.startsWith("priority/")) {
+      continue;
+    }
+    try {
+      return parseInt(tag.name.substring("priority/".length));
+    } catch {
+      continue;
+    }
+  }
+  return 0;
+}
+
 export function getIdleDuration(puzzle: Puzzle): moment.Duration {
   if (puzzle.complete) {
     return moment.duration(0);

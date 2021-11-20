@@ -10,10 +10,30 @@ import * as taskQueue from "./task_queue";
 import * as users from "./users";
 
 const maxUsersToList = 5;
-const maxPuzzlesToList = 30;
+const maxPuzzlesToList = 95;
+
+function getPuzzleIconText(puzzle: puzzles.Puzzle): string {
+  if (puzzles.isNew(puzzle)) {
+    return ":new:";
+  }
+  if (puzzle.users.length == 0) {
+    return ":desert:";
+  }
+  const idleDuration = puzzles.getIdleDuration(puzzle);
+  if (idleDuration.asMinutes() < 60) {
+    return ":thinking_face:";
+  }
+  if (idleDuration.asMinutes() < 180) {
+    const choices = [":shrug:", ":man-shrugging:", ":woman-shrugging:"];
+    return choices[Math.floor(Math.random() * choices.length)];
+  }
+  const choices = [":face_palm:", ":man-facepalming:", ":woman-facepalming:"];
+  return choices[Math.floor(Math.random() * choices.length)];
+}
 
 function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
-  let text = `:eye-in-speech-bubble: <slack://channel?team=${process.env.SLACK_TEAM_ID}&id=${puzzle.id}|${puzzle.name}>`;
+  let text = getPuzzleIconText(puzzle);
+  text += ` <slack://channel?team=${process.env.SLACK_TEAM_ID}&id=${puzzle.id}|${puzzle.name}>`;
   const idleStatus = puzzles.buildIdleStatus(puzzle);
   if (idleStatus) {
     text += "   " + idleStatus;
@@ -28,6 +48,13 @@ function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
     }
     text += `\n:man-woman-girl-boy: (${puzzle.users.length}) ${users}`;
   }
+
+  const tagLinks = tags.buildTagLinks(puzzle.tags);
+  if (tagLinks.length > 0) {
+    text += `\n${tagLinks}`;
+  }
+
+  text += "\n\u{00A0}";
 
   let accessory: Button = undefined;
   if (puzzle.users.map(u => u.id).indexOf(userId) === -1) {
@@ -53,11 +80,6 @@ function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
     },
   ];
 
-  const tagsBlock = tags.buildTagsBlock(puzzle.id, puzzle.tags);
-  if (tagsBlock) {
-    blocks.push(tagsBlock);
-  }
-
   return blocks;
 }
 
@@ -69,11 +91,36 @@ async function buildHomeBlocks(userId: string) {
     const joinedA = a.users.map(u => u.id).indexOf(userId) !== -1;
     const joinedB = b.users.map(u => u.id).indexOf(userId) !== -1;
     if (joinedA && !joinedB) {
-      return -1;
+      return 1;
     } else if (!joinedA && joinedB) {
+      return -1;
+    }
+
+    const aPriority = puzzles.getPriority(a);
+    const bPriority = puzzles.getPriority(b);
+    if (aPriority > bPriority) {
+      return -1;
+    } else if (bPriority > aPriority) {
       return 1;
     }
-    return puzzles.getIdleDuration(b).subtract(puzzles.getIdleDuration(a)).asMilliseconds();
+
+    const aNew = puzzles.isNew(a);
+    const bNew = puzzles.isNew(b);
+    if (aNew && !bNew) {
+      return -1;
+    } else if (!aNew && bNew) {
+      return 1;
+    }
+
+    const aHasUsers = a.users.length > 0;
+    const bHasUsers = b.users.length > 0;
+    if (aHasUsers && !bHasUsers) {
+      return -1;
+    } else if (bHasUsers && !aHasUsers) {
+      return 1;
+    }
+
+    return puzzles.getIdleDuration(a).subtract(puzzles.getIdleDuration(b)).asMilliseconds();
   });
 
   const isAdmin = await isAdminPromise;
@@ -159,18 +206,18 @@ async function buildHomeBlocks(userId: string) {
     });
   }
 
-  for (const puzzle of allPuzzles.slice(0, maxPuzzlesToList)) {
-    blocks.push({
-      type: "divider",
-    });
-    blocks.push(...buildPuzzleBlocks(puzzle, userId));
-  }
-
   blocks.push({
     type: "divider",
   });
 
+  for (const puzzle of allPuzzles.slice(0, maxPuzzlesToList)) {
+    blocks.push(...buildPuzzleBlocks(puzzle, userId));
+  }
+
   if (allPuzzles.length > maxPuzzlesToList) {
+    blocks.push({
+      type: "divider",
+    });
     blocks.push({
       type: "section",
       text: {
