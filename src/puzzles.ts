@@ -38,6 +38,7 @@ export interface Puzzle {
   drawingUrl: string;
   calendarEventId: string;
   googleMeetUrl: string;
+  registrationTimestamp: moment.Moment;
   chatModifiedTimestamp: moment.Moment;
   sheetModifiedTimestamp: moment.Moment;
   drawingModifiedTimestamp: moment.Moment;
@@ -50,19 +51,20 @@ export function getIdleDuration(puzzle: Puzzle): moment.Duration {
     return moment.duration(0);
   }
   const latestTimestamp = moment.max(
+    puzzle.registrationTimestamp,
     puzzle.chatModifiedTimestamp,
     puzzle.sheetModifiedTimestamp,
     puzzle.drawingModifiedTimestamp,
     puzzle.manualPokeTimestamp,
   );
-  return moment.duration(moment().diff(latestTimestamp));
+  return moment.duration(moment().utc().diff(latestTimestamp));
 }
 
 export function getTopicIdleDuration(puzzle: Puzzle): moment.Duration {
   if (puzzle.complete) {
     return moment.duration(0);
   }
-  return moment.duration(moment().diff(puzzle.channelTopicModifiedTimestamp));
+  return moment.duration(moment().utc().diff(puzzle.channelTopicModifiedTimestamp));
 }
 
 export function buildIdleStatus(puzzle: Puzzle): string {
@@ -115,6 +117,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
         JOIN puzzle_tag ON puzzle_tag.tag_id = tags.id
         WHERE puzzle_tag.puzzle_id = puzzles.id
       ) tags,
+      registration_timestamp,
       chat_modified_timestamp,
       sheet_modified_timestamp,
       drawing_modified_timestamp,
@@ -153,17 +156,18 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       answer: row.answer,
       channelName: row.channel_name,
       channelTopic: row.channel_topic,
-      channelTopicModifiedTimestamp: moment(row.channel_topic_modified_timestamp),
+      channelTopicModifiedTimestamp: moment.utc(row.channel_topic_modified_timestamp),
       users: row.users || [],
       tags: row.tags || [],
       sheetUrl: row.sheet_url,
       drawingUrl: row.drawing_url,
       calendarEventId: row.calendar_event_id,
       googleMeetUrl: row.google_meet_url,
-      chatModifiedTimestamp: moment(row.chat_modified_timestamp),
-      sheetModifiedTimestamp: moment(row.sheet_modified_timestamp),
-      drawingModifiedTimestamp: moment(row.drawing_modified_timestamp),
-      manualPokeTimestamp: moment(row.manual_poke_timestamp),
+      registrationTimestamp: moment.utc(row.registration_timestamp),
+      chatModifiedTimestamp: moment.utc(row.chat_modified_timestamp),
+      sheetModifiedTimestamp: moment.utc(row.sheet_modified_timestamp),
+      drawingModifiedTimestamp: moment.utc(row.drawing_modified_timestamp),
+      manualPokeTimestamp: moment.utc(row.manual_poke_timestamp),
       statusMessageTs: row.status_message_ts,
     });
   }
@@ -204,6 +208,7 @@ export async function isIdlePuzzleChannel(channelId: string): Promise<boolean> {
   const result = await db.query(`
     SELECT
       complete,
+      registration_timestamp,
       chat_modified_timestamp,
       sheet_modified_timestamp,
       drawing_modified_timestamp,
@@ -219,12 +224,13 @@ export async function isIdlePuzzleChannel(channelId: string): Promise<boolean> {
     return false;
   }
   const latestTimestamp = moment.max(
-    moment(row.chat_modified_timestamp),
-    moment(row.sheet_modified_timestamp),
-    moment(row.drawing_modified_timestamp),
-    moment(row.manual_poke_timestamp),
+    moment.utc(row.registration_timestamp),
+    moment.utc(row.chat_modified_timestamp),
+    moment.utc(row.sheet_modified_timestamp),
+    moment.utc(row.drawing_modified_timestamp),
+    moment.utc(row.manual_poke_timestamp),
   );
-  return moment.duration(moment().diff(latestTimestamp)).asMinutes() >= Number(process.env.MINIMUM_IDLE_MINUTES);
+  return moment.duration(moment().utc().diff(latestTimestamp)).asMinutes() >= Number(process.env.MINIMUM_IDLE_MINUTES);
 }
 
 export function buildPuzzleNameMrkdwn(puzzle: Puzzle) {
@@ -726,12 +732,13 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       drawing_url,
       calendar_event_id,
       google_meet_url,
+      registration_timestamp,
       chat_modified_timestamp,
       sheet_modified_timestamp,
       drawing_modified_timestamp,
       manual_poke_timestamp,
       status_message_ts
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
     [
       puzzle.id,
       puzzle.name,
@@ -744,6 +751,7 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       puzzle.drawingUrl,
       puzzle.calendarEventId,
       puzzle.googleMeetUrl,
+      puzzle.registrationTimestamp.format(),
       puzzle.chatModifiedTimestamp.format(),
       puzzle.sheetModifiedTimestamp.format(),
       puzzle.drawingModifiedTimestamp.format(),
@@ -762,7 +770,7 @@ async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | nu
     if (message.type === "message" && message.subtype === "channel_leave") {
       continue;
     }
-    return moment.unix(Number(message.ts)).utc();
+    return moment.utc(moment.unix(Number(message.ts)));
   }
   return null;
 }
@@ -993,7 +1001,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const drawingUrl = await drawingUrlPromise;
   const calendarEvent = await calendarEventPromise;
 
-  const now = moment();
+  const now = moment().utc();
   let puzzle: Puzzle = {
     id,
     name,
@@ -1009,6 +1017,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     drawingUrl,
     calendarEventId: calendarEvent.eventId,
     googleMeetUrl: calendarEvent.googleMeetUrl,
+    registrationTimestamp: now,
     chatModifiedTimestamp: now,
     sheetModifiedTimestamp: now,
     drawingModifiedTimestamp: now,
@@ -1143,14 +1152,16 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
   const refreshUsersPromise = users.refreshPuzzleUsers(id, client);
   const latestMessageTimestampPromise = getLatestMessageTimestamp(id);
 
+  const now = moment().utc();
+
   let sheetModifiedTimestamp = null;
-  if (moment.duration(moment().diff(puzzle.sheetModifiedTimestamp)).asMinutes() >=
+  if (moment.duration(now.diff(puzzle.sheetModifiedTimestamp)).asMinutes() >=
       Number(process.env.MINIMUM_IDLE_MINUTES)) {
     sheetModifiedTimestamp = await googleDrive.getSheetModifiedTimestamp(puzzle.sheetUrl);
   }
 
   let drawingModifiedTimestamp = null;
-  if (moment.duration(moment().diff(puzzle.drawingModifiedTimestamp)).asMinutes() >=
+  if (moment.duration(now.diff(puzzle.drawingModifiedTimestamp)).asMinutes() >=
       Number(process.env.MINIMUM_IDLE_MINUTES)) {
     drawingModifiedTimestamp = await googleDrive.getDrawingModifiedTimestamp(puzzle.drawingUrl);
   }
@@ -1159,7 +1170,7 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
 
   let dirty = false;
   if (conversationInfoResult.channel.topic) {
-    const topicUpdateTimestamp = moment.unix(conversationInfoResult.channel.topic.last_set).utc();
+    const topicUpdateTimestamp = moment.utc(moment.unix(conversationInfoResult.channel.topic.last_set));
     if (puzzle.chatModifiedTimestamp.isBefore(topicUpdateTimestamp)) {
       dirty = true;
       puzzle.chatModifiedTimestamp = topicUpdateTimestamp;
@@ -1213,10 +1224,10 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
       [
         id,
         puzzle.channelTopic,
-        puzzle.channelTopicModifiedTimestamp,
-        puzzle.chatModifiedTimestamp,
-        puzzle.sheetModifiedTimestamp,
-        puzzle.drawingModifiedTimestamp,
+        puzzle.channelTopicModifiedTimestamp.format(),
+        puzzle.chatModifiedTimestamp.format(),
+        puzzle.sheetModifiedTimestamp.format(),
+        puzzle.drawingModifiedTimestamp.format(),
       ]);
   }
 

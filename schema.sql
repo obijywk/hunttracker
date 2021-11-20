@@ -20,15 +20,16 @@ CREATE TABLE puzzles (
   answer text,
   channel_name text,
   channel_topic text,
-  channel_topic_modified_timestamp timestamp,
+  channel_topic_modified_timestamp timestamp with time zone,
   sheet_url text,
   drawing_url text,
   calendar_event_id text,
   google_meet_url text,
-  chat_modified_timestamp timestamp,
-  sheet_modified_timestamp timestamp,
-  drawing_modified_timestamp timestamp,
-  manual_poke_timestamp timestamp,
+  registration_timestamp timestamp with time zone,
+  chat_modified_timestamp timestamp with time zone,
+  sheet_modified_timestamp timestamp with time zone,
+  drawing_modified_timestamp timestamp with time zone,
+  manual_poke_timestamp timestamp with time zone,
   status_message_ts text
 );
 
