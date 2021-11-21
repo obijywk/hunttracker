@@ -164,14 +164,24 @@
           ajax: "puzzles/data",
           search: {
             search: "{{initialSearch}}",
+            smart: false,
             regex: true,
           },
+          searchCols: [
+            null, null, null, null, null, null,
+            { search: "{{initialSearch}}", smart: false, regex: true },
+            { search: "{{initialSearch}}", smart: false, regex: true },
+            { search: "{{initialSearch}}", smart: false, regex: true },
+            { search: "{{initialSearch}}", smart: false, regex: true },
+            null, null,
+          ],
           order: [[6, "asc"]],
           columns: [
             {
               data: null,
               className: "details-control",
               orderable: false,
+              searchable: false,
               defaultContent: "",
               createdCell: (td, cellData, row, rowIndex, colIndex) => {
                 if (row.complete) {
@@ -182,6 +192,7 @@
             {
               data: "complete",
               visible: false,
+              searchable: false,
               render: (data, type, row) => {
                 if (data) {
                   return "solved";
@@ -193,6 +204,7 @@
               data: "url",
               className: "icon-column",
               orderable: false,
+              searchable: false,
               render: (data, type, row) => {
                 if (type === "display") {
                   if (data) {
@@ -207,6 +219,7 @@
               data: "id",
               className: "icon-column",
               orderable: false,
+              searchable: false,
               render: (data, type, row) => {
                 if (type === "display") {
                   return `<a href="{{slackUrlPrefix}}${data}" target="_blank"><div class="icon-slack">&nbsp;</div></a>`;
@@ -218,6 +231,7 @@
               data: "sheetUrl",
               className: "icon-column",
               orderable: false,
+              searchable: false,
               render: (data, type, row) => {
                 if (type === "display") {
                   return `<a href="${data}" target="_blank"><div class="icon-sheet">&nbsp;</div></a>`;
@@ -229,6 +243,7 @@
               data: "drawingUrl",
               className: "icon-column",
               orderable: false,
+              searchable: false,
               render: (data, type, row) => {
                 if (type === "display") {
                   return `<a href="${data}" target="_blank"><div class="icon-drawing">&nbsp;</div></a>`;
@@ -267,6 +282,7 @@
               data: "idleDurationMilliseconds",
               width: "4rem",
               className: "idle-column",
+              searchable: false,
               render: (data, type, row) => {
                 if (type === "display" || type === "filter") {
                   if (data === 0) {
@@ -287,6 +303,7 @@
                 return row.users.map(u => u.name).join(", ");
               },
               visible: false,
+              searchable: false,
             },
           ],
         });
