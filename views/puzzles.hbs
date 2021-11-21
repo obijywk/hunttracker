@@ -31,7 +31,7 @@
           </label>
           &nbsp;
           <label>
-            <input type="radio" name="solved-filter" value="all" checked>All
+            <input type="radio" name="solved-filter" value="all">All
           </label>
         </div>
         <div class="filter-tags">
@@ -353,6 +353,15 @@
               }
             });
           };
+        }
+
+        const initialSolvedFilter = "{{initialSolvedFilter}}";
+        if (initialSolvedFilter === "unsolved") {
+          $("input:radio[name='solved-filter'][value='unsolved']").prop("checked", true);
+        } else if (initialSolvedFilter === "solved") {
+          $("input:radio[name='solved-filter'][value='solved']").prop("checked", true);
+        } else {
+          $("input:radio[name='solved-filter'][value='all']").prop("checked", true);
         }
 
         table.on("xhr", function() {

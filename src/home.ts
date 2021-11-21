@@ -222,7 +222,7 @@ async function buildHomeBlocks(userId: string) {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `There are too many open puzzles to show here! Visit <${process.env.WEB_SERVER_URL}puzzles> to see more.`,
+        text: `There are too many open puzzles to show here! Visit <${process.env.WEB_SERVER_URL}puzzles?solved=unsolved> to see more.`,
       },
     });
   }
