@@ -24,11 +24,11 @@ function getPuzzleIconText(puzzle: puzzles.Puzzle): string {
     return ":thinking_face:";
   }
   if (idleDuration.asMinutes() < 180) {
-    const choices = [":shrug:", ":man-shrugging:", ":woman-shrugging:"];
-    return choices[Math.floor(Math.random() * choices.length)];
+    return puzzles.chooseConsistentlyForPuzzle(
+      puzzle, [":shrug:", ":man-shrugging:", ":woman-shrugging:"]);
   }
-  const choices = [":face_palm:", ":man-facepalming:", ":woman-facepalming:"];
-  return choices[Math.floor(Math.random() * choices.length)];
+  return puzzles.chooseConsistentlyForPuzzle(
+    puzzle, [":face_palm:", ":man-facepalming:", ":woman-facepalming:"]);
 }
 
 function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {

@@ -46,6 +46,15 @@ export interface Puzzle {
   statusMessageTs?: string;
 }
 
+export function chooseConsistentlyForPuzzle<T>(puzzle: Puzzle, choices: Array<T>): T {
+  let h = 0;
+  for (let i = 0; i < puzzle.id.length; i++) {
+    h = ((h << 5) - h) + puzzle.id.charCodeAt(i);
+    h = h & h;
+  }
+  return choices[Math.abs(h) % choices.length];
+}
+
 export function isNew(puzzle: Puzzle): boolean {
   const now = moment().utc();
   const newPuzzleMinutes =
