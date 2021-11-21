@@ -481,6 +481,23 @@ async function updateStatusMessage(puzzle: Puzzle) {
   }) as ChatPostMessageResult;
 }
 
+async function announceSolve(
+    channelName: string, text: string, spoilerText: string) {
+  const postMessageResult = await app.client.chat.postMessage({
+    token: process.env.SLACK_USER_TOKEN,
+    channel: `#${channelName}`,
+    text,
+  }) as ChatPostMessageResult;
+  if (text !== spoilerText) {
+    await app.client.chat.postMessage({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: `#${channelName}`,
+      "thread_ts": postMessageResult.ts,
+      text: spoilerText,
+    });
+  }
+}
+
 app.action("puzzle_open_spreadsheet", async ({ack}) => {
   ack();
 });
@@ -707,25 +724,23 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
       text = `${buildPuzzleNameMrkdwn(puzzle)} completed.`;
       spoilerText = text;
     }
-    await app.client.chat.postMessage({
-      token: process.env.SLACK_USER_TOKEN,
-      channel: `#${channelName}`,
-      text: spoilerText,
-    });
-    if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
-      const logChannelPostMessageResult = await app.client.chat.postMessage({
+    const announcementPromises: Array<Promise<any>> = [
+      app.client.chat.postMessage({
         token: process.env.SLACK_USER_TOKEN,
-        channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
-        text,
-      }) as ChatPostMessageResult;
-      if (text !== spoilerText) {
-        await app.client.chat.postMessage({
-          token: process.env.SLACK_USER_TOKEN,
-          channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
-          "thread_ts": logChannelPostMessageResult.ts,
-          text: spoilerText,
-        });
-      }
+        channel: `#${channelName}`,
+        text: spoilerText,
+      }),
+    ];
+    if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
+      announcementPromises.push(announceSolve(
+        process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME, text, spoilerText));
+    }
+    if (process.env.SLACK_SOLVE_ANNOUNCEMENT_CHANNEL_NAME) {
+      announcementPromises.push(announceSolve(
+        process.env.SLACK_SOLVE_ANNOUNCEMENT_CHANNEL_NAME, text, spoilerText));
+    }
+    for (const p of announcementPromises) {
+      await p;
     }
     await updateStatusMessage(puzzle);
     if (process.env.AUTO_ARCHIVE) {

@@ -65,7 +65,9 @@ Everything is configured using environment variables, and they need to be set fo
 - **PGPASSWORD**: The PostgreSQL database password for the given user.
 - **PGDATABASE**: The name of the PostgreSQL database to use.
 - **SLACK_ACTIVITY_LOG_CHANNEL_NAME**: A Slack channel name (without the leading #) where
-  puzzle creations etc. will be announced.
+  puzzle creations, topic changes, and solves will be announced.
+- **SLACK_SOLVE_ANNOUNCEMENT_CHANNEL_NAME**: A Slack channel name (without the leading #) where
+  puzzle solves will be announced (in addition to within the activity log channel).
 - **SLACK_ADMIN_CHANNEL_ID**: A Slack channel ID (not name!). Only members of this channel will
   be able to register puzzles. Leave this unset to allow any user to register puzzles. The app
   user must be a member of this channel for this to work.
