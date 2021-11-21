@@ -192,7 +192,6 @@
             {
               data: "complete",
               visible: false,
-              searchable: false,
               render: (data, type, row) => {
                 if (data) {
                   return "solved";
@@ -389,6 +388,8 @@
         $("input[name='solved-filter']").change(function() {
           table.draw();
         });
+
+        window.history.replaceState({}, document.title, "/puzzles");
       });
     </script>
   </body>
