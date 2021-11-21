@@ -64,6 +64,9 @@
           return true;
         }
         const selectedTagNames = new Set(selectedTags.map(o => o.text));
+        if (data[9].length === 0 && selectedTagNames.has("!untagged")) {
+          return true;
+        }
         for (const tagName of data[9].split(" ")) {
           if (selectedTagNames.has(tagName)) {
             return true;
@@ -338,7 +341,7 @@
 
         table.on("xhr", function() {
           const json = table.ajax.json();
-          const tagNameSet = new Set();
+          const tagNameSet = new Set(["!untagged"]);
           for (const puzzle of json.data) {
             for (const tag of puzzle.tags) {
               tagNameSet.add(tag.name);
