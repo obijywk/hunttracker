@@ -161,7 +161,7 @@ div.meta-view-wrapper {
 
 div.meta-view {
 	display: grid;
-	grid-template-columns: max-content min-content 1fr max-content;
+	grid-template-columns: minmax(min-content, 1fr) min-content 1.2fr max-content;
 	align-self: start;
 	
 	box-shadow: 4px 6px 8px -2px #0003;
@@ -173,10 +173,9 @@ div.meta-header {
 	background: linear-gradient(to bottom, #0288d1, #0277bd);
 	padding: 0.6em 1em;
 	color: #fff;
-	line-height: 1.5em;
-	align-self: center;
-	height: 1.5em;
+	line-height: 1.4em;
 }
+
 div.meta-header.meta-complete {
 	background: linear-gradient(to bottom, #388e3c, #2e7d32);
 }
