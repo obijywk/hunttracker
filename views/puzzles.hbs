@@ -316,7 +316,7 @@
         });
         const initialTags = "{{initialTags}}";
         if (initialTags) {
-          const initialTagsArray = initialTags.split(" ").filter(t => t.length > 0);
+          const initialTagsArray = initialTags.split(",").filter(t => t.length > 0);
           for (const tag of initialTagsArray) {
             if (!$(".tags-select").find("option[value='" + tag + "']").length) {
               const newOption = new Option(tag, tag, true, true);
