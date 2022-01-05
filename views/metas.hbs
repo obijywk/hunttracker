@@ -18,11 +18,11 @@
 				{{#each metas}}
 					<div class="meta-view">
 						<div class="meta-header title{{#if complete}} meta-complete{{/if}}">
-							{{name}}
+							<a class="meta-link" href="puzzles?tags=in/{{tagSuffix}}&tags=meta/{{tagSuffix}}{{#if id}}&expanded={{id}}{{/if}}">{{name}}</a>
 						</div>
-						<div class="meta-header dashboard{{#if complete}} meta-complete{{/if}}">
+						<!--<div class="meta-header dashboard{{#if complete}} meta-complete{{/if}}">
 							<a class="dash-link" href="puzzles?tags=in/{{tagSuffix}}&tags=meta/{{tagSuffix}}">[dashboard]</a>
-						</div>
+						</div>-->
 						<div class="meta-header answer{{#if complete}} meta-complete{{/if}}">
 							{{#if answer}}<span class="answer">{{answer}}</span>{{/if}}
 						</div>
