@@ -128,19 +128,17 @@ a {
 
 a.tag-link {
 	line-height: 2em;
-	padding: 0.2em 0.6em;
-	border-radius: 2px;
+	padding: 0.2em 0.8em;
+	border-radius: 1em;
 	text-decoration: none;
-	background: linear-gradient(to bottom, #90a4ae, #78909c);
-	color: #fff;
-	font-size: 0.8em;
-	margin: 0.1em;
-	box-shadow: 0px 0.1em 0px 0px #263238;
+	background: #D0D9DD;
+	color: #555;
+	font-size: 0.85em;
 	white-space: nowrap;
 }
 a.tag-link:hover {
-	background: linear-gradient(to bottom, #ffa726, #fb8c00);
-	color: #000;
+	background: #718C98;
+	color: #fff;
 }
 
 table.task-queue-table {
@@ -266,14 +264,26 @@ div.meta-dashboard-icon {
 	position: relative;
 	top: 0.125em;
 }
-.icon:hover {
-	fill: #9E0059;
+.icon-link:hover {
+	fill: #4285F4;
+}
+.icon-slack:hover {
+	--slack-1: #E01E5A;
+	--slack-2: #36C5F0;
+	--slack-3: #2EB67D;
+	--slack-4: #ECB22E;
+}
+.icon-sheet:hover {
+	fill: #0F9D58;
+}
+.icon-drawing:hover {
+	fill: #DB4437;
 }
 .meta-header-icons .icon {
 	fill: white;
 }
 .meta-header-icons .icon:hover {
-	fill: #FF7B9C;
+	fill: #F4B400;
 }
 
 .icon-idle,
