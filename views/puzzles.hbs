@@ -48,6 +48,7 @@
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
+            <th>BR</th>
             <th>Name</th>
             <th>Answer</th>
             <th>Topic</th>
@@ -59,16 +60,29 @@
       </table>
     </div>
     <script>
+      const colExpand = 0;
+      const colSolved = 1;
+      const colPuzzleLink = 2;
+      const colChannelLink = 3;
+      const colSheetLink = 4;
+      const colDrawingLink = 5;
+      const colBreakout = 6;
+      const colName = 7;
+      const colAnswer = 8;
+      const colTopic = 9;
+      const colTags = 10;
+      const colIdle = 11;
+      const colSolvers = 12;
       $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
         const selectedTags = $(".tags-select").select2("data");
         if (selectedTags.length === 0) {
           return true;
         }
         const selectedTagNames = new Set(selectedTags.map(o => o.text));
-        if (data[9].length === 0 && selectedTagNames.has("!untagged")) {
+        if (data[colTags].length === 0 && selectedTagNames.has("!untagged")) {
           return true;
         }
-        for (const tagName of data[9].split(" ")) {
+        for (const tagName of data[colTags].split(" ")) {
           if (selectedTagNames.has(tagName)) {
             return true;
           }
@@ -78,10 +92,10 @@
 
       $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
         const solvedFilterValue = $("input[name='solved-filter']:checked").val();
-        if (data[1] == "solved" && solvedFilterValue == "unsolved") {
+        if (data[colSolved] == "solved" && solvedFilterValue == "unsolved") {
           return false;
         }
-        if (data[1] == "unsolved" && solvedFilterValue == "solved") {
+        if (data[colSolved] == "unsolved" && solvedFilterValue == "solved") {
           return false;
         }
         return true;
@@ -144,13 +158,13 @@
             {
               extend: "copy",
               exportOptions: {
-                columns: [6, 7, 8, 9],
+                columns: [colName, colAnswer, colTopic, colTags],
               },
             },
             {
               extend: "csv",
               exportOptions: {
-                columns: [6, 7, 8, 9],
+                columns: [colName, colAnswer, colTopic, colTags],
               },
             },
             {
@@ -174,9 +188,10 @@
             { search: "{{initialSearch}}", smart: false, regex: true },
             { search: "{{initialSearch}}", smart: false, regex: true },
             { search: "{{initialSearch}}", smart: false, regex: true },
+            { search: "{{initialSearch}}", smart: false, regex: true },
             null, null,
           ],
-          order: [[6, "asc"]],
+          order: [[colName, "asc"]],
           columns: [
             {
               data: null,
@@ -247,6 +262,19 @@
               render: (data, type, row) => {
                 if (type === "display") {
                   return `<a href="${data}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="#drawing"></use></svg></a>`;
+                }
+                return data;
+              },
+            },
+            {
+              data: "breakout",
+              className: "breakout",
+              render: (data, type, row) => {
+                if (type === 'sort') {
+                  if (!data) {
+                    return 999;
+                  }
+                  return data;
                 }
                 return data;
               },

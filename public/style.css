@@ -103,6 +103,10 @@ th.details-control {
   width: 0.4em !important;
 }
 
+td.breakout {
+  text-align: right;
+}
+
 td.answer,
 div.answer,
 span.answer {

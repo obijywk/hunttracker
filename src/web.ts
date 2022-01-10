@@ -82,6 +82,7 @@ receiver.app.get("/puzzles/data", async (req, res) => {
     {}, p, {
       idleDurationMilliseconds: puzzles.getIdleDuration(p).asMilliseconds(),
       puzzleStatusEmojiName: puzzleStatusEmojiName(p),
+      breakout: puzzles.getBreakout(p),
     }));
   res.end(JSON.stringify({
     data,
