@@ -11,6 +11,7 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
   </head>
   <body>
     <div class="menu-header">
@@ -44,6 +45,7 @@
           <tr>
             <th>&nbsp;</th>
             <th>Solved</th>
+            <th>&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
@@ -62,17 +64,18 @@
     <script>
       const colExpand = 0;
       const colSolved = 1;
-      const colPuzzleLink = 2;
-      const colChannelLink = 3;
-      const colSheetLink = 4;
-      const colDrawingLink = 5;
-      const colBreakout = 6;
-      const colName = 7;
-      const colAnswer = 8;
-      const colTopic = 9;
-      const colTags = 10;
-      const colIdle = 11;
-      const colSolvers = 12;
+      const colStatusEmoji = 2;
+      const colPuzzleLink = 3;
+      const colChannelLink = 4;
+      const colSheetLink = 5;
+      const colDrawingLink = 6;
+      const colBreakout = 7;
+      const colName = 8;
+      const colAnswer = 9;
+      const colTopic = 10;
+      const colTags = 11;
+      const colIdle = 12;
+      const colSolvers = 13;
       $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
         const selectedTags = $(".tags-select").select2("data");
         if (selectedTags.length === 0) {
@@ -183,7 +186,7 @@
             regex: true,
           },
           searchCols: [
-            null, null, null, null, null, null,
+            null, null, null, null, null, null, null,
             { search: "{{initialSearch}}", smart: false, regex: true },
             { search: "{{initialSearch}}", smart: false, regex: true },
             { search: "{{initialSearch}}", smart: false, regex: true },
@@ -213,6 +216,21 @@
                   return "solved";
                 }
                 return "unsolved";
+              },
+            },
+            {
+              data: "puzzleStatusEmoji",
+              className: "emoji-column",
+              orderable: false,
+              searchable: false,
+              render: (data, type, row) => {
+                if (type === "display") {
+                  if (data) {
+                    return twemoji.parse(data);
+                  }
+                  return "&nbsp;";
+                }
+                return data;
               },
             },
             {

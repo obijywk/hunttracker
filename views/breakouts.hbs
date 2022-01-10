@@ -2,6 +2,7 @@
   <head>
     <title>Breakouts</title>
     <link rel="stylesheet" type="text/css" href="static/style.css">
+    <script type="text/javascript" charset="utf8" src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
   </head>
   <body>
     <div class="menu-header">
@@ -15,6 +16,7 @@
       <p>Unsolved puzzles that have cited breakout rooms in their topics will appear here.</p>
       <table class="breakout">
         <thead>
+          <th>&nbsp;</th>
           <th>Room</th>
           <th>Puzzle</th>
           <th>Topic</th>
@@ -24,6 +26,7 @@
         <tbody>
         {{#each breakouts}}
         <tr>
+          <td class="emoji-column">{{puzzleStatusEmoji puzzle}}</td>
           <td>{{breakout}}</td>
           <td><a href="{{../slackUrlPrefix}}{{puzzle.id}}" target="_blank">{{puzzle.name}}</a></td>
           <td>{{puzzle.channelTopic}}</td>
@@ -43,5 +46,8 @@
         </tbody>
       </table>
     </div>
+    <script type="text/javascript">
+      twemoji.parse(document.body);
+    </script>
   </body>
 </html>

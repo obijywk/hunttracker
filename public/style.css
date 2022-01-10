@@ -93,6 +93,10 @@ table.puzzleDetails tr {
   background: #fff0 !important;
 }
 
+td.emoji-column img {
+  width: 1.5em;
+}
+
 td.icon-column {
   margin: 0;
   padding: 0 !important;
@@ -163,7 +167,7 @@ div.meta-view-wrapper {
 
 div.meta-view {
   display: grid;
-  grid-template-columns: minmax(min-content, 1fr) 1.2fr max-content;
+  grid-template-columns: auto minmax(min-content, 1fr) 1.2fr max-content;
   align-self: start;
 
   box-shadow: 4px 6px 8px -2px #0003;
@@ -180,6 +184,9 @@ div.meta-header {
 
 div.meta-header.meta-complete {
   background: linear-gradient(to bottom, #388e3c, #2e7d32);
+}
+div.meta-header.emoji img {
+  width: 1.5em;
 }
 div.meta-header.title a {
   color: #fff;
@@ -205,11 +212,14 @@ div.meta-puzzle {
   border-top: 0.1rem solid #0002;
 }
 
+.meta-puzzle.emoji img {
+  width: 1.5em;
+}
 .meta-puzzle.title {
-  grid-column: 1/2;
+  grid-column: 2/3;
 }
 .meta-puzzle.answer {
-  grid-column: 2/4;
+  grid-column: 3/5;
 }
 
 div.menu-header {

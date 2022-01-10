@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import expressHbs = require("express-hbs");
+import * as nodeEmoji from "node-emoji";
 import * as path from "path";
 import * as url from "url";
 
@@ -18,6 +19,12 @@ function puzzleStatusEmojiName(puzzle: puzzles.Puzzle): string {
   return slackEmojiId.substring(1, slackEmojiId.length - 1);
 }
 expressHbs.registerHelper("puzzleStatusEmojiName", puzzleStatusEmojiName);
+
+function puzzleStatusEmoji(puzzle: puzzles.Puzzle): string {
+  const emojiName = puzzleStatusEmojiName(puzzle);
+  return nodeEmoji.get(emojiName);
+}
+expressHbs.registerHelper("puzzleStatusEmoji", puzzleStatusEmoji);
 
 function checkAuth(req: Request, res: Response) {
   if (req.isAuthenticated()) {
@@ -82,6 +89,7 @@ receiver.app.get("/puzzles/data", async (req, res) => {
     {}, p, {
       idleDurationMilliseconds: puzzles.getIdleDuration(p).asMilliseconds(),
       puzzleStatusEmojiName: puzzleStatusEmojiName(p),
+      puzzleStatusEmoji: nodeEmoji.get(puzzleStatusEmojiName(p)),
       breakout: puzzles.getBreakout(p),
     }));
   res.end(JSON.stringify({
@@ -126,6 +134,7 @@ receiver.app.get("/metas", async(req, res) => {
         name: tagSuffix,
         tagSuffix,
         complete: false,
+        tags: [],
       };
     }
     meta.puzzles = tagSuffixToPuzzles[tagSuffix];

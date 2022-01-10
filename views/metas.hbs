@@ -2,6 +2,7 @@
   <head>
     <title>Metas</title>
     <link rel="stylesheet" type="text/css" href="static/style.css">
+    <script type="text/javascript" charset="utf8" src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
   </head>
   <body>
     <div class="menu-header">
@@ -18,6 +19,9 @@
       <div class="meta-view-wrapper">
         {{#each metas}}
           <div class="meta-view">
+            <div class="meta-header emoji{{#if complete}} meta-complete{{/if}}">
+              {{puzzleStatusEmoji this}}
+            </div>
             <div class="meta-header title{{#if complete}} meta-complete{{/if}}">
               <a class="meta-link" href="puzzles?tags=in/{{tagSuffix}}&tags=meta/{{tagSuffix}}{{#if id}}&expanded={{id}}{{/if}}">{{name}}</a>
             </div>
@@ -47,8 +51,10 @@
               {{/if}}
             </div>
             {{#each puzzles}}
+              <div class="meta-puzzle emoji{{#if complete}} puzzle-complete{{/if}}">
+                {{puzzleStatusEmoji this}}
+              </div>
               <div class="meta-puzzle title{{#if complete}} puzzle-complete{{/if}}">
-                <svg class="icon icon-{{puzzleStatusEmojiName this}}"><use xlink:href="#{{puzzleStatusEmojiName this}}"></use></svg>
                 <a href="puzzles?tags=in/{{../tagSuffix}}&tags=meta/{{../tagSuffix}}&expanded={{id}}">
                   {{name}}
                 </a>
@@ -61,6 +67,10 @@
         {{/each}}
       </div>
     </div>
+
+    <script type="text/javascript">
+      twemoji.parse(document.body);
+    </script>
 
     <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">
       <symbol id="drawing" viewBox="0 0 32 32">
