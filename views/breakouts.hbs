@@ -12,7 +12,16 @@
       <div class="menu-item"><a href="tagger">Tag Editor</a></div>
     </div>
     <div class="body-wrapper">
-      <table>
+	<p>Any puzzle that has tagged a breakout room at the start of their topic will appear below.</p>
+      <table class="breakout">
+      	<thead>
+      		<th>Room</th>
+      		<th>Puzzle</th>
+      		<th>Topic</th>
+      		<th>Solvers</th>
+      		<th>&nbsp;</th>
+      	</thead>
+      	<tbody>
         {{#each breakouts}}
         <tr>
           <td>{{breakout}}</td>
@@ -26,11 +35,12 @@
           <td>
             <form action="breakouts/remove" method="POST">
               <input type="hidden" name="puzzleId" value="{{puzzle.id}}">
-              <input type="submit" name="submit" value="Remove BR {{breakout}} from topic">
+              <button type="submit" name="submit">Clear 'BR {{breakout}}' from topic</button>
             </form>
           </td>
         </tr>
         {{/each}}
+        </tbody>
       </table>
     </div>
   </body>

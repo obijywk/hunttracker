@@ -280,3 +280,41 @@ div.meta-dashboard-icon {
 .icon-tags {
 	fill: white;
 }
+
+table.breakout {
+	width:100%;
+	border-spacing: 0;
+	
+	box-shadow: 4px 6px 8px -2px #0003;
+	background: white;
+	border-radius: 0.4rem;
+}
+
+table.breakout thead th {
+	font-size: 1.1em;
+	background: linear-gradient(to bottom, #0288d1, #0277bd);
+	padding: calc(var(--padding-base) / 4) var(--padding-base);
+	color: #fff;
+	line-height: 1.4em;
+}
+
+table.breakout thead th:nth-child(n+2) {
+	text-align: left;
+	
+}
+
+table.breakout tbody tr td {
+	padding: calc(var(--padding-base) / 2) var(--padding-base);
+}
+
+table.breakout tbody td {
+	border-top: 1px solid #0002;
+}
+
+table.breakout tbody tr td:first-child {
+	text-align:center;
+}
+
+table.breakout tbody tr td form {
+	margin:0;
+}
