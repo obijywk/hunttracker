@@ -347,13 +347,10 @@ receiver.app.get("/breakouts", async (req, res) => {
     return;
   }
 
-  const allPuzzles = await puzzles.list();
+  const allPuzzles = await puzzles.list({excludeComplete: true});
 
   const breakouts: any = [];
   for (const puzzle of allPuzzles) {
-    if (puzzle.complete) {
-      continue;
-    }
     const breakout = puzzles.getBreakout(puzzle);
     if (breakout === null) {
       continue;
@@ -367,6 +364,7 @@ receiver.app.get("/breakouts", async (req, res) => {
 
   res.render("breakouts", {
     appName: process.env.APP_NAME,
+    slackUrlPrefix: `slack://channel?team=${process.env.SLACK_TEAM_ID}&id=`,
     breakouts: breakouts,
   });
 });
