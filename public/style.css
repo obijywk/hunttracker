@@ -1,333 +1,333 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Roboto+Mono:wght@700&display=swap');
 
 html {
-	--padding-base: 1.75rem;
-	--meta-col: 2;
+  --padding-base: 1.75rem;
+  --meta-col: 2;
 }
 
 @media screen and (min-width: 1300px){
-	html {
-		--meta-col: 3;
-	}
+  html {
+    --meta-col: 3;
+  }
 }
 
 @media screen and (min-width: 2000px){
-	html {
-		--meta-col: 4;
-	}
+  html {
+    --meta-col: 4;
+  }
 }
 
 body {
-	font-family: 'Noto Sans', sans-serif;
-	font-size: 15px;
-	margin:0;
-	padding:0;
-	background-color: #f1f1f1;
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 15px;
+  margin:0;
+  padding:0;
+  background-color: #f1f1f1;
 }
 
 div.body-wrapper {
-	padding: calc(var(--padding-base) / 4) var(--padding-base);
+  padding: calc(var(--padding-base) / 4) var(--padding-base);
 }
 
 div.puzzle-filters {
-	display: flex;
-	justify-content: space-between;
-	padding: 0 0 0.5em 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0 0.5em 0;
 }
 
 div.filter-solved {
-	color: #333;
-	width: 30vw;
-	align-self: center;
+  color: #333;
+  width: 30vw;
+  align-self: center;
 }
 
 div.filter-tags {
-	width: 30vw;
+  width: 30vw;
 }
 
 select.wide-select {
-	width: 100%;
+  width: 100%;
 }
 
 table.dataTable thead th {
-	background: linear-gradient(to bottom, #0288d1, #0277bd);
-	color: white;
+  background: linear-gradient(to bottom, #0288d1, #0277bd);
+  color: white;
 }
 table.dataTable tbody tr {
-	background-color: #fff;
+  background-color: #fff;
 }
 table.dataTable tbody tr.complete,
 div.puzzle-complete {
-	background-color: #E0F8B4;
+  background-color: #E0F8B4;
 }
 
 td.details-control {
-	background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMDAwMDAwNjYiIGQ9Ik01MTIgMHYyMDhsLTgwLTgwLTk2IDk2LTQ4LTQ4IDk2LTk2LTgwLTgwek0yMjQgMzM2bC05NiA5NiA4MCA4MGgtMjA4di0yMDhsODAgODAgOTYtOTZ6Ij48L3BhdGg+PC9zdmc+) no-repeat center center;
-	background-size: 1em;
-	cursor: pointer;
+  background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMDAwMDAwNjYiIGQ9Ik01MTIgMHYyMDhsLTgwLTgwLTk2IDk2LTQ4LTQ4IDk2LTk2LTgwLTgwek0yMjQgMzM2bC05NiA5NiA4MCA4MGgtMjA4di0yMDhsODAgODAgOTYtOTZ6Ij48L3BhdGg+PC9zdmc+) no-repeat center center;
+  background-size: 1em;
+  cursor: pointer;
 }
 tr.shown td.details-control {
-	background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMDAwMDAwNjYiIGQ9Ik0yMjQgMjg4djIwOGwtODAtODAtOTYgOTYtNDgtNDggOTYtOTYtODAtODB6TTUxMiA0OGwtOTYgOTYgODAgODBoLTIwOHYtMjA4bDgwIDgwIDk2LTk2eiI+PC9wYXRoPjwvc3ZnPg==) no-repeat center center;
-	background-size: 1em;
+  background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMDAwMDAwNjYiIGQ9Ik0yMjQgMjg4djIwOGwtODAtODAtOTYgOTYtNDgtNDggOTYtOTYtODAtODB6TTUxMiA0OGwtOTYgOTYgODAgODBoLTIwOHYtMjA4bDgwIDgwIDk2LTk2eiI+PC9wYXRoPjwvc3ZnPg==) no-repeat center center;
+  background-size: 1em;
 }
 
 tr.shown {
-	background-color: #FBED9D !important;
+  background-color: #FBED9D !important;
 }
 tr.shown a {
-	font-weight: bold;
+  font-weight: bold;
 }
 tr.shown a.tag-link {
-	font-weight: normal;
+  font-weight: normal;
 }
 tr.shown + tr {
-	background: #FDF8D8 !important;
+  background: #FDF8D8 !important;
 }
 
 table.puzzleDetails {
-	padding-left: 2.4em;
-	border-spacing: 0;
+  padding-left: 2.4em;
+  border-spacing: 0;
 }
 
 table.puzzleDetails tr {
-	background: #fff0 !important;
+  background: #fff0 !important;
 }
 
 td.icon-column {
-	margin: 0;
-	padding: 0 !important;
+  margin: 0;
+  padding: 0 !important;
 }
 
 th.icon-column,
 th.details-control {
-	width: 0.4em !important;
+  width: 0.4em !important;
 }
 
 td.answer,
 div.answer,
 span.answer {
-	font-family: 'Roboto Mono', monospace;
-	font-weight: bold;
-	font-size: 0.9em;
+  font-family: 'Roboto Mono', monospace;
+  font-weight: bold;
+  font-size: 0.9em;
 }
 
 td.channel-topic {
-	max-width: 30vw;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  max-width: 30vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 td.idle-column {
-	text-align: right;
+  text-align: right;
 }
 
 a {
-	text-decoration: none;
+  text-decoration: none;
 }
 
 a.tag-link {
-	line-height: 2em;
-	padding: 0.2em 0.8em;
-	border-radius: 1em;
-	text-decoration: none;
-	background: #D0D9DD;
-	color: #555;
-	font-size: 0.85em;
-	white-space: nowrap;
+  line-height: 2em;
+  padding: 0.2em 0.8em;
+  border-radius: 1em;
+  text-decoration: none;
+  background: #D0D9DD;
+  color: #555;
+  font-size: 0.85em;
+  white-space: nowrap;
 }
 a.tag-link:hover {
-	background: #718C98;
-	color: #fff;
+  background: #718C98;
+  color: #fff;
 }
 
 table.task-queue-table {
-	border: 1px solid black;
-	border-collapse: collapse;
+  border: 1px solid black;
+  border-collapse: collapse;
 }
 
 table.task-queue-table td {
-	border: 1px solid black;
-	border-collapse: collapse;
+  border: 1px solid black;
+  border-collapse: collapse;
 }
 
 div.meta-view-wrapper {
-	display: grid;
-	grid-template-columns: repeat(var(--meta-col), 1fr);
-	grid-gap: var(--padding-base);
+  display: grid;
+  grid-template-columns: repeat(var(--meta-col), 1fr);
+  grid-gap: var(--padding-base);
 }
 
 div.meta-view {
-	display: grid;
-	grid-template-columns: minmax(min-content, 1fr) 1.2fr max-content;
-	align-self: start;
+  display: grid;
+  grid-template-columns: minmax(min-content, 1fr) 1.2fr max-content;
+  align-self: start;
 
-	box-shadow: 4px 6px 8px -2px #0003;
-	background: white;
-	border-radius: 0.4rem;
+  box-shadow: 4px 6px 8px -2px #0003;
+  background: white;
+  border-radius: 0.4rem;
 }
 div.meta-header {
-	font-size: 1.1em;
-	background: linear-gradient(to bottom, #0288d1, #0277bd);
-	padding: 0.6em 1em;
-	color: #fff;
-	line-height: 1.4em;
+  font-size: 1.1em;
+  background: linear-gradient(to bottom, #0288d1, #0277bd);
+  padding: 0.6em 1em;
+  color: #fff;
+  line-height: 1.4em;
 }
 
 div.meta-header.meta-complete {
-	background: linear-gradient(to bottom, #388e3c, #2e7d32);
+  background: linear-gradient(to bottom, #388e3c, #2e7d32);
 }
 div.meta-header.title a {
-	color: #fff;
-	font-weight: bold;
+  color: #fff;
+  font-weight: bold;
 }
 a.meta-link {
-	text-decoration: underline;
+  text-decoration: underline;
 }
 a:hover.meta-link {
-	color: #FF7B9C !important;
+  color: #FF7B9C !important;
 }
 a.dash-link {
-	color: #fffc;
-	font-size: 0.8em;
+  color: #fffc;
+  font-size: 0.8em;
 }
 
 div.meta-puzzle {
-	display: flex;
-	line-height: 1.8em;
-	padding: 0.2em 1em;
+  display: flex;
+  line-height: 1.8em;
+  padding: 0.2em 1em;
 
-	align-items: center;
-	border-top: 0.1rem solid #0002;
+  align-items: center;
+  border-top: 0.1rem solid #0002;
 }
 
 .meta-puzzle.title {
-	grid-column: 1/2;
+  grid-column: 1/2;
 }
 .meta-puzzle.answer {
-	grid-column: 2/4;
+  grid-column: 2/4;
 }
 
 div.menu-header {
-	background: #0d1f2d;
-	display: flex;
-	line-height: 1.8rem;
-	margin: 0;
-	padding: 0;
-	font-size: 1.1em;
-	flex-wrap: nowrap;
-	align-items: center;
-	color: white;
-	height: calc(var(--padding-base) * 1.5);
+  background: #0d1f2d;
+  display: flex;
+  line-height: 1.8rem;
+  margin: 0;
+  padding: 0;
+  font-size: 1.1em;
+  flex-wrap: nowrap;
+  align-items: center;
+  color: white;
+  height: calc(var(--padding-base) * 1.5);
 }
 
 div.menu-item {
-	padding: 0.2rem var(--padding-base);
-	line-height: calc(var(--padding-base) * 1.5);
-	height: 100%;
+  padding: 0.2rem var(--padding-base);
+  line-height: calc(var(--padding-base) * 1.5);
+  height: 100%;
 }
 
 div.menu-selected {
-	background: #bf4e30;
-	font-weight: bold;
-	border-radius: 0.3rem;
+  background: #bf4e30;
+  font-weight: bold;
+  border-radius: 0.3rem;
 }
 
 div.menu-header a,
 div.menu-header a:visited {
-	color: white;
-	height: 100%;
+  color: white;
+  height: 100%;
 }
 
 
 div.meta-header.dashboard {
-	padding: 0.6em 0;
+  padding: 0.6em 0;
 }
 div.meta-header-icons {
-	padding: 0.6em 0.75em;
+  padding: 0.6em 0.75em;
 }
 
 div.meta-dashboard-icon {
-	display: inline-block;
-	width: 1.5em;
-	vertical-align: middle;
+  display: inline-block;
+  width: 1.5em;
+  vertical-align: middle;
 }
 
 .icon {
-	display: inline-block;
-	width: 1.4em;
-	height: 1.4em;
-	stroke-width: 0;
-	stroke: currentColor;
-	fill: #000a;
-	transition: 0.1s fill;
-	position: relative;
-	top: 0.125em;
+  display: inline-block;
+  width: 1.4em;
+  height: 1.4em;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: #000a;
+  transition: 0.1s fill;
+  position: relative;
+  top: 0.125em;
 }
 .icon-link:hover {
-	fill: #4285F4;
+  fill: #4285F4;
 }
 .icon-slack:hover {
-	--slack-1: #E01E5A;
-	--slack-2: #36C5F0;
-	--slack-3: #2EB67D;
-	--slack-4: #ECB22E;
+  --slack-1: #E01E5A;
+  --slack-2: #36C5F0;
+  --slack-3: #2EB67D;
+  --slack-4: #ECB22E;
 }
 .icon-sheet:hover {
-	fill: #0F9D58;
+  fill: #0F9D58;
 }
 .icon-drawing:hover {
-	fill: #DB4437;
+  fill: #DB4437;
 }
 .meta-header-icons .icon {
-	fill: white;
+  fill: white;
 }
 .meta-header-icons .icon:hover {
-	fill: #F4B400;
+  fill: #F4B400;
 }
 
 .icon-idle,
 .icon-tags {
-	fill: white;
+  fill: white;
 }
 
 table.breakout {
-	width: 100%;
-	border-spacing: 0;
+  width: 100%;
+  border-spacing: 0;
 
-	box-shadow: 4px 6px 8px -2px #0003;
-	background: white;
-	border-radius: 0.4rem;
+  box-shadow: 4px 6px 8px -2px #0003;
+  background: white;
+  border-radius: 0.4rem;
 }
 
 table.breakout thead th {
-	font-size: 1.1em;
-	background: linear-gradient(to bottom, #0288d1, #0277bd);
-	padding: calc(var(--padding-base) / 4) var(--padding-base);
-	color: #fff;
-	line-height: 1.4em;
+  font-size: 1.1em;
+  background: linear-gradient(to bottom, #0288d1, #0277bd);
+  padding: calc(var(--padding-base) / 4) var(--padding-base);
+  color: #fff;
+  line-height: 1.4em;
 }
 
 table.breakout thead th:nth-child(n+2) {
-	text-align: left;
+  text-align: left;
 }
 
 table.breakout tbody tr td {
-	padding: calc(var(--padding-base) / 2) var(--padding-base);
+  padding: calc(var(--padding-base) / 2) var(--padding-base);
 }
 
 table.breakout tbody td {
-	border-top: 1px solid #0002;
+  border-top: 1px solid #0002;
 }
 
 table.breakout tbody tr td:first-child {
-	text-align: center;
+  text-align: center;
 }
 
 table.breakout tbody tr td span.solver-name {
-	white-space: nowrap;
+  white-space: nowrap;
 }
 
 table.breakout tbody tr td form {
-	margin:0;
+  margin:0;
 }
