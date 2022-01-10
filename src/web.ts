@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as path from "path";
 import * as url from "url";
 
-import { receiver } from "./app";
+import { app, receiver } from "./app";
 import * as db from "./db";
 import * as home from "./home";
 import * as puzzles from "./puzzles";
@@ -340,4 +340,49 @@ receiver.app.post("/tagger/update", async (req, res) => {
   await tags.addAndRemoveTags(puzzleIds, addedTagIds, addedTagNames, removedTagIds);
 
   return res.redirect("../tagger");
+});
+
+receiver.app.get("/breakouts", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+
+  const allPuzzles = await puzzles.list();
+
+  const breakouts: any = [];
+  for (const puzzle of allPuzzles) {
+    if (puzzle.complete) {
+      continue;
+    }
+    const breakout = puzzles.getBreakout(puzzle);
+    if (breakout === null) {
+      continue;
+    }
+    breakouts.push({
+      breakout,
+      puzzle,
+    });
+  }
+  breakouts.sort((a: any, b: any) => (a.breakout < b.breakout) ? -1 : 1);
+
+  res.render("breakouts", {
+    appName: process.env.APP_NAME,
+    breakouts: breakouts,
+  });
+});
+
+receiver.app.post("/breakouts/remove", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+
+  const id = req.body.puzzleId as string;
+  const client = await db.connect();
+  try {
+    await puzzles.clearBreakout(id, client);
+  } finally {
+    client.release();
+  }
+
+  return res.redirect("../breakouts");
 });

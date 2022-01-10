@@ -108,6 +108,24 @@ export function buildIdleStatus(puzzle: Puzzle): string {
   return "";
 }
 
+export function getBreakout(puzzle: Puzzle): number | null {
+  const match = puzzle.channelTopic.match(/BR *(\d+)/i);
+  if (!match) {
+    return null;
+  }
+  return Number(match[1]);
+}
+
+export async function clearBreakout(id: string, client: PoolClient): Promise<void> {
+  const puzzle = await get(id);
+  await app.client.conversations.setTopic({
+    token: process.env.SLACK_USER_TOKEN,
+    channel: id,
+    topic: puzzle.channelTopic.replace(/BR *\d+[ .:;]*/i, ""),
+  });
+  await refreshPuzzle(id, client);
+}
+
 interface ReadFromDatabaseOptions {
   id?: string;
   client?: PoolClient;
@@ -1184,9 +1202,7 @@ taskQueue.registerHandler("edit_puzzle", async (client, payload) => {
   }
 });
 
-taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
-  const id: string = payload.id;
-
+export async function refreshPuzzle(id: string, client: PoolClient) {
   const conversationInfoResult = await app.client.conversations.info({
     token: process.env.SLACK_USER_TOKEN,
     channel: id,
@@ -1293,4 +1309,9 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
     refreshEventUsers(id, client);
     await taskQueue.notifyQueue();
   }
+}
+
+taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
+  const id: string = payload.id;
+  await refreshPuzzle(id, client);
 });
