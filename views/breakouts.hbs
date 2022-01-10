@@ -12,24 +12,24 @@
       <div class="menu-item"><a href="tagger">Tag Editor</a></div>
     </div>
     <div class="body-wrapper">
-	<p>Any puzzle that has tagged a breakout room at the start of their topic will appear below.</p>
+      <p>Unsolved puzzles that have cited breakout rooms in their topics will appear here.</p>
       <table class="breakout">
-      	<thead>
-      		<th>Room</th>
-      		<th>Puzzle</th>
-      		<th>Topic</th>
-      		<th>Solvers</th>
-      		<th>&nbsp;</th>
-      	</thead>
-      	<tbody>
+        <thead>
+          <th>Room</th>
+          <th>Puzzle</th>
+          <th>Topic</th>
+          <th>Solvers</th>
+          <th>&nbsp;</th>
+        </thead>
+        <tbody>
         {{#each breakouts}}
         <tr>
           <td>{{breakout}}</td>
-          <td>{{puzzle.name}}</td>
+          <td><a href="{{../slackUrlPrefix}}{{puzzle.id}}" target="_blank">{{puzzle.name}}</a></td>
           <td>{{puzzle.channelTopic}}</td>
           <td>
             {{#each puzzle.users}}
-              {{name}}&nbsp;&nbsp;
+              <span class="solver-name">{{name}}</span>&nbsp;&nbsp;
             {{/each}}
           </td>
           <td>
