@@ -1,5 +1,6 @@
 import * as bodyParser from "body-parser";
 import * as express from "express";
+import expressHbs = require("express-hbs");
 import expressSession from "express-session";
 import moment = require("moment");
 import passport from "passport";
@@ -61,7 +62,10 @@ receiver.app.get(
     return res.redirect("/");
   });
 
+export const hbs = expressHbs.express4({});
 receiver.app.set("view engine", "hbs");
+receiver.app.engine("hbs", hbs);
+
 receiver.app.set("views", "views");
 
 receiver.app.use("/static", express.static("public"));

@@ -285,14 +285,15 @@
               searchable: false,
               render: (data, type, row) => {
                 if (type === "display" || type === "filter") {
+                  let s = `<svg class="icon icon-${row.puzzleStatusEmojiName}"><use xlink:href="#${row.puzzleStatusEmojiName}"></use></svg> `;
                   if (data === 0) {
-                    return "n/a";
+                    return s + "n/a";
                   }
                   const idleDuration = moment.duration(data);
                   if (idleDuration.asMinutes() < {{minimumIdleMinutes}}) {
-                    return "active";
+                    return s + "active";
                   }
-                  return Math.floor(idleDuration.asHours()) + "h"
+                  return s + Math.floor(idleDuration.asHours()) + "h"
                     + String(idleDuration.minutes()).padStart(2, "0") + "m";
                 }
                 return data;
@@ -467,6 +468,9 @@
         <path d="M7.406 8.578l4.594 4.594 4.594-4.594 1.406 1.406-6 6-6-6z"></path>
       </symbol>
       <symbol id="up" viewBox="0 0 24 24">
+        <path d="M7.406 15.422l-1.406-1.406 6-6 6 6-1.406 1.406-4.594-4.594z"></path>
+      </symbol>
+      <symbol id="desert" viewBox="0 0 24 24">
         <path d="M7.406 15.422l-1.406-1.406 6-6 6 6-1.406 1.406-4.594-4.594z"></path>
       </symbol>
     </svg>

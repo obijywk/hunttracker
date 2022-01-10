@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import expressHbs = require("express-hbs");
 import * as path from "path";
 import * as url from "url";
 
@@ -6,10 +7,17 @@ import { app, receiver } from "./app";
 import * as db from "./db";
 import * as home from "./home";
 import * as puzzles from "./puzzles";
+import { getPuzzleStatusEmoji } from "./puzzle_status_emoji";
 import * as refreshPolling from "./refresh_polling";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
+
+function puzzleStatusEmojiName(puzzle: puzzles.Puzzle): string {
+  const slackEmojiId = getPuzzleStatusEmoji(puzzle);
+  return slackEmojiId.substring(1, slackEmojiId.length - 1);
+}
+expressHbs.registerHelper("puzzleStatusEmojiName", puzzleStatusEmojiName);
 
 function checkAuth(req: Request, res: Response) {
   if (req.isAuthenticated()) {
@@ -71,7 +79,10 @@ receiver.app.get("/puzzles/data", async (req, res) => {
   res.contentType("application/json");
   const allPuzzles = await puzzles.list();
   const data = allPuzzles.map(p => Object.assign(
-    {}, p, {idleDurationMilliseconds: puzzles.getIdleDuration(p).asMilliseconds()}));
+    {}, p, {
+      idleDurationMilliseconds: puzzles.getIdleDuration(p).asMilliseconds(),
+      puzzleStatusEmojiName: puzzleStatusEmojiName(p),
+    }));
   res.end(JSON.stringify({
     data,
   }));

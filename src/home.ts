@@ -4,6 +4,7 @@ import { Block, Button, KnownBlock, Option } from "@slack/types";
 import { app } from "./app";
 import * as puzzles from "./puzzles";
 import { PuzzleMetadataErrorField } from "./puzzles";
+import { getPuzzleStatusEmoji } from "./puzzle_status_emoji";
 import { MAX_NUM_OPTIONS, getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
@@ -12,27 +13,8 @@ import * as users from "./users";
 const maxUsersToList = 5;
 const maxPuzzlesToList = 95;
 
-function getPuzzleIconText(puzzle: puzzles.Puzzle): string {
-  if (puzzles.isNew(puzzle)) {
-    return ":new:";
-  }
-  if (puzzle.users.length == 0) {
-    return ":desert:";
-  }
-  const idleDuration = puzzles.getIdleDuration(puzzle);
-  if (idleDuration.asMinutes() < 60) {
-    return ":thinking_face:";
-  }
-  if (idleDuration.asMinutes() < 180) {
-    return puzzles.chooseConsistentlyForPuzzle(
-      puzzle, [":shrug:", ":man-shrugging:", ":woman-shrugging:"]);
-  }
-  return puzzles.chooseConsistentlyForPuzzle(
-    puzzle, [":face_palm:", ":man-facepalming:", ":woman-facepalming:"]);
-}
-
 function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
-  let text = getPuzzleIconText(puzzle);
+  let text = getPuzzleStatusEmoji(puzzle);
   text += ` <slack://channel?team=${process.env.SLACK_TEAM_ID}&id=${puzzle.id}|${puzzle.name}>`;
   const idleStatus = puzzles.buildIdleStatus(puzzle);
   if (idleStatus) {
