@@ -834,6 +834,9 @@ async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | nu
     limit: 100,
   }) as ConversationsHistoryResult;
   for (const message of channelHistoryResult.messages) {
+    if (message.type === "message" && message.subtype === "channel_join") {
+      continue;
+    }
     if (message.type === "message" && message.subtype === "channel_leave") {
       continue;
     }
