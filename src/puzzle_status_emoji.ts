@@ -35,7 +35,7 @@ export function getPuzzleStatusEmoji(puzzle: puzzles.Puzzle): PuzzleStatusEmoji 
   }
   if (puzzle.registrationTimestamp === undefined) {
     return makePuzzleStatusEmoji(
-      ":grey_question:",
+      ":question:",
       "Unknown puzzle");
   }
   if (puzzles.isNew(puzzle)) {
