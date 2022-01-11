@@ -13,6 +13,7 @@ import { sessionStore } from "./db";
 declare module "express-session" {
   interface Session {
     postLoginUrl?: string;
+    useSlackWebLinks?: boolean;
   }
 }
 

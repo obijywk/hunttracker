@@ -13,6 +13,20 @@
       <p>
         Learn more about this app by <a href="{{helpUrl}}" target="_blank">reading the manual</a>.
       </p>
+      <p>
+        <form method="POST">
+          <input
+            type="checkbox"
+            id="useSlackWebLinks"
+            name="useSlackWebLinks"
+            {{#if useSlackWebLinks}}checked{{/if}}
+            onchange="this.form.submit()">
+          <label for="useSlackWebLinks">
+            Use Slack web app (https://) links instead of
+            Slack native app (slack://) links for Slack channels
+          </label>
+        </form>
+      </p>
       {{#if isAdmin}}
       <p>
         You're an admin. Check out the <a href="admin">admin</a> page, but be careful!

@@ -10,6 +10,7 @@ import * as home from "./home";
 import * as puzzles from "./puzzles";
 import { getPuzzleStatusEmoji, PuzzleStatusEmoji } from "./puzzle_status_emoji";
 import * as refreshPolling from "./refresh_polling";
+import { makeSlackChannelUrlPrefix } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
@@ -60,16 +61,29 @@ receiver.app.get("/logout", async (req, res) => {
   return res.redirect("login");
 });
 
-receiver.app.get("/", async (req, res) => {
-  if (!checkAuth(req, res)) {
-    return;
-  }
-  return res.render("index", {
+async function indexRenderOptions(req: Request) {
+  return {
     appName: process.env.APP_NAME,
     user: req.user,
     helpUrl: process.env.HELP_URL,
     isAdmin: await checkAdmin(req),
-  });
+    useSlackWebLinks: req.session.useSlackWebLinks,
+  };
+}
+
+receiver.app.get("/", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+  return res.render("index", await indexRenderOptions(req));
+});
+
+receiver.app.post("/", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+  req.session.useSlackWebLinks = req.body.useSlackWebLinks !== undefined;
+  return res.render("index", await indexRenderOptions(req));
 });
 
 receiver.app.get("/puzzles", async (req, res) => {
@@ -78,7 +92,7 @@ receiver.app.get("/puzzles", async (req, res) => {
   }
   return res.render("puzzles", {
     appName: process.env.APP_NAME,
-    slackUrlPrefix: `slack://channel?team=${process.env.SLACK_TEAM_ID}&id=`,
+    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
     minimumIdleMinutes: process.env.MINIMUM_IDLE_MINUTES,
     initialSearch: req.query.search || "",
     initialTags: req.query.tags || "",
@@ -162,7 +176,7 @@ receiver.app.get("/metas", async(req, res) => {
   return res.render("metas", {
     appName: process.env.APP_NAME,
     metas,
-    slackUrlPrefix: `slack://channel?team=${process.env.SLACK_TEAM_ID}&id=`,
+    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
   });
 });
 
@@ -392,7 +406,7 @@ receiver.app.get("/breakouts", async (req, res) => {
 
   res.render("breakouts", {
     appName: process.env.APP_NAME,
-    slackUrlPrefix: `slack://channel?team=${process.env.SLACK_TEAM_ID}&id=`,
+    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
     breakouts: breakouts,
   });
 });

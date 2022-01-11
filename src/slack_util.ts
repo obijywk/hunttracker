@@ -52,3 +52,10 @@ export function getViewStateValues(view: ViewOutput) {
   }
   return values;
 }
+
+export function makeSlackChannelUrlPrefix(useSlackWebLinks: boolean): string {
+  if (useSlackWebLinks) {
+    return `https://app.slack.com/client/${process.env.SLACK_TEAM_ID}/`;
+  }
+  return `slack://channel?team=${process.env.SLACK_TEAM_ID}&id=`;
+}
