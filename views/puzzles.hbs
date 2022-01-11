@@ -398,6 +398,7 @@
               if (initialExpandedPuzzleIds.indexOf(row.data().id) !== -1) {
                 row.child(formatDetails(row.data())).show();
                 $(row.node()).addClass("shown");
+                row.node().scrollIntoView();
               }
             });
           };

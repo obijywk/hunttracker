@@ -32,7 +32,7 @@
         <tr>
           <td>{{breakout}}</td>
           <td class="emoji-column">{{puzzleStatusEmoji puzzle}}</td>
-          <td><a href="{{../slackUrlPrefix}}{{puzzle.id}}" target="_blank">{{puzzle.name}}</a></td>
+          <td><a href="puzzles?expanded={{puzzle.id}}">{{puzzle.name}}</a></td>
           <td>{{puzzle.channelTopic}}</td>
           <td class="icon-column">{{#if puzzle.url}}<a href="{{puzzle.url}}" target="_blank"><svg class="icon icon-link"><use xlink:href="#link"></use></svg></a>{{/if}}</td>
           <td class="icon-column"><a href="{{../slackUrlPrefix}}{{puzzle.id}}" target="_blank"><svg class="icon icon-slack"><use xlink:href="#slack"></use></svg></a></td>
