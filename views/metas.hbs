@@ -19,9 +19,11 @@
       <div class="meta-view-wrapper">
         {{#each metas}}
           <div class="meta-view">
-            <div class="meta-header emoji{{#if complete}} meta-complete{{/if}}">
-              {{puzzleStatusEmoji this}}
-            </div>
+            {{#with (puzzleStatusEmoji this)}}
+              <div title="{{description}}" class="meta-header emoji{{#if ../complete}} meta-complete{{/if}}">
+                {{unicodeEmoji}}
+              </div>
+            {{/with}}
             <div class="meta-header title{{#if complete}} meta-complete{{/if}}">
               <a class="meta-link" href="puzzles?tags=in/{{tagSuffix}}&tags=meta/{{tagSuffix}}{{#if id}}&expanded={{id}}{{/if}}">{{name}}</a>
             </div>
@@ -51,9 +53,11 @@
               {{/if}}
             </div>
             {{#each puzzles}}
-              <div class="meta-puzzle emoji{{#if complete}} puzzle-complete{{/if}}">
-                {{puzzleStatusEmoji this}}
-              </div>
+              {{#with (puzzleStatusEmoji this)}}
+                <div title="{{description}}" class="meta-puzzle emoji{{#if ../complete}} puzzle-complete{{/if}}">
+                  {{unicodeEmoji}}
+                </div>
+              {{/with}}
               <div class="meta-puzzle title{{#if complete}} puzzle-complete{{/if}}">
                 <a href="puzzles?tags=in/{{../tagSuffix}}&tags=meta/{{../tagSuffix}}&expanded={{id}}">
                   {{name}}

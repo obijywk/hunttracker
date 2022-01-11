@@ -228,7 +228,7 @@
               render: (data, type, row) => {
                 if (type === "display") {
                   if (data) {
-                    return twemoji.parse(data);
+                    return twemoji.parse(`<span title="${data.description}">${data.unicodeEmoji}</span>`);
                   }
                   return "&nbsp;";
                 }

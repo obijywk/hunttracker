@@ -31,7 +31,11 @@
         {{#each breakouts}}
         <tr>
           <td>{{breakout}}</td>
-          <td class="emoji-column">{{puzzleStatusEmoji puzzle}}</td>
+          {{#with (puzzleStatusEmoji puzzle)}}
+            <td title="{{description}}" class="emoji-column">
+              {{unicodeEmoji}}
+            </td>
+          {{/with}}
           <td><a href="puzzles?expanded={{puzzle.id}}">{{puzzle.name}}</a></td>
           <td>{{puzzle.channelTopic}}</td>
           <td class="icon-column">{{#if puzzle.url}}<a href="{{puzzle.url}}" target="_blank"><svg class="icon icon-link"><use xlink:href="#link"></use></svg></a>{{/if}}</td>

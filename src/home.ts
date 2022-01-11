@@ -14,7 +14,7 @@ const maxUsersToList = 5;
 const maxPuzzlesToList = 95;
 
 function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
-  let text = getPuzzleStatusEmoji(puzzle);
+  let text = getPuzzleStatusEmoji(puzzle).slackEmoji;
   text += ` <slack://channel?team=${process.env.SLACK_TEAM_ID}&id=${puzzle.id}|${puzzle.name}>`;
   const idleStatus = puzzles.buildIdleStatus(puzzle);
   if (idleStatus) {

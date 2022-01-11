@@ -55,12 +55,13 @@ export function chooseConsistentlyForPuzzle<T>(puzzle: Puzzle, choices: Array<T>
   return choices[Math.abs(h) % choices.length];
 }
 
+export const newPuzzleMinutes =
+    process.env.NEW_PUZZLE_MINUTES ?
+    Number(process.env.NEW_PUZZLE_MINUTES) :
+    60;
+
 export function isNew(puzzle: Puzzle): boolean {
   const now = moment().utc();
-  const newPuzzleMinutes =
-      process.env.NEW_PUZZLE_MINUTES ?
-      Number(process.env.NEW_PUZZLE_MINUTES) :
-      60;
   return moment.duration(now.diff(puzzle.registrationTimestamp)).asMinutes() <=
       newPuzzleMinutes;
 }

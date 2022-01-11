@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import expressHbs = require("express-hbs");
-import * as nodeEmoji from "node-emoji";
 import * as path from "path";
 import * as url from "url";
 
@@ -8,21 +7,14 @@ import { app, receiver } from "./app";
 import * as db from "./db";
 import * as home from "./home";
 import * as puzzles from "./puzzles";
-import { getPuzzleStatusEmoji } from "./puzzle_status_emoji";
+import { getPuzzleStatusEmoji, PuzzleStatusEmoji } from "./puzzle_status_emoji";
 import * as refreshPolling from "./refresh_polling";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
 
-function puzzleStatusEmojiName(puzzle: puzzles.Puzzle): string {
-  const slackEmojiId = getPuzzleStatusEmoji(puzzle);
-  return slackEmojiId.substring(1, slackEmojiId.length - 1);
-}
-expressHbs.registerHelper("puzzleStatusEmojiName", puzzleStatusEmojiName);
-
-function puzzleStatusEmoji(puzzle: puzzles.Puzzle): string {
-  const emojiName = puzzleStatusEmojiName(puzzle);
-  return nodeEmoji.get(emojiName);
+function puzzleStatusEmoji(puzzle: puzzles.Puzzle): PuzzleStatusEmoji {
+  return getPuzzleStatusEmoji(puzzle);
 }
 expressHbs.registerHelper("puzzleStatusEmoji", puzzleStatusEmoji);
 
@@ -99,8 +91,7 @@ receiver.app.get("/puzzles/data", async (req, res) => {
   const data = allPuzzles.map(p => Object.assign(
     {}, p, {
       idleDurationMilliseconds: puzzles.getIdleDuration(p).asMilliseconds(),
-      puzzleStatusEmojiName: puzzleStatusEmojiName(p),
-      puzzleStatusEmoji: nodeEmoji.get(puzzleStatusEmojiName(p)),
+      puzzleStatusEmoji: getPuzzleStatusEmoji(p),
       breakout: puzzles.getBreakout(p),
     }));
   res.end(JSON.stringify({

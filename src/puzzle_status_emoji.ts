@@ -1,34 +1,70 @@
+import * as nodeEmoji from "node-emoji";
+
 import * as puzzles from "./puzzles";
 
-export function getPuzzleStatusEmoji(puzzle: puzzles.Puzzle): string {
+export interface PuzzleStatusEmoji {
+  slackEmoji: string;
+  unicodeEmoji: string;
+  description: string;
+}
+
+function makePuzzleStatusEmoji(slackEmoji: string, description: string): PuzzleStatusEmoji {
+  return {
+    slackEmoji,
+    unicodeEmoji: nodeEmoji.get(slackEmoji.substring(1, slackEmoji.length - 1)),
+    description,
+  };
+}
+
+export function getPuzzleStatusEmoji(puzzle: puzzles.Puzzle): PuzzleStatusEmoji {
   if (puzzle.complete) {
-    return ":white_check_mark:";
+    return makePuzzleStatusEmoji(
+      ":white_check_mark:",
+      "Solved");
   }
   const priority = puzzles.getPriority(puzzle);
   if (priority >= 5) {
-    return ":exclamation:";
+    return makePuzzleStatusEmoji(
+      ":exclamation:",
+      "High priority");
   }
   if (priority < 0) {
-    return ":skull:";
+    return makePuzzleStatusEmoji(
+      ":skull:",
+      "Low priority");
   }
   if (puzzle.registrationTimestamp === undefined) {
-    return ":grey_question:";
+    return makePuzzleStatusEmoji(
+      ":grey_question:",
+      "Unknown puzzle");
   }
   if (puzzles.isNew(puzzle)) {
-    return ":new:";
+    return makePuzzleStatusEmoji(
+      ":new:",
+      `Registered less than ${puzzles.newPuzzleMinutes} minutes ago`);
   }
   if (puzzle.users.length == 0) {
-    return ":desert:";
+    return makePuzzleStatusEmoji(
+      ":desert:",
+      "No solvers");
   }
   const idleDuration = puzzles.getIdleDuration(puzzle);
   if (idleDuration.asMinutes() < 15) {
-    return ":memo:";
+    return makePuzzleStatusEmoji(
+      ":memo:",
+      "Active within last 15 minutes");
   }
   if (idleDuration.asMinutes() < 60) {
-    return ":thinking_face:";
+    return makePuzzleStatusEmoji(
+      ":thinking_face:",
+      "Inactive for 15 to 60 minutes");
   }
   if (idleDuration.asMinutes() < 180) {
-    return ":turtle:";
+    return makePuzzleStatusEmoji(
+      ":turtle:",
+      "Inactive for 1 to 3 hours");
   }
-  return ":zzz:";
+  return makePuzzleStatusEmoji(
+    ":zzz:",
+    "Inactive for more than 3 hours");
 }
