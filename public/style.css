@@ -100,15 +100,22 @@ td.emoji-column img {
 td.icon-column {
   margin: 0;
   padding: 0 !important;
+  text-align: center;
 }
 
 th.icon-column,
 th.details-control {
   width: 0.4em !important;
 }
+th.tag-column {
+  max-width: 12vw;
+}
+th.breakout {
+  max-width: 2rem;
+}
 
 td.breakout {
-  text-align: right;
+  text-align: center;
 }
 
 td.answer,
@@ -117,13 +124,6 @@ span.answer {
   font-family: 'Roboto Mono', monospace;
   font-weight: bold;
   font-size: 0.9em;
-}
-
-td.channel-topic {
-  max-width: 30vw;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 td.idle-column {
@@ -185,8 +185,13 @@ div.meta-header {
 div.meta-header.meta-complete {
   background: linear-gradient(to bottom, #388e3c, #2e7d32);
 }
-div.meta-header.emoji img {
-  width: 1.5em;
+div.meta-header.emoji img,
+div.meta-puzzle.emoji img {
+  width: 1.5rem;
+}
+div.meta-header.emoji,
+div.meta-puzzle.emoji {
+  padding-right: 0;
 }
 div.meta-header.title a {
   color: #fff;
@@ -212,9 +217,6 @@ div.meta-puzzle {
   border-top: 0.1rem solid #0002;
 }
 
-.meta-puzzle.emoji img {
-  width: 1.5em;
-}
 .meta-puzzle.title {
   grid-column: 2/3;
 }
@@ -344,4 +346,28 @@ table.breakout tbody tr td span.solver-name {
 
 table.breakout tbody tr td form {
   margin:0;
+}
+
+a.tag-link[class*="meta"] {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  transition: 0.6s all;
+  background-position: 0% 50%;
+  color: white;
+}
+a.tag-link[class*="meta"]:hover {
+  background-position: 100% 50%;
+}
+
+th.emoji-column,
+td.emoji-column {
+  width: 1.5rem;
+  padding: 0 !important;
+  text-align: center;
+}
+table.breakout th.icon-column,
+table.breakout td.icon-column {
+  width: 2.5rem;
+  padding: 0 !important;
+  text-align: center;
 }
