@@ -11,6 +11,9 @@ export function getPuzzleStatusEmoji(puzzle: puzzles.Puzzle): string {
   if (priority < 0) {
     return ":skull:";
   }
+  if (puzzle.registrationTimestamp === undefined) {
+    return ":grey_question:";
+  }
   if (puzzles.isNew(puzzle)) {
     return ":new:";
   }
