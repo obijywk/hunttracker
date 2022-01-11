@@ -38,11 +38,7 @@
           <td class="icon-column"><a href="{{../slackUrlPrefix}}{{puzzle.id}}" target="_blank"><svg class="icon icon-slack"><use xlink:href="#slack"></use></svg></a></td>
           <td class="icon-column"><a href="{{puzzle.sheetUrl}}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="#sheet"></use></svg></a></td>
           <td class="icon-column"><a href="{{puzzle.drawingUrl}}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="#drawing"></use></svg></a></td>
-          <td>({{puzzle.users.length}})&nbsp;
-            {{#each puzzle.users}}
-              <span class="solver-name">{{name}}</span>&nbsp;
-            {{/each}}
-          </td>
+          <td>({{puzzle.users.length}})&nbsp;{{{commaSeparatedSolvers puzzle 5}}}</td>
           <td>
             <form action="breakouts/remove" method="POST">
               <input type="hidden" name="puzzleId" value="{{puzzle.id}}">

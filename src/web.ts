@@ -26,6 +26,17 @@ function puzzleStatusEmoji(puzzle: puzzles.Puzzle): string {
 }
 expressHbs.registerHelper("puzzleStatusEmoji", puzzleStatusEmoji);
 
+function commaSeparatedSolvers(puzzle: puzzles.Puzzle, limit: number): string {
+  let s = puzzle.users.map(
+    u => "<span class='solver-name'>" + u.name + "</span>",
+  ).slice(0, limit).join(", ");
+  if (puzzle.users.length > limit) {
+    s += ", &mldr;";
+  }
+  return s;
+}
+expressHbs.registerHelper("commaSeparatedSolvers", commaSeparatedSolvers);
+
 function checkAuth(req: Request, res: Response) {
   if (req.isAuthenticated()) {
     return true;
