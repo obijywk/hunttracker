@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import expressHbs = require("express-hbs");
 import * as path from "path";
+import * as fs from "fs";
 import * as url from "url";
 
 import { app, receiver } from "./app";
@@ -12,6 +13,10 @@ import * as refreshPolling from "./refresh_polling";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
+
+expressHbs.registerPartial(
+  "menuheader",
+  fs.readFileSync("views/menuheader.hbs", "utf-8"));
 
 function puzzleStatusEmoji(puzzle: puzzles.Puzzle): PuzzleStatusEmoji {
   return getPuzzleStatusEmoji(puzzle);

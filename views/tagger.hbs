@@ -8,13 +8,7 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
   </head>
   <body>
-     <div class="menu-header">
-      <div class="menu-item">{{appName}}</div>
-      <div class="menu-item"><a href="puzzles">Puzzles</a></div>
-      <div class="menu-item"><a href="metas">Metas</a></div>
-      <div class="menu-item"><a href="breakouts">Breakouts</a></div>
-      <div class="menu-item menu-selected"><a href="tagger">Tag Editor</a></div>
-    </div>
+    {{> menuheader tagger=true }}
     <div class="body-wrapper">
       <form action="tagger/update" method="post">
         <p>Puzzles to update</p>

@@ -15,13 +15,7 @@
     <script type="text/javascript" charset="utf8" src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
   </head>
   <body>
-    <div class="menu-header">
-      <div class="menu-item">{{appName}}</div>
-      <div class="menu-item menu-selected"><a href="puzzles">Puzzles</a></div>
-      <div class="menu-item"><a href="metas">Metas</a></div>
-      <div class="menu-item"><a href="breakouts">Breakouts</a></div>
-      <div class="menu-item"><a href="tagger">Tag Editor</a></div>
-    </div>
+    {{> menuheader puzzles=true }}
     <div class="body-wrapper">
       <div class="puzzle-filters">
         <div class="filter-solved">

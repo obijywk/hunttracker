@@ -6,13 +6,7 @@
     <script type="text/javascript" charset="utf8" src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
   </head>
   <body>
-    <div class="menu-header">
-      <div class="menu-item">{{appName}}</div>
-      <div class="menu-item"><a href="puzzles">Puzzles</a></div>
-      <div class="menu-item"><a href="metas">Metas</a></div>
-      <div class="menu-item menu-selected"><a href="breakouts">Breakouts</a></div>
-      <div class="menu-item"><a href="tagger">Tag Editor</a></div>
-    </div>
+    {{> menuheader breakouts=true }}
     <div class="body-wrapper">
       <p>Unsolved puzzles that have cited breakout rooms in their topics will appear here.</p>
       <table class="breakout">
