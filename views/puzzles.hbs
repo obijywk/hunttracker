@@ -46,16 +46,16 @@
             <th>&nbsp;</th>
             <th>Solved</th>
             <th>&nbsp;</th>
-            <th class="icon-column">&nbsp;</th>
-            <th class="icon-column">&nbsp;</th>
-            <th class="icon-column">&nbsp;</th>
-            <th class="icon-column">&nbsp;</th>
-            <th>BR</th>
             <th>Name</th>
+			<th>BR</th>
             <th>Answer</th>
             <th>Topic</th>
-            <th><svg class="icon icon-tags"><title>Tags</title><use xlink:href="#tags"></use></svg></th>
+			<th class="icon-column">&nbsp;</th>
+            <th class="icon-column">&nbsp;</th>
+            <th class="icon-column">&nbsp;</th>
+            <th class="icon-column">&nbsp;</th>
             <th><svg class="icon icon-idle"><title>Idle</title><use xlink:href="#idle"></use></svg></th>
+			<th><svg class="icon icon-tags"><title>Tags</title><use xlink:href="#tags"></use></svg></th>
             <th>Solvers</th>
           </tr>
         </thead>
@@ -65,16 +65,16 @@
       const colExpand = 0;
       const colSolved = 1;
       const colStatusEmoji = 2;
-      const colPuzzleLink = 3;
-      const colChannelLink = 4;
-      const colSheetLink = 5;
-      const colDrawingLink = 6;
-      const colBreakout = 7;
-      const colName = 8;
-      const colAnswer = 9;
-      const colTopic = 10;
-      const colTags = 11;
-      const colIdle = 12;
+      const colPuzzleLink = 8;
+      const colChannelLink = 9;
+      const colSheetLink = 10;
+      const colDrawingLink = 11;
+      const colBreakout = 4;
+      const colName = 3;
+      const colAnswer = 5;
+      const colTopic = 6;
+      const colTags = 12;
+      const colIdle = 7;
       const colSolvers = 13;
       $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
         const selectedTags = $(".tags-select").select2("data");
@@ -232,8 +232,38 @@
                 }
                 return data;
               },
+            },            
+			{
+              data: "name",
+              render: (data, type, row) => {
+                if (type === "display") {
+                  return `<a href="javascript:void(0);" class="puzzle-name-link">${data}</a>`;
+                }
+                return data;
+              },
+            },
+			{
+              data: "breakout",
+              className: "breakout",
+              render: (data, type, row) => {
+                if (type === 'sort') {
+                  if (!data) {
+                    return 999;
+                  }
+                  return data;
+                }
+                return data;
+              },
             },
             {
+              data: "answer",
+              className: "answer",
+            },
+            {
+              data: "channelTopic",
+              className: "channel-topic",
+            },			
+			{
               data: "url",
               className: "icon-column",
               orderable: false,
@@ -285,48 +315,7 @@
               },
             },
             {
-              data: "breakout",
-              className: "breakout",
-              render: (data, type, row) => {
-                if (type === 'sort') {
-                  if (!data) {
-                    return 999;
-                  }
-                  return data;
-                }
-                return data;
-              },
-            },
-            {
-              data: "name",
-              render: (data, type, row) => {
-                if (type === "display") {
-                  return `<a href="javascript:void(0);" class="puzzle-name-link">${data}</a>`;
-                }
-                return data;
-              },
-            },
-            {
-              data: "answer",
-              className: "answer",
-            },
-            {
-              data: "channelTopic",
-              width: "30vw",
-              className: "channel-topic",
-            },
-            {
-              data: "tags",
-              orderable: false,
-              render: (data, type, row) => {
-                return data.map(tag => {
-                  return `<a class="tag-link" href="javascript:void(0);">${tag.name}</a>`;
-                }).join(" ");
-              },
-            },
-            {
               data: "idleDurationMilliseconds",
-              width: "4rem",
               className: "idle-column",
               searchable: false,
               render: (data, type, row) => {
@@ -342,6 +331,16 @@
                     + String(idleDuration.minutes()).padStart(2, "0") + "m";
                 }
                 return data;
+              },
+            },			
+            {
+              data: "tags",
+			  className: "tag-column",
+              orderable: false,
+              render: (data, type, row) => {
+                return data.map(tag => {
+                  return `<a class="tag-link ${tag.name}" href="javascript:void(0);">${tag.name}</a>`;
+                }).join(" ");
               },
             },
             {
