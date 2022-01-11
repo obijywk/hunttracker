@@ -17,7 +17,7 @@
       <table class="breakout">
         <thead>
           <th>Room</th>
-          <th class="emoji-column">&nbsp;</th>       
+          <th class="emoji-column">&nbsp;</th>
           <th>Puzzle</th>
           <th>Topic</th>
           <th class="icon-column">&nbsp;</th>
@@ -31,10 +31,10 @@
         {{#each breakouts}}
         <tr>
           <td>{{breakout}}</td>
-		  <td class="emoji-column">{{puzzleStatusEmoji puzzle}}</td>
+          <td class="emoji-column">{{puzzleStatusEmoji puzzle}}</td>
           <td><a href="{{../slackUrlPrefix}}{{puzzle.id}}" target="_blank">{{puzzle.name}}</a></td>
           <td>{{puzzle.channelTopic}}</td>
-		  <td class="icon-column">{{#if puzzle.url}}<a href="{{puzzle.url}}" target="_blank"><svg class="icon icon-link"><use xlink:href="#link"></use></svg></a>{{/if}}</td>
+          <td class="icon-column">{{#if puzzle.url}}<a href="{{puzzle.url}}" target="_blank"><svg class="icon icon-link"><use xlink:href="#link"></use></svg></a>{{/if}}</td>
           <td class="icon-column"><a href="{{../slackUrlPrefix}}{{puzzle.id}}" target="_blank"><svg class="icon icon-slack"><use xlink:href="#slack"></use></svg></a></td>
           <td class="icon-column"><a href="{{puzzle.sheetUrl}}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="#sheet"></use></svg></a></td>
           <td class="icon-column"><a href="{{puzzle.drawingUrl}}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="#drawing"></use></svg></a></td>
@@ -57,7 +57,7 @@
     <script type="text/javascript">
       twemoji.parse(document.body);
     </script>
-	<svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">
       <symbol id="drawing" viewBox="0 0 32 32">
         <title>Google Drawing</title>
         <path d="M26 28h-20v-4l6-10 8.219 10 5.781-4v8z"></path>

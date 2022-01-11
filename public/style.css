@@ -108,10 +108,10 @@ th.details-control {
   width: 0.4em !important;
 }
 th.tag-column {
-	max-width: 12vw;
+  max-width: 12vw;
 }
 th.breakout {
-	max-width: 2rem;
+  max-width: 2rem;
 }
 
 td.breakout {
@@ -124,10 +124,6 @@ span.answer {
   font-family: 'Roboto Mono', monospace;
   font-weight: bold;
   font-size: 0.9em;
-}
-
-td.channel-topic {
-
 }
 
 td.idle-column {
@@ -195,7 +191,7 @@ div.meta-puzzle.emoji img {
 }
 div.meta-header.emoji,
 div.meta-puzzle.emoji {
-	padding-right: 0;
+  padding-right: 0;
 }
 div.meta-header.title a {
   color: #fff;
@@ -353,14 +349,14 @@ table.breakout tbody tr td form {
 }
 
 a.tag-link[class*="meta"] {
-	background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-	background-size: 400% 400%;
-	transition: 0.6s all;
-	background-position: 0% 50%;
-	color: white;
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  transition: 0.6s all;
+  background-position: 0% 50%;
+  color: white;
 }
 a.tag-link[class*="meta"]:hover {
-	background-position: 100% 50%;
+  background-position: 100% 50%;
 }
 
 th.emoji-column,

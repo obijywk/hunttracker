@@ -47,15 +47,15 @@
             <th>Solved</th>
             <th>&nbsp;</th>
             <th>Name</th>
-			<th>BR</th>
+            <th>BR</th>
             <th>Answer</th>
             <th>Topic</th>
-			<th class="icon-column">&nbsp;</th>
+            <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th><svg class="icon icon-idle"><title>Idle</title><use xlink:href="#idle"></use></svg></th>
-			<th><svg class="icon icon-tags"><title>Tags</title><use xlink:href="#tags"></use></svg></th>
+            <th><svg class="icon icon-tags"><title>Tags</title><use xlink:href="#tags"></use></svg></th>
             <th>Solvers</th>
           </tr>
         </thead>
@@ -65,17 +65,18 @@
       const colExpand = 0;
       const colSolved = 1;
       const colStatusEmoji = 2;
-      const colPuzzleLink = 8;
-      const colChannelLink = 9;
-      const colSheetLink = 10;
-      const colDrawingLink = 11;
-      const colBreakout = 4;
       const colName = 3;
+      const colBreakout = 4;
       const colAnswer = 5;
       const colTopic = 6;
+      const colPuzzleLink = 7;
+      const colChannelLink = 8;
+      const colSheetLink = 9;
+      const colDrawingLink = 10;
+      const colIdle = 11;
       const colTags = 12;
-      const colIdle = 7;
       const colSolvers = 13;
+
       $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
         const selectedTags = $(".tags-select").select2("data");
         if (selectedTags.length === 0) {
@@ -186,13 +187,14 @@
             regex: true,
           },
           searchCols: [
-            null, null, null, null, null, null, null,
-            { search: "{{initialSearch}}", smart: false, regex: true },
-            { search: "{{initialSearch}}", smart: false, regex: true },
-            { search: "{{initialSearch}}", smart: false, regex: true },
-            { search: "{{initialSearch}}", smart: false, regex: true },
-            { search: "{{initialSearch}}", smart: false, regex: true },
-            null, null,
+            null, null, null,
+            { search: "{{initialSearch}}", smart: false, regex: true },  // name
+            { search: "{{initialSearch}}", smart: false, regex: true },  // breakout
+            { search: "{{initialSearch}}", smart: false, regex: true },  // answer
+            { search: "{{initialSearch}}", smart: false, regex: true },  // topic
+            null, null, null, null, null,
+            { search: "{{initialSearch}}", smart: false, regex: true },  // tags
+            null,
           ],
           order: [[colName, "asc"]],
           columns: [
@@ -232,8 +234,8 @@
                 }
                 return data;
               },
-            },            
-			{
+            },
+            {
               data: "name",
               render: (data, type, row) => {
                 if (type === "display") {
@@ -242,7 +244,7 @@
                 return data;
               },
             },
-			{
+            {
               data: "breakout",
               className: "breakout",
               render: (data, type, row) => {
@@ -262,8 +264,8 @@
             {
               data: "channelTopic",
               className: "channel-topic",
-            },			
-			{
+            },
+            {
               data: "url",
               className: "icon-column",
               orderable: false,
@@ -332,10 +334,10 @@
                 }
                 return data;
               },
-            },			
+            },
             {
               data: "tags",
-			  className: "tag-column",
+              className: "tag-column",
               orderable: false,
               render: (data, type, row) => {
                 return data.map(tag => {
