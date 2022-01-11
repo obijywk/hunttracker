@@ -187,7 +187,12 @@ div.meta-header.meta-complete {
 }
 div.meta-header.emoji img,
 div.meta-puzzle.emoji img {
-  width: 1.5rem;
+  width: 1.25rem;
+  padding: 0.125rem;
+}
+div.meta-header.emoji img {
+  background-color: #fff;
+  border-radius: 0.25rem;
 }
 div.meta-header.emoji,
 div.meta-puzzle.emoji {
