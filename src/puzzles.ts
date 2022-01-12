@@ -728,12 +728,19 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
   const answer: string = values["puzzle_answer_input"];
   const complete: boolean = values["puzzle_solved_input"] === "true";
 
+  const puzzle = await get(id);
+  if (puzzle.answer === answer && puzzle.complete === complete) {
+    ack();
+    return;
+  }
+
   await db.query(
     "UPDATE puzzles SET answer = $2, complete = $3 WHERE id = $1",
     [id, answer, complete]);
+  puzzle.answer = answer;
+  puzzle.complete = complete;
 
   if (complete) {
-    const puzzle = await get(id);
     let text;
     let spoilerText;
     if (answer) {
