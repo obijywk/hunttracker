@@ -120,19 +120,28 @@ async function buildHomeBlocks(userId: string) {
       type: "button",
       text: {
         type: "plain_text",
-        text: ":books: See all puzzles",
+        text: ":jigsaw: Puzzles",
       },
-      "action_id": "home_see_all_puzzles",
+      "action_id": "home_nav_puzzles",
       url: process.env.WEB_SERVER_URL + "puzzles",
     },
     {
       type: "button",
       text: {
         type: "plain_text",
-        text: ":books: See all metas",
+        text: ":the_horns: Metas",
       },
-      "action_id": "home_see_all_metas",
+      "action_id": "home_nav_metas",
       url: process.env.WEB_SERVER_URL + "metas",
+    },
+    {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":door: Breakouts",
+      },
+      "action_id": "home_nav_breakouts",
+      url: process.env.WEB_SERVER_URL + "breakouts",
     },
     {
       type: "button",
@@ -140,7 +149,7 @@ async function buildHomeBlocks(userId: string) {
         type: "plain_text",
         text: ":bookmark: Update tags",
       },
-      "action_id": "home_update_tags",
+      "action_id": "home_nav_tagger",
       url: process.env.WEB_SERVER_URL + "tagger",
     },
   ];
@@ -536,15 +545,19 @@ app.view("home_edit_puzzle_view", async ({ack, body, view}) => {
   ack();
 });
 
-app.action("home_see_all_puzzles", async ({ ack }) => {
+app.action("home_nav_puzzles", async ({ ack }) => {
   ack();
 });
 
-app.action("home_see_all_metas", async ({ ack }) => {
+app.action("home_nav_metas", async ({ ack }) => {
   ack();
 });
 
-app.action("home_update_tags", async ({ ack }) => {
+app.action("home_nav_breakouts", async ({ ack }) => {
+  ack();
+});
+
+app.action("home_nav_tagger", async ({ ack }) => {
   ack();
 });
 
