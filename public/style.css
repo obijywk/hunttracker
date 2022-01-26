@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Roboto+Mono:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Mono:wght@500&display=swap');
 
 html {
   --padding-base: 1.75rem;
@@ -16,10 +16,12 @@ html {
   
   --background-puzzle-selected: #ffd54f;
   --background-puzzle-detail: #ffecb3;
-  --background-puzzle-solved: #dcedc8;
+  --background-puzzle-solved: hsla(100, 80%, 55%, 0.25);
   
-  --background-tag: #90a4ae;
-  --background-tag-hover: #cfd8dc;
+  --background-tag: hsla(288, 2%, 45%, 0.6);
+  --background-tag-hover: #bf360c;
+  --background-tag-meta: #000000;
+  --background-tag-meta-hover: #bf360c;
   
   --background-dropdown: #00000055;
 
@@ -35,19 +37,15 @@ html {
   --text-puzzle: #1976d2;
   
   --text-tag: #ffffff;
-  --text-tag-hover: #455a64;
-
-  --tag-meta-position: 0% 50%;
-  --tag-meta-position-hover: 100% 50%;
+  --text-tag-meta: #ffffff;
   
-  --icon-fill: #000000aa;
+  --icon-fill: #000a;
   
-  --special-color: #00000022;
+  --special-color: #0002;
   --section-shadow: 4px 6px 8px -2px var(--special-color);
-  --section-delineate: 0.1rem solid var(--special-color);
+  --section-delineate: 1px solid var(--special-color);
 }
 
-/* dark mode - for figuring out post-hunt why it seems to get chewed up
 html[data-theme="dark"] {
   --background-page: #000000;
   --background-section: #212121;
@@ -61,7 +59,6 @@ html[data-theme="dark"] {
   
   --background-puzzle-selected: #424242;
   --background-puzzle-detail: #616161;
-  --background-puzzle-solved: #1a381b;
   
   --background-tag: #513E49;
   --background-tag-hover: #E9B872;
@@ -89,8 +86,7 @@ html[data-theme="dark"] {
   
   --special-color: #ffffff44;
   --section-shadow: none;
-  --section-delineate: 0.1rem solid var(--special-color);
-} */
+}
 
 @media screen and (min-width: 1300px){
   html {
@@ -98,15 +94,9 @@ html[data-theme="dark"] {
   }
 }
 
-@media screen and (min-width: 2000px){
-  html {
-    --meta-col: 4;
-  }
-}
-
 body {
-  font-family: 'Noto Sans', sans-serif;
-  font-size: 15px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
   margin: 0;
   padding: 0;
   background-color: var(--background-page);
@@ -114,7 +104,7 @@ body {
 }
 
 div.body-wrapper {
-  padding: calc(var(--padding-base) / 4) var(--padding-base);
+  padding: calc(var(--padding-base) / 4) calc(var(--padding-base) * 2);
 }
 
 div.puzzle-filters {
@@ -146,14 +136,14 @@ table.dataTable.no-footer {
     box-shadow: var(--section-shadow);
 }
 
-table.dataTable thead .sorting {
- background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiAyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZjg4IiBkPSJNOC43LDEyLjlsLTIuNSwyLjVsLTIuNS0yLjV2LTEuM2wyLjUsMi41bDIuNS0yLjVWMTIuOXoiLz48cGF0aCBmaWxsPSIjZmZmZmZmODgiIGQ9Ik0zLjcsNy4xbDIuNS0yLjVsMi41LDIuNXYxLjNMNi4yLDUuOUwzLjcsOC40VjcuMXoiLz48L3N2Zz4=) no-repeat center right, var(--background-header);
+table.dataTable thead .sorting::after {
+  content: ' ◦';
 }
-table.dataTable thead .sorting_asc {
- background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiAyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZmNjIiBkPSJNOC43LDEyLjlsLTIuNSwyLjVsLTIuNS0yLjV2LTEuM2gyLjVoMi41VjEyLjl6Ii8+PHBhdGggZmlsbD0iI2ZmZmZmZjg4IiBkPSJNMy43LDcuMWwyLjUtMi41bDIuNSwyLjV2MS4zTDYuMiw1LjlMMy43LDguNFY3LjF6Ii8+PC9zdmc+) no-repeat center right, var(--background-header);
+table.dataTable thead .sorting_asc::after {
+  content: ' ▾';
 }
-table.dataTable thead .sorting_desc {
- background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiAyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZmNjIiBkPSJNMy43LDcuMWwyLjUtMi41bDIuNSwyLjV2MS4zSDYuMkgzLjdWNy4xeiIvPjxwYXRoIGZpbGw9IiNmZmZmZmY4OCIgZD0iTTguNywxMi45bC0yLjUsMi41bC0yLjUtMi41di0xLjNsMi41LDIuNWwyLjUtMi41VjEyLjl6Ii8+PC9zdmc+) no-repeat center right, var(--background-header);
+table.dataTable thead .sorting_desc::after {
+  content: ' ▴';
 }
 
 table.dataTable tbody tr {
@@ -204,25 +194,15 @@ table.puzzleDetails tr {
   background: #fff0 !important;
 }
 
-td.emoji-column img {
-  width: 1.5em;
+img.emoji {
+  aspect-ratio: 1 / 1;
+  width: 1.25rem;
 }
 
 td.icon-column {
   margin: 0;
   padding: 0 !important;
   text-align: center;
-}
-
-th.icon-column,
-th.details-control {
-  width: 0.4em !important;
-}
-th.tag-column {
-  max-width: 12vw;
-}
-th.breakout {
-  max-width: 2rem;
 }
 
 td.breakout {
@@ -233,8 +213,15 @@ td.answer,
 div.answer,
 span.answer {
   font-family: 'Roboto Mono', monospace;
-  font-weight: bold;
+  font-weight: 500;
   font-size: 0.9em;
+  text-transform: uppercase;
+}
+
+td.answer:hover,
+div.answer:hover,
+span.answer:hover {
+  text-transform: none;
 }
 
 td.idle-column {
@@ -258,7 +245,14 @@ a.tag-link {
 }
 a.tag-link:hover {
   background: var(--background-tag-hover);
-  color: var(--text-tag-hover);
+}
+
+a.tag-link[class*="meta"] {
+  background-color: var(--background-tag-meta);
+  color: var(--text-tag-meta);
+}
+a.tag-link[class*="meta"]:hover {
+  background-color: var(--background-tag-meta-hover);
 }
 
 table.task-queue-table {
@@ -330,11 +324,8 @@ div.meta-puzzle {
   border-top: var(--section-delineate);
 }
 
-.meta-puzzle.title {
-  grid-column: 2/3;
-}
 .meta-puzzle.answer {
-  grid-column: 3/5;
+  grid-column: span 2;
 }
 
 div.menu-header {
@@ -342,7 +333,7 @@ div.menu-header {
   display: flex;
   line-height: 1.8rem;
   margin: 0;
-  padding: 0;
+  padding: calc(var(--padding-base) / 8) calc(var(--padding-base) * 2);
   font-size: 1.1em;
   flex-wrap: nowrap;
   align-items: center;
@@ -356,10 +347,36 @@ div.menu-item {
   height: 100%;
 }
 
+div.menu-item:first-child {
+  margin-left: calc(var(--padding-base) * -1);
+}
+
+div.menu-item:last-child { /* should be the toggle for dark mode */
+  margin-left: auto;
+  margin-right: calc(var(--padding-base) * -1);
+}
+
+div.menu-item svg {
+  height: 2rem;
+  aspect-ratio: 1 / 1;
+  fill: var(--text-menu);
+  position: relative;
+  top: 0.3em;
+}
+
+div.menu-item button {
+  background-color: var(--background-menu);
+  fill: var(--text-menu);
+  border: none;
+}
+
+div.menu-item button:hover svg {
+  fill: var(--background-menu-selected);
+}
+
 div.menu-selected {
   background: var(--background-menu-selected);
-  font-weight: bold;
-  border-radius: 0.3rem;
+  font-weight: 700;
 }
 
 div.menu-header a,
@@ -384,8 +401,8 @@ div.meta-dashboard-icon {
 
 .icon {
   display: inline-block;
-  width: 1.4em;
-  height: 1.4em;
+  height: 1.35em;
+  aspect-ratio: 1 / 1;
   stroke-width: 0;
   stroke: currentColor;
   fill: var(--icon-fill);
@@ -432,7 +449,7 @@ table.breakout {
 table.breakout thead th {
   font-size: 1.1em;
   background: var(--background-header);
-  padding: calc(var(--padding-base) / 4) var(--padding-base);
+  padding: calc(var(--padding-base) / 2);
   color: var(--text-header);
   line-height: 1.4em;
 }
@@ -442,7 +459,7 @@ table.breakout thead th:nth-child(n+2) {
 }
 
 table.breakout tbody tr td {
-  padding: calc(var(--padding-base) / 2) var(--padding-base);
+  padding: calc(var(--padding-base) / 4) calc(var(--padding-base) / 2);
 }
 
 table.breakout tbody td {
@@ -459,17 +476,6 @@ table.breakout tbody tr td span.solver-name {
 
 table.breakout tbody tr td form {
   margin:0;
-}
-
-a.tag-link[class*="meta"] {
-  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-  background-size: 400% 400%;
-  transition: 0.6s all;
-  background-position: var(--tag-meta-position);
-  color: white;
-}
-a.tag-link[class*="meta"]:hover {
-  background-position: var(--tag-meta-position-hover);
 }
 
 th.emoji-column,
