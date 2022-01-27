@@ -60,9 +60,8 @@ html[data-theme="dark"] {
   --background-puzzle-selected: #424242;
   --background-puzzle-detail: #616161;
   
-  --background-tag: #513E49;
-  --background-tag-hover: #E9B872;
-  
+  --background-tag-meta: #ffffff;
+    
   --background-dropdown: #ffffff55;
 
   --text-link: #000000; 
@@ -77,12 +76,9 @@ html[data-theme="dark"] {
   --text-puzzle: #b3e5fc;
   
   --text-tag: #e0e0e0;
-  --text-tag-hover: #000000;
-
-  --tag-meta-position: 100% 50%;
-  --tag-meta-position-hover: 0% 50%;
+  --text-tag-meta: #000000;
   
-  --icon-fill: #ffffffaa;
+  --icon-fill: #fffa;
   
   --special-color: #ffffff44;
   --section-shadow: none;
@@ -491,5 +487,23 @@ table.breakout td.icon-column {
   width: 2.5rem;
   padding: 0 !important;
   text-align: center;
+}
+
+[data-theme="dark"] .select2-container--default .select2-selection--multiple .select2-selection__choice {
+  background-color: var(--background-puzzle-selected);
+  color: var(--text-menu);
+}
+
+[data-theme="dark"] .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background-color: var(--background-puzzle-selected);
+  color: var(--text-menu);
+}
+
+[data-theme="dark"] .select2-results__option {
+  color: var(--background-puzzle-selected);
+}
+
+[data-theme="dark"] .dataTables_filter {
+  color: var(--text-header);
 }
 
