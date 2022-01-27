@@ -14,19 +14,19 @@
       </p>
       <div class="meta-view-wrapper">
         {{#each metas}}
-          <div class="meta-view">
+          <div class="meta-view{{#if complete}} meta-complete{{/if}}">
             {{#with (puzzleStatusEmoji this)}}
-              <div title="{{description}}" class="meta-header emoji{{#if ../complete}} meta-complete{{/if}}">
+              <div title="{{description}}" class="meta-header emoji">
                 {{unicodeEmoji}}
               </div>
             {{/with}}
-            <div class="meta-header title{{#if complete}} meta-complete{{/if}}">
+            <div class="meta-header title">
               <a class="meta-link" href="puzzles?tags=in/{{tagSuffix}}&tags=meta/{{tagSuffix}}{{#if id}}&expanded={{id}}{{/if}}">{{name}}</a>
             </div>
-            <div class="meta-header answer{{#if complete}} meta-complete{{/if}}">
+            <div class="meta-header answer">
               {{#if answer}}{{answer}}{{/if}}
             </div>
-            <div class="meta-header meta-header-icons{{#if complete}} meta-complete{{/if}}">
+            <div class="meta-header meta-header-icons">
               {{#if url}}
                 <a href="{{url}}" target="_blank">
                   <svg class="icon icon-link"><use xlink:href="static/icons.svg#link"></use></svg>
