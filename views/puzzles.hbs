@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-theme="light">
+<html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
   <head>
     <title>Puzzles - {{appName}}</title>
     <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
@@ -447,6 +447,5 @@
         window.history.replaceState({}, document.title, "/puzzles");
       });
     </script>
-    <script type="text/javascript" charset="utf8" src="static/darkmode.js"></script>
   </body>
 </html>

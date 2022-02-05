@@ -349,11 +349,6 @@ div.menu-item:first-child {
   margin-left: calc(var(--padding-base) * -1);
 }
 
-div.menu-item:last-child { /* should be the toggle for dark mode */
-  margin-left: auto;
-  margin-right: calc(var(--padding-base) * -1);
-}
-
 div.menu-item svg {
   height: 2rem;
   aspect-ratio: 1 / 1;

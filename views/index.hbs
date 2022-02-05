@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-theme="light">
+<html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
   <head>
     <title>{{appName}}</title>
     <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
@@ -16,16 +16,29 @@
       </p>
       <p>
         <form method="POST">
-          <input
-            type="checkbox"
-            id="useSlackWebLinks"
-            name="useSlackWebLinks"
-            {{#if useSlackWebLinks}}checked{{/if}}
-            onchange="this.form.submit()">
-          <label for="useSlackWebLinks">
-            Use Slack web app (https://) links instead of
-            Slack native app (slack://) links for Slack channels
-          </label>
+          <p>
+            <input
+              type="checkbox"
+              id="useSlackWebLinks"
+              name="useSlackWebLinks"
+              {{#if useSlackWebLinks}}checked{{/if}}
+              onchange="this.form.submit()">
+            <label for="useSlackWebLinks">
+              Use Slack web app (https://) links instead of
+              Slack native app (slack://) links for Slack channels
+            </label>
+          </p>
+          <p>
+            <input
+              type="checkbox"
+              id="enableDarkMode"
+              name="enableDarkMode"
+              {{#if enableDarkMode}}checked{{/if}}
+              onchange="this.form.submit()">
+            <label for="enableDarkMode">
+              Enable dark mode
+            </label>
+          </p>
         </form>
       </p>
       {{#if isAdmin}}
@@ -34,6 +47,5 @@
       </p>
       {{/if}}
     </div>
-    <script type="text/javascript" charset="utf8" src="static/darkmode.js"></script>
   </body>
 </html>

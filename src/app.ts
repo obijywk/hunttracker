@@ -14,6 +14,7 @@ declare module "express-session" {
   interface Session {
     postLoginUrl?: string;
     useSlackWebLinks?: boolean;
+    enableDarkMode?: boolean;
   }
 }
 
