@@ -176,7 +176,14 @@ receiver.app.get("/metas", async(req, res) => {
       .reduce((a: number, b: number) => a + b, 0);
     metas.push(meta);
   }
-  metas.sort((a: any, b: any) => a.name < b.name ? -1 : 1);
+  metas.sort((a: any, b: any) => {
+    if (a.complete && !b.complete) {
+      return 1;
+    } else if (b.complete && !a.complete) {
+      return -1;
+    }
+    return a.name < b.name ? -1 : 1;
+  });
   return res.render("metas", {
     appName: process.env.APP_NAME,
     enableDarkMode: req.session.enableDarkMode,

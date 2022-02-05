@@ -283,9 +283,6 @@ div.meta-header {
   color: var(--text-header);
   line-height: 1.4em;
 }
-div.meta-complete {
-  order: 5;
-}
 div.meta-complete .meta-header {
   background: var(--background-header-solved);
 }
