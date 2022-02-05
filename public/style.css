@@ -6,41 +6,41 @@ html {
 
   --background-page: #eeeeee;
   --background-section: #ffffff;
-  
+
   --background-header: linear-gradient(to bottom, #1e88e5, #1565c0);
   --background-header-solved: linear-gradient(to bottom, #7cb342, #558b2f);
   --background-header-emoji: #ffffff;
-  
+
   --background-menu: #212121;
   --background-menu-selected: #bf360c;
-  
+
   --background-puzzle-selected: #ffd54f;
   --background-puzzle-detail: #ffecb3;
   --background-puzzle-solved: hsla(100, 80%, 55%, 0.25);
-  
+
   --background-tag: hsla(288, 2%, 45%, 0.6);
   --background-tag-hover: #bf360c;
   --background-tag-meta: #000000;
   --background-tag-meta-hover: #bf360c;
-  
+
   --background-dropdown: #00000055;
 
-  --text-link: #21a0a0; 
+  --text-link: #21a0a0;
   --text-default: #000000;
   --text-deemphasised: #333333;
-  
+
   --text-header: #ffffff;
   --text-header-hover: #ffd54f;
-  
+
   --text-menu: #ffffff;
-  
+
   --text-puzzle: #1976d2;
-  
+
   --text-tag: #ffffff;
   --text-tag-meta: #ffffff;
-  
+
   --icon-fill: #000a;
-  
+
   --special-color: #0002;
   --section-shadow: 4px 6px 8px -2px var(--special-color);
   --section-delineate: 1px solid var(--special-color);
@@ -49,37 +49,37 @@ html {
 html[data-theme="dark"] {
   --background-page: #000000;
   --background-section: #212121;
-  
+
   --background-header: linear-gradient(to bottom, #405977, #32455D);
   --background-header-solved: linear-gradient(to bottom, #2e7d32, #1b5e20);
   --background-header-emoji: #ffffff;
-  
+
   --background-menu: #212121;
   --background-menu-selected: #bf360c;
-  
+
   --background-puzzle-selected: #424242;
   --background-puzzle-detail: #616161;
-  
+
   --background-tag-meta: #ffffff;
-    
+
   --background-dropdown: #ffffff55;
 
-  --text-link: #000000; 
+  --text-link: #000000;
   --text-default: #ffffff;
   --text-deemphasised: #dddddd;
-  
+
   --text-header: #ffffff;
   --text-header-hover: #ffd54f;
-  
+
   --text-menu: #ffffff;
-  
+
   --text-puzzle: #b3e5fc;
-  
+
   --text-tag: #e0e0e0;
   --text-tag-meta: #000000;
-  
+
   --icon-fill: #fffa;
-  
+
   --special-color: #ffffff44;
   --section-shadow: none;
 }
@@ -129,7 +129,7 @@ table.dataTable thead th {
 }
 
 table.dataTable.no-footer {
-    box-shadow: var(--section-shadow);
+  box-shadow: var(--section-shadow);
 }
 
 table.dataTable thead .sorting::after {
@@ -160,7 +160,7 @@ td.details-control:before {
   display: block;
   content: ' ';
   width: 1em;
-  height: 1em; 
+  height: 1em;
   clip-path: polygon(50% 80%, 100% 35%, 85% 20%, 50% 55%, 15% 20%, 0% 35%);
   background-color: var(--background-dropdown);
 }
