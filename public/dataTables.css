@@ -11,8 +11,7 @@ table.dataTable tfoot th {
 }
 table.dataTable thead th,
 table.dataTable thead td {
- padding: 0.6em 1em;
- border-bottom:1px solid #111;
+ padding: 0.5em 1em;
 }
 table.dataTable thead th:active,
 table.dataTable thead td:active {
@@ -31,18 +30,9 @@ table.dataTable thead .sorting_desc_disabled {
  cursor:pointer;
  *cursor:hand;
 }
-table.dataTable thead .sorting {
- background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiAyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZjg4IiBkPSJNOC43LDEyLjlsLTIuNSwyLjVsLTIuNS0yLjV2LTEuM2wyLjUsMi41bDIuNS0yLjVWMTIuOXoiLz48cGF0aCBmaWxsPSIjZmZmZmZmODgiIGQ9Ik0zLjcsNy4xbDIuNS0yLjVsMi41LDIuNXYxLjNMNi4yLDUuOUwzLjcsOC40VjcuMXoiLz48L3N2Zz4=) no-repeat center right, linear-gradient(to bottom, #0288d1, #0277bd);
-}
-table.dataTable thead .sorting_asc {
- background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiAyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZmNjIiBkPSJNOC43LDEyLjlsLTIuNSwyLjVsLTIuNS0yLjV2LTEuM2gyLjVoMi41VjEyLjl6Ii8+PHBhdGggZmlsbD0iI2ZmZmZmZjg4IiBkPSJNMy43LDcuMWwyLjUtMi41bDIuNSwyLjV2MS4zTDYuMiw1LjlMMy43LDguNFY3LjF6Ii8+PC9zdmc+) no-repeat center right, linear-gradient(to bottom, #0288d1, #0277bd);
-}
-table.dataTable thead .sorting_desc {
- background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiAyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZmNjIiBkPSJNMy43LDcuMWwyLjUtMi41bDIuNSwyLjV2MS4zSDYuMkgzLjdWNy4xeiIvPjxwYXRoIGZpbGw9IiNmZmZmZmY4OCIgZD0iTTguNywxMi45bC0yLjUsMi41bC0yLjUtMi41di0xLjNsMi41LDIuNWwyLjUtMi41VjEyLjl6Ii8+PC9zdmc+) no-repeat center right, linear-gradient(to bottom, #0288d1, #0277bd);
-}
 table.dataTable tbody th,
 table.dataTable tbody td {
- padding:8px 10px
+ padding:6px 8px
 }
 table.dataTable.row-border tbody th,
 table.dataTable.row-border tbody td,

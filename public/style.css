@@ -1,8 +1,87 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Roboto+Mono:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Mono:wght@500&display=swap');
 
 html {
   --padding-base: 1.75rem;
   --meta-col: 2;
+
+  --background-page: #eeeeee;
+  --background-section: #ffffff;
+
+  --background-header: linear-gradient(to bottom, #1e88e5, #1565c0);
+  --background-header-solved: linear-gradient(to bottom, #7cb342, #558b2f);
+  --background-header-emoji: #ffffff;
+
+  --background-menu: #212121;
+  --background-menu-selected: #bf360c;
+
+  --background-puzzle-selected: #ffd54f;
+  --background-puzzle-detail: #ffecb3;
+  --background-puzzle-solved: hsla(100, 80%, 55%, 0.25);
+
+  --background-tag: hsla(288, 2%, 45%, 0.6);
+  --background-tag-hover: #bf360c;
+  --background-tag-meta: #000000;
+  --background-tag-meta-hover: #bf360c;
+
+  --background-dropdown: #00000055;
+
+  --text-link: #21a0a0;
+  --text-default: #000000;
+  --text-deemphasised: #333333;
+
+  --text-header: #ffffff;
+  --text-header-hover: #ffd54f;
+
+  --text-menu: #ffffff;
+
+  --text-puzzle: #1976d2;
+
+  --text-tag: #ffffff;
+  --text-tag-meta: #ffffff;
+
+  --icon-fill: #000a;
+
+  --special-color: #0002;
+  --section-shadow: 4px 6px 8px -2px var(--special-color);
+  --section-delineate: 1px solid var(--special-color);
+}
+
+html[data-theme="dark"] {
+  --background-page: #000000;
+  --background-section: #212121;
+
+  --background-header: linear-gradient(to bottom, #405977, #32455D);
+  --background-header-solved: linear-gradient(to bottom, #2e7d32, #1b5e20);
+  --background-header-emoji: #ffffff;
+
+  --background-menu: #212121;
+  --background-menu-selected: #bf360c;
+
+  --background-puzzle-selected: #424242;
+  --background-puzzle-detail: #616161;
+
+  --background-tag-meta: #ffffff;
+
+  --background-dropdown: #ffffff55;
+
+  --text-link: #000000;
+  --text-default: #ffffff;
+  --text-deemphasised: #dddddd;
+
+  --text-header: #ffffff;
+  --text-header-hover: #ffd54f;
+
+  --text-menu: #ffffff;
+
+  --text-puzzle: #b3e5fc;
+
+  --text-tag: #e0e0e0;
+  --text-tag-meta: #000000;
+
+  --icon-fill: #fffa;
+
+  --special-color: #ffffff44;
+  --section-shadow: none;
 }
 
 @media screen and (min-width: 1300px){
@@ -11,22 +90,17 @@ html {
   }
 }
 
-@media screen and (min-width: 2000px){
-  html {
-    --meta-col: 4;
-  }
-}
-
 body {
-  font-family: 'Noto Sans', sans-serif;
-  font-size: 15px;
-  margin:0;
-  padding:0;
-  background-color: #f1f1f1;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-page);
+  color: var(--text-default);
 }
 
 div.body-wrapper {
-  padding: calc(var(--padding-base) / 4) var(--padding-base);
+  padding: calc(var(--padding-base) / 4) calc(var(--padding-base) * 2);
 }
 
 div.puzzle-filters {
@@ -36,7 +110,7 @@ div.puzzle-filters {
 }
 
 div.filter-solved {
-  color: #333;
+  color: var(--text-deemphasised);
   width: 30vw;
   align-self: center;
 }
@@ -50,29 +124,52 @@ select.wide-select {
 }
 
 table.dataTable thead th {
-  background: linear-gradient(to bottom, #0288d1, #0277bd);
+  background: var(--background-header);
   color: white;
 }
+
+table.dataTable.no-footer {
+  box-shadow: var(--section-shadow);
+}
+
+table.dataTable thead .sorting::after {
+  content: ' ◦';
+}
+table.dataTable thead .sorting_asc::after {
+  content: ' ▾';
+}
+table.dataTable thead .sorting_desc::after {
+  content: ' ▴';
+}
+
 table.dataTable tbody tr {
-  background-color: #fff;
+  background-color: var(--background-section);
 }
 table.dataTable tbody tr.complete,
 div.puzzle-complete {
-  background-color: #E0F8B4;
+  background-color: var(--background-puzzle-solved);
 }
 
+table.dataTable tbody td {
+  border-top: var(--section-delineate) !important;
+}
 td.details-control {
-  background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMDAwMDAwNjYiIGQ9Ik01MTIgMHYyMDhsLTgwLTgwLTk2IDk2LTQ4LTQ4IDk2LTk2LTgwLTgwek0yMjQgMzM2bC05NiA5NiA4MCA4MGgtMjA4di0yMDhsODAgODAgOTYtOTZ6Ij48L3BhdGg+PC9zdmc+) no-repeat center center;
-  background-size: 1em;
   cursor: pointer;
 }
-tr.shown td.details-control {
-  background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMDAwMDAwNjYiIGQ9Ik0yMjQgMjg4djIwOGwtODAtODAtOTYgOTYtNDgtNDggOTYtOTYtODAtODB6TTUxMiA0OGwtOTYgOTYgODAgODBoLTIwOHYtMjA4bDgwIDgwIDk2LTk2eiI+PC9wYXRoPjwvc3ZnPg==) no-repeat center center;
-  background-size: 1em;
+td.details-control:before {
+  display: block;
+  content: ' ';
+  width: 1em;
+  height: 1em;
+  clip-path: polygon(50% 80%, 100% 35%, 85% 20%, 50% 55%, 15% 20%, 0% 35%);
+  background-color: var(--background-dropdown);
+}
+tr.shown td.details-control:before {
+  clip-path: polygon(50% 20%, 100% 65%, 85% 80%, 50% 45%, 15% 80%, 0% 65%);
 }
 
 tr.shown {
-  background-color: #FBED9D !important;
+  background-color: var(--background-puzzle-selected) !important;
 }
 tr.shown a {
   font-weight: bold;
@@ -81,11 +178,11 @@ tr.shown a.tag-link {
   font-weight: normal;
 }
 tr.shown + tr {
-  background: #FDF8D8 !important;
+  background: var(--background-puzzle-detail) !important;
 }
 
 table.puzzleDetails {
-  padding-left: 2.4em;
+  padding-left: 3em;
   border-spacing: 0;
 }
 
@@ -93,25 +190,15 @@ table.puzzleDetails tr {
   background: #fff0 !important;
 }
 
-td.emoji-column img {
-  width: 1.5em;
+img.emoji {
+  aspect-ratio: 1 / 1;
+  width: 1.25rem;
 }
 
 td.icon-column {
   margin: 0;
   padding: 0 !important;
   text-align: center;
-}
-
-th.icon-column,
-th.details-control {
-  width: 0.4em !important;
-}
-th.tag-column {
-  max-width: 12vw;
-}
-th.breakout {
-  max-width: 2rem;
 }
 
 td.breakout {
@@ -122,8 +209,15 @@ td.answer,
 div.answer,
 span.answer {
   font-family: 'Roboto Mono', monospace;
-  font-weight: bold;
+  font-weight: 500;
   font-size: 0.9em;
+  text-transform: uppercase;
+}
+
+td.answer:hover,
+div.answer:hover,
+span.answer:hover {
+  text-transform: none;
 }
 
 td.idle-column {
@@ -132,6 +226,7 @@ td.idle-column {
 
 a {
   text-decoration: none;
+  color: var(--text-puzzle);
 }
 
 a.tag-link {
@@ -139,14 +234,21 @@ a.tag-link {
   padding: 0.2em 0.8em;
   border-radius: 1em;
   text-decoration: none;
-  background: #D0D9DD;
-  color: #555;
+  background: var(--background-tag);
+  color: var(--text-tag);
   font-size: 0.85em;
   white-space: nowrap;
 }
 a.tag-link:hover {
-  background: #718C98;
-  color: #fff;
+  background: var(--background-tag-hover);
+}
+
+a.tag-link[class*="meta"] {
+  background-color: var(--background-tag-meta);
+  color: var(--text-tag-meta);
+}
+a.tag-link[class*="meta"]:hover {
+  background-color: var(--background-tag-meta-hover);
 }
 
 table.task-queue-table {
@@ -170,20 +272,19 @@ div.meta-view {
   grid-template-columns: auto minmax(min-content, 1fr) 1.2fr max-content;
   align-self: start;
 
-  box-shadow: 4px 6px 8px -2px #0003;
-  background: white;
+  box-shadow: var(--section-shadow);
+  background: var(--background-section);
   border-radius: 0.4rem;
 }
 div.meta-header {
   font-size: 1.1em;
-  background: linear-gradient(to bottom, #0288d1, #0277bd);
+  background: var(--background-header);
   padding: 0.6em 1em;
-  color: #fff;
+  color: var(--text-header);
   line-height: 1.4em;
 }
-
-div.meta-header.meta-complete {
-  background: linear-gradient(to bottom, #388e3c, #2e7d32);
+div.meta-complete .meta-header {
+  background: var(--background-header-solved);
 }
 div.meta-header.emoji img,
 div.meta-puzzle.emoji img {
@@ -191,7 +292,7 @@ div.meta-puzzle.emoji img {
   padding: 0.125rem;
 }
 div.meta-header.emoji img {
-  background-color: #fff;
+  background-color: var(--background-header-emoji);
   border-radius: 0.25rem;
 }
 div.meta-header.emoji,
@@ -199,18 +300,14 @@ div.meta-puzzle.emoji {
   padding-right: 0;
 }
 div.meta-header.title a {
-  color: #fff;
+  color: var(--text-header);
   font-weight: bold;
 }
 a.meta-link {
   text-decoration: underline;
 }
 a:hover.meta-link {
-  color: #FF7B9C !important;
-}
-a.dash-link {
-  color: #fffc;
-  font-size: 0.8em;
+  color: var(--text-header-hover) !important;
 }
 
 div.meta-puzzle {
@@ -219,26 +316,23 @@ div.meta-puzzle {
   padding: 0.2em 1em;
 
   align-items: center;
-  border-top: 0.1rem solid #0002;
+  border-top: var(--section-delineate);
 }
 
-.meta-puzzle.title {
-  grid-column: 2/3;
-}
 .meta-puzzle.answer {
-  grid-column: 3/5;
+  grid-column: span 2;
 }
 
 div.menu-header {
-  background: #0d1f2d;
+  background: var(--background-menu);
   display: flex;
   line-height: 1.8rem;
   margin: 0;
-  padding: 0;
+  padding: calc(var(--padding-base) / 8) calc(var(--padding-base) * 2);
   font-size: 1.1em;
   flex-wrap: nowrap;
   align-items: center;
-  color: white;
+  color: var(--text-menu);
   height: calc(var(--padding-base) * 1.5);
 }
 
@@ -248,15 +342,36 @@ div.menu-item {
   height: 100%;
 }
 
+div.menu-item:first-child {
+  margin-left: calc(var(--padding-base) * -1);
+}
+
+div.menu-item svg {
+  height: 2rem;
+  aspect-ratio: 1 / 1;
+  fill: var(--text-menu);
+  position: relative;
+  top: 0.3em;
+}
+
+div.menu-item button {
+  background-color: var(--background-menu);
+  fill: var(--text-menu);
+  border: none;
+}
+
+div.menu-item button:hover svg {
+  fill: var(--background-menu-selected);
+}
+
 div.menu-selected {
-  background: #bf4e30;
-  font-weight: bold;
-  border-radius: 0.3rem;
+  background: var(--background-menu-selected);
+  font-weight: 700;
 }
 
 div.menu-header a,
 div.menu-header a:visited {
-  color: white;
+  color: var(--text-menu);
   height: 100%;
 }
 
@@ -276,11 +391,11 @@ div.meta-dashboard-icon {
 
 .icon {
   display: inline-block;
-  width: 1.4em;
-  height: 1.4em;
+  height: 1.35em;
+  aspect-ratio: 1 / 1;
   stroke-width: 0;
   stroke: currentColor;
-  fill: #000a;
+  fill: var(--icon-fill);
   transition: 0.1s fill;
   position: relative;
   top: 0.125em;
@@ -301,31 +416,31 @@ div.meta-dashboard-icon {
   fill: #DB4437;
 }
 .meta-header-icons .icon {
-  fill: white;
+  fill: var(--text-header);
 }
 .meta-header-icons .icon:hover {
-  fill: #F4B400;
+  fill: var(--text-header-hover);
 }
 
 .icon-idle,
 .icon-tags {
-  fill: white;
+  fill: var(--text-header);
 }
 
 table.breakout {
   width: 100%;
   border-spacing: 0;
 
-  box-shadow: 4px 6px 8px -2px #0003;
-  background: white;
+  box-shadow: var(--section-shadow);
+  background: var(--background-section);
   border-radius: 0.4rem;
 }
 
 table.breakout thead th {
   font-size: 1.1em;
-  background: linear-gradient(to bottom, #0288d1, #0277bd);
-  padding: calc(var(--padding-base) / 4) var(--padding-base);
-  color: #fff;
+  background: var(--background-header);
+  padding: calc(var(--padding-base) / 2);
+  color: var(--text-header);
   line-height: 1.4em;
 }
 
@@ -334,11 +449,11 @@ table.breakout thead th:nth-child(n+2) {
 }
 
 table.breakout tbody tr td {
-  padding: calc(var(--padding-base) / 2) var(--padding-base);
+  padding: calc(var(--padding-base) / 4) calc(var(--padding-base) / 2);
 }
 
 table.breakout tbody td {
-  border-top: 1px solid #0002;
+  border-top: var(--section-delineate);
 }
 
 table.breakout tbody tr td:first-child {
@@ -353,17 +468,6 @@ table.breakout tbody tr td form {
   margin:0;
 }
 
-a.tag-link[class*="meta"] {
-  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-  background-size: 400% 400%;
-  transition: 0.6s all;
-  background-position: 0% 50%;
-  color: white;
-}
-a.tag-link[class*="meta"]:hover {
-  background-position: 100% 50%;
-}
-
 th.emoji-column,
 td.emoji-column {
   width: 1.5rem;
@@ -376,3 +480,22 @@ table.breakout td.icon-column {
   padding: 0 !important;
   text-align: center;
 }
+
+[data-theme="dark"] .select2-container--default .select2-selection--multiple .select2-selection__choice {
+  background-color: var(--background-puzzle-selected);
+  color: var(--text-menu);
+}
+
+[data-theme="dark"] .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background-color: var(--background-puzzle-selected);
+  color: var(--text-menu);
+}
+
+[data-theme="dark"] .select2-results__option {
+  color: var(--background-puzzle-selected);
+}
+
+[data-theme="dark"] .dataTables_filter {
+  color: var(--text-header);
+}
+

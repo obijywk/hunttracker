@@ -1,4 +1,5 @@
-<html>
+<!doctype html>
+<html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
   <head>
     <title>Puzzles - {{appName}}</title>
     <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
@@ -49,8 +50,8 @@
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
-            <th><svg class="icon icon-idle"><title>Idle</title><use xlink:href="#idle"></use></svg></th>
-            <th><svg class="icon icon-tags"><title>Tags</title><use xlink:href="#tags"></use></svg></th>
+            <th><svg class="icon icon-idle"><title>Idle</title><use xlink:href="static/icons.svg#idle"></use></svg></th>
+            <th><svg class="icon icon-tags"><title>Tags</title><use xlink:href="static/icons.svg#tags"></use></svg></th>
             <th>Solvers</th>
           </tr>
         </thead>
@@ -105,7 +106,7 @@
         if (data.url) {
           puzzleRow = `
             <tr>
-              <td class="detail-icon-column"><a href="${data.url}" target="_blank"><svg class="icon icon-link"><use xlink:href="#link"></use></svg></a></td>
+              <td class="detail-icon-column"><a href="${data.url}" target="_blank"><svg class="icon icon-link"><use xlink:href="static/icons.svg#link"></use></svg></a></td>
               <td>Puzzle</td>
               <td><a href="${data.url}" target="_blank">${data.url}</a></td>
             </tr>
@@ -115,27 +116,27 @@
           <table class="puzzleDetails">
             ${puzzleRow}
             <tr>
-              <td class="detail-icon-column"><a href="{{slackUrlPrefix}}${data.id}" target="_blank"><svg class="icon icon-slack"><use xlink:href="#slack"></use></svg></a></td>
+              <td class="detail-icon-column"><a href="{{slackUrlPrefix}}${data.id}" target="_blank"><svg class="icon icon-slack"><use xlink:href="static/icons.svg#slack"></use></svg></a></td>
               <td>Channel</td>
               <td><a href="{{slackUrlPrefix}}${data.id}" target="_blank">#${data.channelName}</a></td>
             </tr>
             <tr>
-              <td class="detail-icon-column"><a href="${data.sheetUrl}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="#sheet"></use></svg></a></td>
+              <td class="detail-icon-column"><a href="${data.sheetUrl}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="static/icons.svg#sheet"></use></svg></a></td>
               <td>Sheet</td>
               <td><a href="${data.sheetUrl}" target="_blank">${data.sheetUrl}</a></td>
             </tr>
             <tr>
-              <td class="detail-icon-column"><a href="${data.drawingUrl}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="#drawing"></use></svg></a></td>
+              <td class="detail-icon-column"><a href="${data.drawingUrl}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="static/icons.svg#drawing"></use></svg></a></td>
               <td>Drawing</td>
               <td><a href="${data.drawingUrl}" target="_blank">${data.drawingUrl}</a></td>
             </tr>
             <tr>
-              <td><svg class="icon icon-people"><use xlink:href="#people"></use></svg></td>
+              <td><svg class="icon icon-people"><use xlink:href="static/icons.svg#people"></use></svg></td>
               <td>Solvers</td>
               <td>${data.users.map(u => u.name).join(", ")}</td>
             </tr>
             <tr>
-              <td><svg class="icon icon-topic"><use xlink:href="#topic"></use></svg></td>
+              <td><svg class="icon icon-topic"><use xlink:href="static/icons.svg#topic"></use></svg></td>
               <td>Topic</td>
               <td>${data.channelTopic}</td>
             </tr>
@@ -147,6 +148,7 @@
         const table = $("#puzzles-table").DataTable({
           paging: false,
           dom: "Bfrtip",
+          autoWidth: false,
           buttons: [
             {
               text: "Refresh",
@@ -268,7 +270,7 @@
               render: (data, type, row) => {
                 if (type === "display") {
                   if (data) {
-                    return `<a href="${data}" target="_blank"><svg class="icon icon-link"><use xlink:href="#link"></use></svg></a>`;
+                    return `<a href="${data}" target="_blank"><svg class="icon icon-link"><use xlink:href="static/icons.svg#link"></use></svg></a>`;
                   }
                   return "&nbsp;";
                 }
@@ -282,7 +284,7 @@
               searchable: false,
               render: (data, type, row) => {
                 if (type === "display") {
-                  return `<a href="{{slackUrlPrefix}}${data}" target="_blank"><svg class="icon icon-slack"><use xlink:href="#slack"></use></svg></a>`;
+                  return `<a href="{{slackUrlPrefix}}${data}" target="_blank"><svg class="icon icon-slack"><use xlink:href="static/icons.svg#slack"></use></svg></a>`;
                 }
                 return data;
               },
@@ -294,7 +296,7 @@
               searchable: false,
               render: (data, type, row) => {
                 if (type === "display") {
-                  return `<a href="${data}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="#sheet"></use></svg></a>`;
+                  return `<a href="${data}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="static/icons.svg#sheet"></use></svg></a>`;
                 }
                 return data;
               },
@@ -306,7 +308,7 @@
               searchable: false,
               render: (data, type, row) => {
                 if (type === "display") {
-                  return `<a href="${data}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="#drawing"></use></svg></a>`;
+                  return `<a href="${data}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="static/icons.svg#drawing"></use></svg></a>`;
                 }
                 return data;
               },
@@ -445,73 +447,5 @@
         window.history.replaceState({}, document.title, "/puzzles");
       });
     </script>
-    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">
-      <symbol id="drawing" viewBox="0 0 32 32">
-        <title>Google Drawing</title>
-        <path d="M26 28h-20v-4l6-10 8.219 10 5.781-4v8z"></path>
-        <path d="M26 15c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3c1.657 0 3 1.343 3 3z"></path>
-        <path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
-      </symbol>
-      <symbol id="link" viewBox="0 0 512 512">
-        <title>Link to Puzzle</title>
-        <path d="M220.118 317.883c-6.655 0-13.308-2.538-18.385-7.615-47.567-47.568-47.567-124.967 0-172.535l96-96c23.044-23.043 53.68-35.733 86.267-35.733s63.224 12.69 86.268 35.732c47.566 47.568 47.566 124.967 0 172.535l-43.883 43.883c-10.154 10.154-26.615 10.154-36.77 0-10.153-10.153-10.153-26.616 0-36.77l43.883-43.883c27.292-27.293 27.292-71.702 0-98.995-13.221-13.221-30.8-20.502-49.498-20.502s-36.276 7.281-49.498 20.503l-96 95.999c-27.293 27.293-27.293 71.703 0 98.996 10.154 10.153 10.153 26.616 0 36.77-5.075 5.076-11.731 7.615-18.384 7.615z"></path>
-        <path d="M128 506c-32.588 0-63.225-12.69-86.267-35.732-47.567-47.568-47.567-124.967 0-172.535l43.882-43.882c10.154-10.153 26.617-10.153 36.77 0 10.154 10.153 10.154 26.616 0 36.77l-43.882 43.882c-27.293 27.293-27.293 71.703 0 98.996 13.22 13.22 30.799 20.501 49.497 20.501s36.276-7.281 49.499-20.503l96-95.999c27.292-27.293 27.292-71.703 0-98.996-10.154-10.154-10.153-26.616 0-36.77 10.153-10.153 26.616-10.153 36.77 0.001 47.566 47.567 47.566 124.966 0.001 172.534l-96.001 96c-23.045 23.044-53.682 35.733-86.269 35.733z"></path>
-      </symbol>
-      <symbol id="sheet" viewBox="0 0 32 32">
-        <title>Google Sheet</title>
-        <path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
-        <path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-        <path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-        <path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-      </symbol>
-      <symbol id="slack" viewBox="71 71 128 128">
-        <title>Slack Channel</title>
-        <g>
-          <g>
-            <path fill="var(--slack-1)" d="M99.4,151.2c0,7.1-5.8,12.9-12.9,12.9c-7.1,0-12.9-5.8-12.9-12.9c0-7.1,5.8-12.9,12.9-12.9h12.9V151.2z"/>
-            <path fill="var(--slack-1)" d="M105.9,151.2c0-7.1,5.8-12.9,12.9-12.9s12.9,5.8,12.9,12.9v32.3c0,7.1-5.8,12.9-12.9,12.9
-              s-12.9-5.8-12.9-12.9V151.2z"/>
-          </g>
-          <g>
-            <path fill="var(--slack-2)" d="M118.8,99.4c-7.1,0-12.9-5.8-12.9-12.9c0-7.1,5.8-12.9,12.9-12.9s12.9,5.8,12.9,12.9v12.9H118.8z"/>
-            <path fill="var(--slack-2)" d="M118.8,105.9c7.1,0,12.9,5.8,12.9,12.9s-5.8,12.9-12.9,12.9H86.5c-7.1,0-12.9-5.8-12.9-12.9
-              s5.8-12.9,12.9-12.9H118.8z"/>
-          </g>
-          <g>
-            <path fill="var(--slack-3)" d="M170.6,118.8c0-7.1,5.8-12.9,12.9-12.9c7.1,0,12.9,5.8,12.9,12.9s-5.8,12.9-12.9,12.9h-12.9V118.8z"/>
-            <path fill="var(--slack-3)" d="M164.1,118.8c0,7.1-5.8,12.9-12.9,12.9c-7.1,0-12.9-5.8-12.9-12.9V86.5c0-7.1,5.8-12.9,12.9-12.9
-              c7.1,0,12.9,5.8,12.9,12.9V118.8z"/>
-          </g>
-          <g>
-            <path fill="var(--slack-4)" d="M151.2,170.6c7.1,0,12.9,5.8,12.9,12.9c0,7.1-5.8,12.9-12.9,12.9c-7.1,0-12.9-5.8-12.9-12.9v-12.9H151.2z"/>
-            <path fill="var(--slack-4)" d="M151.2,164.1c-7.1,0-12.9-5.8-12.9-12.9c0-7.1,5.8-12.9,12.9-12.9h32.3c7.1,0,12.9,5.8,12.9,12.9
-              c0,7.1-5.8,12.9-12.9,12.9H151.2z"/>
-          </g>
-        </g>
-      </symbol>
-      <symbol id="people" viewBox="0 0 24 24">
-        <title>Solvers</title>
-        <path d="M15.984 12.984q1.313 0 2.859 0.375t2.859 1.219 1.313 1.922v2.484h-6v-2.484q0-2.063-1.969-3.469 0.328-0.047 0.938-0.047zM8.016 12.984q1.313 0 2.859 0.375t2.836 1.219 1.289 1.922v2.484h-14.016v-2.484q0-1.078 1.313-1.922t2.859-1.219 2.859-0.375zM8.016 11.016q-1.219 0-2.109-0.891t-0.891-2.109 0.891-2.109 2.109-0.891 2.086 0.891 0.867 2.109-0.867 2.109-2.086 0.891zM15.984 11.016q-1.219 0-2.109-0.891t-0.891-2.109 0.891-2.109 2.109-0.891 2.109 0.891 0.891 2.109-0.891 2.109-2.109 0.891z"></path>
-      </symbol>
-      <symbol id="topic" viewBox="0 0 24 24">
-        <title>Puzzle topic</title>
-        <path d="M20.016 6h-8.016l-2.016-2.016h-6q-0.797 0-1.383 0.586t-0.586 1.43v12q0 0.844 0.586 1.43t1.383 0.586h16.031q0.797 0 1.383-0.586t0.586-1.43v-9.984q0-0.844-0.586-1.43t-1.383-0.586zM14.016 15.984h-8.016v-1.969h8.016v1.969zM18 12h-12v-2.016h12v2.016z"></path>
-      </symbol>
-      <symbol id="idle" viewBox="0 0 24 24">
-        <title>Time since last activity</title>
-        <path d="M16.219 16.219l0.797-1.313-4.5-2.719v-5.203h-1.5v6zM12 2.016q4.125 0 7.055 2.93t2.93 7.055-2.93 7.055-7.055 2.93-7.055-2.93-2.93-7.055 2.93-7.055 7.055-2.93z"></path>
-      </symbol>
-      <symbol id="tags" viewBox="0 0 40 32">
-        <title>Puzzle Tags</title>
-        <path d="M38.5 0h-12c-0.825 0-1.977 0.477-2.561 1.061l-14.879 14.879c-0.583 0.583-0.583 1.538 0 2.121l12.879 12.879c0.583 0.583 1.538 0.583 2.121 0l14.879-14.879c0.583-0.583 1.061-1.736 1.061-2.561v-12c0-0.825-0.675-1.5-1.5-1.5zM31 12c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"></path>
-        <path d="M4 17l17-17h-2.5c-0.825 0-1.977 0.477-2.561 1.061l-14.879 14.879c-0.583 0.583-0.583 1.538 0 2.121l12.879 12.879c0.583 0.583 1.538 0.583 2.121 0l0.939-0.939-13-13z"></path>
-      </symbol>
-      <symbol id="down" viewBox="0 0 24 24">
-        <path d="M7.406 8.578l4.594 4.594 4.594-4.594 1.406 1.406-6 6-6-6z"></path>
-      </symbol>
-      <symbol id="up" viewBox="0 0 24 24">
-        <path d="M7.406 15.422l-1.406-1.406 6-6 6 6-1.406 1.406-4.594-4.594z"></path>
-      </symbol>
-    </svg>
   </body>
 </html>

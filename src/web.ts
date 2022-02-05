@@ -52,6 +52,7 @@ async function checkAdmin(req: Request) {
 receiver.app.get("/login", async (req, res) => {
   return res.render("login", {
     slackClientId: process.env.SLACK_CLIENT_ID,
+    enableDarkMode: req.session.enableDarkMode,
   });
 });
 
@@ -68,6 +69,7 @@ async function indexRenderOptions(req: Request) {
     helpUrl: process.env.HELP_URL,
     isAdmin: await checkAdmin(req),
     useSlackWebLinks: req.session.useSlackWebLinks,
+    enableDarkMode: req.session.enableDarkMode,
   };
 }
 
@@ -83,6 +85,7 @@ receiver.app.post("/", async (req, res) => {
     return;
   }
   req.session.useSlackWebLinks = req.body.useSlackWebLinks !== undefined;
+  req.session.enableDarkMode = req.body.enableDarkMode !== undefined;
   return res.render("index", await indexRenderOptions(req));
 });
 
@@ -92,6 +95,7 @@ receiver.app.get("/puzzles", async (req, res) => {
   }
   return res.render("puzzles", {
     appName: process.env.APP_NAME,
+    enableDarkMode: req.session.enableDarkMode,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
     minimumIdleMinutes: process.env.MINIMUM_IDLE_MINUTES,
     initialSearch: req.query.search || "",
@@ -172,9 +176,17 @@ receiver.app.get("/metas", async(req, res) => {
       .reduce((a: number, b: number) => a + b, 0);
     metas.push(meta);
   }
-  metas.sort((a: any, b: any) => a.name < b.name ? -1 : 1);
+  metas.sort((a: any, b: any) => {
+    if (a.complete && !b.complete) {
+      return 1;
+    } else if (b.complete && !a.complete) {
+      return -1;
+    }
+    return a.name < b.name ? -1 : 1;
+  });
   return res.render("metas", {
     appName: process.env.APP_NAME,
+    enableDarkMode: req.session.enableDarkMode,
     metas,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
   });
@@ -195,6 +207,7 @@ receiver.app.get("/admin", async (req, res) => {
   }
   return res.render("admin", {
     appName: process.env.APP_NAME,
+    enableDarkMode: req.session.enableDarkMode,
     allowResetDatabase: process.env.ALLOW_RESET_DATABASE !== undefined,
   });
 });
@@ -278,6 +291,7 @@ receiver.app.get("/taskqueue", async (req, res) => {
   }));
   return res.render("taskqueue", {
     appName: process.env.APP_NAME,
+    enableDarkMode: req.session.enableDarkMode,
     tasks: displayTasks,
   });
 });
@@ -354,6 +368,7 @@ receiver.app.get("/tagger", async (req, res) => {
 
   res.render("tagger", {
     appName: process.env.APP_NAME,
+    enableDarkMode: req.session.enableDarkMode,
     puzzleOptions: JSON.stringify(puzzleOptions),
     tagOptions: JSON.stringify(tagOptions),
   });
@@ -406,6 +421,7 @@ receiver.app.get("/breakouts", async (req, res) => {
 
   res.render("breakouts", {
     appName: process.env.APP_NAME,
+    enableDarkMode: req.session.enableDarkMode,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
     breakouts: breakouts,
   });
