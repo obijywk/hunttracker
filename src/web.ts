@@ -57,7 +57,11 @@ receiver.app.get("/login", async (req, res) => {
 });
 
 receiver.app.get("/logout", async (req, res) => {
-  req.logout();
+  req.logout((err) => {
+    if (err) {
+      console.warn(err);
+    }
+  });
   req.session.postLoginUrl = null;
   return res.redirect("login");
 });

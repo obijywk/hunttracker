@@ -48,15 +48,15 @@ for (const messageEventListener of messageEventListeners) {
 export const handler = serverlessHttp(receiver.app);
 
 export const refresh = async (
-  event: AWSLambda.APIGatewayEvent,
-  context: AWSLambda.APIGatewayEventRequestContext,
+  event: any/*: AWSLambda.APIGatewayEvent*/,
+  context: any/*: AWSLambda.APIGatewayEventRequestContext*/,
 ) => {
   await refreshPolling.refresh();
 };
 
 export const processTaskQueue = async (
-  event: AWSLambda.APIGatewayEvent,
-  context: AWSLambda.APIGatewayEventRequestContext,
+  event: any/*: AWSLambda.APIGatewayEvent*/,
+  context: any/*: AWSLambda.APIGatewayEventRequestContext*/,
 ) => {
   await taskQueue.processTaskQueue();
 };
