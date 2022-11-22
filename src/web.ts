@@ -111,7 +111,7 @@ receiver.app.get("/puzzles", async (req, res) => {
     initialSearch: req.query.search || "",
     initialTags: req.query.tags || "",
     initialExpandedPuzzleIds: req.query.expanded || "",
-    initialSolvedFilter: req.query.solved || "",
+    initialSolvedFilter: req.query.solved || "unsolved",
   });
 });
 

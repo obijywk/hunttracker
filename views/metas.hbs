@@ -21,7 +21,7 @@
               </div>
             {{/with}}
             <div class="meta-header title">
-              <a class="meta-link" href="puzzles?tags=in/{{tagSuffix}}&tags=meta/{{tagSuffix}}{{#if id}}&expanded={{id}}{{/if}}">{{name}}</a>
+              <a class="meta-link" href="puzzles?solved=all&tags=in/{{tagSuffix}}&tags=meta/{{tagSuffix}}{{#if id}}&expanded={{id}}{{/if}}">{{name}}</a>
             </div>
             <div class="meta-header answer">
               {{#if answer}}{{answer}}{{/if}}
@@ -55,7 +55,7 @@
                 </div>
               {{/with}}
               <div class="meta-puzzle title{{#if complete}} puzzle-complete{{/if}}">
-                <a href="puzzles?tags=in/{{../tagSuffix}}&tags=meta/{{../tagSuffix}}&expanded={{id}}">
+                <a href="puzzles?solved=all&tags=in/{{../tagSuffix}}&tags=meta/{{../tagSuffix}}&expanded={{id}}">
                   {{name}}
                 </a>
               </div>
