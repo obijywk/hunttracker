@@ -36,6 +36,9 @@ function commaSeparatedSolvers(puzzle: puzzles.Puzzle, limit: number): string {
 expressHbs.registerHelper("commaSeparatedSolvers", commaSeparatedSolvers);
 
 function checkAuth(req: Request, res: Response) {
+  if (process.env.DISABLE_WEB_AUTH !== undefined) {
+    return true;
+  }
   if (req.isAuthenticated()) {
     return true;
   }
@@ -45,6 +48,9 @@ function checkAuth(req: Request, res: Response) {
 }
 
 async function checkAdmin(req: Request) {
+  if (process.env.DISABLE_WEB_AUTH !== undefined) {
+    return true;
+  }
   const user = req.user as any;
   return await users.isAdmin(user.id);
 }
@@ -110,7 +116,7 @@ receiver.app.get("/puzzles", async (req, res) => {
 });
 
 receiver.app.get("/puzzles/data", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  if (!req.isAuthenticated() && process.env.DISABLE_WEB_AUTH === undefined) {
     return res.status(401).end();
   }
   res.contentType("application/json");

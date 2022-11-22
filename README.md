@@ -109,6 +109,8 @@ Everything is configured using environment variables, and they need to be set fo
   and reuse.
 - **LOG_MESSAGE_EVENTS**: If set, logs debugging information about incoming Slack requests and
   event messages. Currently only implemented for the AWS handler.
+- **DISABLE_WEB_AUTH**: If set, the web interface won't check for user authentication at all. Only
+  enable this for local testing.
 
 ## Required Slack configuration
 
