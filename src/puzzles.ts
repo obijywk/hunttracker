@@ -656,7 +656,7 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
           text: {
             type: "mrkdwn",
             text: `Enter the *HQ-confirmed* answer for the puzzle *${buildPuzzleNameMrkdwn(puzzle)}* below.` +
-              " Prefer to use only capital letters and spaces, unless there's a good reason not to.",
+              " Prefer to use only uppercase letters and spaces, unless there's a good reason not to.",
           },
         },
         {
@@ -710,6 +710,27 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
             ],
           },
         },
+        {
+          type: "input",
+          "block_id": "answer_allow_lowercase_input",
+          optional: true,
+          label: {
+            type: "plain_text",
+            text: "Record confirmed answer options",
+          },
+          element: {
+            type: "checkboxes",
+            options: [
+              {
+                text: {
+                  type: "plain_text",
+                  text: "Allow lowercase letters in this answer",
+                },
+                value: "answer_allow_lowercase",
+              },
+            ],
+          },
+        },
       ],
       submit: {
         type: "plain_text",
@@ -727,6 +748,17 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
   const values = getViewStateValues(view);
   const answer: string = values["puzzle_answer_input"];
   const complete: boolean = values["puzzle_solved_input"] === "true";
+  const allowLowercase: boolean = values["answer_allow_lowercase_input"].length > 0;
+
+  if (!allowLowercase && answer.match(/[a-z]/)) {
+    ack({
+      "response_action": "errors",
+      errors: {
+        "puzzle_answer_input": "Prefer to use only uppercase letters. If you have a good reason to include lowercase letters, check the \"Allow lowercase letters in this answer\" box below.",
+      },
+    });
+    return;
+  }
 
   const puzzle = await get(id);
   if (puzzle.answer === answer && puzzle.complete === complete) {
