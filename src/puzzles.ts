@@ -769,6 +769,13 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
       await p;
     }
     await updateStatusMessage(puzzle);
+    if (puzzle.channelTopic.match(/BR *\d+[ .:;]*/i)) {
+      await app.client.conversations.setTopic({
+        token: process.env.SLACK_USER_TOKEN,
+        channel: id,
+        topic: puzzle.channelTopic.replace(/BR *\d+[ .:;]*/i, ""),
+      });
+    }
     if (process.env.AUTO_ARCHIVE) {
       await app.client.conversations.archive({
         token: process.env.SLACK_USER_TOKEN,
