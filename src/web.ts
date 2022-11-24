@@ -187,14 +187,31 @@ receiver.app.get("/metas", async(req, res) => {
       .reduce((a: number, b: number) => a + b, 0);
     metas.push(meta);
   }
-  metas.sort((a: any, b: any) => {
+  const sortMetas = (a: any, b: any) => {
     if (a.complete && !b.complete) {
       return 1;
     } else if (b.complete && !a.complete) {
       return -1;
     }
+    if (a.orderKey && b.orderKey) {
+      return a.orderKey < b.orderKey ? -1 : 1;
+    }
     return a.name < b.name ? -1 : 1;
-  });
+  };
+  for (const meta of metas) {
+    if (meta.tags.filter((t: tags.Tag) => t.name.startsWith(inPrefix)).length === 0) {
+      let order = 0;
+      let stack = [meta];
+      while (stack.length !== 0) {
+        const parent = stack.shift();
+        parent.orderKey = `${meta.tagSuffix} ${String(order++).padStart(4, "0")}`;
+        const childMetas = parent.puzzles.filter((p: any) => p.tagSuffix);
+        childMetas.sort(sortMetas);
+        stack = childMetas.concat(stack);
+      }
+    }
+  }
+  metas.sort(sortMetas);
   return res.render("metas", {
     appName: process.env.APP_NAME,
     enableDarkMode: req.session.enableDarkMode,
