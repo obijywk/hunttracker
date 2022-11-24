@@ -29,6 +29,10 @@ function getSheetUrlFileId(url: string): string {
   throw `Failed to extract file ID from ${url}`;
 }
 
+export function getFileIdSheetUrl(fileId: string): string {
+  return SHEET_URL_PREFIX + fileId;
+}
+
 function getDrawingUrlFileId(url: string): string {
   const match = DRAWING_URL_FILE_ID_REGEX.exec(url);
   if (match) {
@@ -102,6 +106,27 @@ export async function getSheetModifiedTimestamp(url: string): Promise<moment.Mom
 export async function getDrawingModifiedTimestamp(url: string): Promise<moment.Moment | null> {
   const fileId = getDrawingUrlFileId(url);
   return getFileModifiedTimestamp(fileId);
+}
+
+export async function getSheetFolderFileId(url: string): Promise<string | null> {
+  const fileId = getSheetUrlFileId(url);
+  try {
+    const response = await drive.files.get({fileId, fields: "parents"});
+    if (response.data.parents.length > 0) {
+      return response.data.parents[0];
+    }
+    return null;
+  } catch (e) {
+    console.error("getSheetFolderFileId failed", e);
+    if (e.response && e.response.errors) {
+      for (const error of e.response.errors) {
+        if (error.reason === "userRateLimitExceeded") {
+          rateLimitExceededTimestamp = moment();
+        }
+      }
+    }
+    return null;
+  }
 }
 
 export async function appendPuzzleRowToTrackingSheet(name: string) {

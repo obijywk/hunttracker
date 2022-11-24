@@ -42,7 +42,9 @@ CREATE TABLE users (
   id text PRIMARY KEY,  -- Slack user ID
   name text,
   email text,
-  admin boolean
+  admin boolean,
+  google_people_resource_name text,  -- A person resourceName as returned by the Google People API
+  google_activity_person_name text   -- A knownUser personName as returned by the Google Drive Activity API
 );
 
 CREATE TABLE puzzle_tag (
@@ -63,7 +65,8 @@ CREATE TYPE task_type AS ENUM (
   'edit_puzzle',
   'refresh_puzzle',
   'publish_home',
-  'refresh_users'
+  'refresh_users',
+  'send_sheet_editor_invites'
 );
 
 CREATE TABLE task_queue (

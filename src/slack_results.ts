@@ -15,6 +15,7 @@ export interface ConversationsHistoryResult extends WebAPICallResult {
     ts: string;
     type: string;
     subtype: string;
+    user: string;
   }>;
   has_more: boolean;
 }

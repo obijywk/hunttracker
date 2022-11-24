@@ -14,6 +14,7 @@ import { makeSlackChannelUrlPrefix } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
+import { deleteAllPeople } from "./google_people";
 
 expressHbs.registerPartial(
   "menuheader",
@@ -259,6 +260,18 @@ receiver.app.post("/admin/refreshusers", async (req, res) => {
     return;
   }
   await users.refreshAll();
+  return res.redirect("../admin");
+});
+
+receiver.app.post("/admin/deletecontacts", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+  if (!await checkAdmin(req)) {
+    res.redirect("../puzzles");
+    return;
+  }
+  await deleteAllPeople();
   return res.redirect("../admin");
 });
 

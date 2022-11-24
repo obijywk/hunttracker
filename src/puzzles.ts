@@ -132,6 +132,7 @@ interface ReadFromDatabaseOptions {
   client?: PoolClient;
   excludeComplete?: boolean;
   withTag?: string;
+  withSheetUrlIn?: Array<string>;
 }
 
 async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array<Puzzle>> {
@@ -193,6 +194,13 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       WHERE puzzle_tag.puzzle_id = puzzles.id AND tags.name = $${params.length}
     )`);
   }
+  if (options.withSheetUrlIn) {
+    const values = [];
+    for (const sheetUrl of options.withSheetUrlIn) {
+      values.push(`'${sheetUrl}'`);
+    }
+    whereConditions.push(`sheet_url IN (${values.join(",")})`);
+  }
   if (whereConditions.length > 0) {
     query += "\nWHERE " + whereConditions.join(" AND ");
   }
@@ -209,7 +217,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       channelName: row.channel_name,
       channelTopic: row.channel_topic,
       channelTopicModifiedTimestamp: moment.utc(row.channel_topic_modified_timestamp),
-      users: row.users || [],
+      users: (row.users || []).map(users.rowToUser),
       tags: row.tags || [],
       sheetUrl: row.sheet_url,
       drawingUrl: row.drawing_url,
@@ -238,14 +246,18 @@ export async function get(id: string, client?: PoolClient): Promise<Puzzle> {
 }
 
 export interface ListOptions {
+  client?: PoolClient;
   excludeComplete?: boolean;
   withTag?: string;
+  withSheetUrlIn?: Array<string>;
 }
 
 export async function list(options: ListOptions = {}): Promise<Array<Puzzle>> {
   return await readFromDatabase({
+    client: options.client,
     excludeComplete: options.excludeComplete,
     withTag: options.withTag,
+    withSheetUrlIn: options.withSheetUrlIn,
   });
 }
 
@@ -1365,3 +1377,16 @@ taskQueue.registerHandler("refresh_puzzle", async (client, payload) => {
   const id: string = payload.id;
   await refreshPuzzle(id, client);
 });
+
+export async function getParticipantUserIds(id: string): Promise<Array<string>> {
+  const channelHistoryResult = await app.client.conversations.history({
+    token: process.env.SLACK_USER_TOKEN,
+    channel: id,
+    limit: 200,
+  }) as ConversationsHistoryResult;
+  const participantUserIds: Set<string> = new Set();
+  for (const message of channelHistoryResult.messages) {
+    participantUserIds.add(message.user);
+  }
+  return Array.from(participantUserIds);
+}

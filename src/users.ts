@@ -3,6 +3,7 @@ import { UserChangeEvent } from "@slack/bolt";
 
 import { app } from "./app";
 import * as db from "./db";
+import { createPeople, getAllPeople, GooglePerson } from "./google_people";
 import { ConversationsMembersResult, UsersListResult, UserResult } from "./slack_results";
 import * as taskQueue from "./task_queue";
 
@@ -11,9 +12,22 @@ export interface User {
   name: string;
   email: string;
   admin: boolean;
+  googlePeopleResourceName: string;
+  googleActivityPersonName: string;
 }
 
 const ignoredUserIds = new Set(process.env.SLACK_IGNORED_USER_IDS.split(","));
+
+export function rowToUser(row: any): User {
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    admin: row.admin,
+    googlePeopleResourceName: row.google_people_resource_name || "",
+    googleActivityPersonName: row.google_activity_person_name || "",
+  };
+}
 
 function shouldAcceptMember(member: UserResult): boolean {
   return !member.deleted && !member.is_bot && !ignoredUserIds.has(member.id);
@@ -67,10 +81,10 @@ async function refreshAllInternal(client: PoolClient) {
     cursor = userListResult.response_metadata.next_cursor;
   } while (cursor);
 
-  const dbUsers = await client.query("SELECT id, name, email, admin FROM users") as QueryResult<User>;
+  const dbUsers = await client.query("SELECT * FROM users") as QueryResult<any>;
   const idToDbUser: { [key: string]: User } = {};
-  for (const dbUser of dbUsers.rows) {
-    idToDbUser[dbUser.id] = dbUser;
+  for (const row of dbUsers.rows) {
+    idToDbUser[row.id] = rowToUser(row);
   }
 
   const adminUserIds = await adminUserIdsPromise;
@@ -107,6 +121,10 @@ async function refreshAllInternal(client: PoolClient) {
       }
     }
   }
+
+  if (process.env.ENABLE_SHEET_EDITOR_INVITES) {
+    await syncGooglePeople(client);
+  }
 }
 
 taskQueue.registerHandler("refresh_users", async (client) => {
@@ -125,6 +143,61 @@ export async function refreshAll() {
     throw e;
   } finally {
     client.release();
+  }
+}
+
+async function syncGooglePeople(client: PoolClient) {
+  const existingPeople = await getAllPeople();
+  const emailToPeople: { [key: string]: GooglePerson } = {};
+  for (const person of existingPeople) {
+    emailToPeople[person.email] = person;
+  }
+
+  const users = (await client.query("SELECT * FROM users")).rows.map(rowToUser);
+  const emailToUser: { [key: string]: User } = {};
+  for (const user of users) {
+    if (user.email) {
+      emailToUser[user.email] = user;
+    }
+  }
+
+  const peopleToCreate: Array<GooglePerson> = [];
+  const userIdToGooglePeopleResourceName: { [key: string]: string } = {};
+  for (const user of users) {
+    if (!user.email) {
+      continue;
+    }
+    const person = emailToPeople[user.email];
+    if (!person) {
+      peopleToCreate.push({
+        email: user.email,
+        name: user.name,
+      });
+    } else {
+      if (person.resourceName !== user.googlePeopleResourceName) {
+        userIdToGooglePeopleResourceName[user.id] = person.resourceName;
+      }
+    }
+  }
+
+  await createPeople(peopleToCreate);
+
+  for (const person of peopleToCreate) {
+    const user = emailToUser[person.email];
+    userIdToGooglePeopleResourceName[user.id] = person.resourceName;
+  }
+  const values = [];
+  for (const userId in userIdToGooglePeopleResourceName) {
+    const googlePeopleResourceName = userIdToGooglePeopleResourceName[userId];
+    values.push(`('${userId}', '${googlePeopleResourceName}')`);
+  }
+  if (values.length > 0) {
+    await client.query(`
+      UPDATE users AS t SET
+        google_people_resource_name = v.google_people_resource_name
+      FROM (VALUES ${values.join(",")}) AS v(id, google_people_resource_name)
+      WHERE v.id = t.id
+    `);
   }
 }
 
@@ -173,7 +246,7 @@ export async function refreshPuzzleUsers(
 }
 
 export async function isAdmin(userId: string): Promise<boolean> {
-  const result = await db.query("SELECT * FROM users WHERE id = $1", [userId]);
+  const result = await db.query("SELECT admin FROM users WHERE id = $1", [userId]);
   if (result.rowCount !== 1) {
     return false;
   }
@@ -187,6 +260,59 @@ export async function exists(userId: string): Promise<boolean> {
   return result.rowCount > 0 && result.rows[0].exists;
 }
 
+export async function findUsersByGoogleActivityPersonName(
+  googleActivityPersonNames: Array<string>,
+  client: PoolClient,
+): Promise<Array<User>> {
+  if (googleActivityPersonNames.length === 0) {
+    return [];
+  }
+  const values = [];
+  for (const googleActivityPersonName of googleActivityPersonNames) {
+    values.push(`'${googleActivityPersonName}'`);
+  }
+  const results = await client.query(`
+    SELECT * FROM users WHERE google_activity_person_name IN (${values.join(",")})
+  `);
+  return results.rows.map(rowToUser);
+}
+
+export async function findUsersByEmail(emails: Array<string>, client: PoolClient): Promise<Array<User>> {
+  if (emails.length === 0) {
+    return [];
+  }
+  const values = [];
+  for (const email of emails) {
+    values.push(`'${email}'`);
+  }
+  const results = await client.query(`
+    SELECT * FROM users WHERE email IN (${values.join(",")})
+  `);
+  return results.rows.map(rowToUser);
+}
+
+export async function updateGoogleActivityPersonNames(
+  userIdToGoogleActivityPersonName: { [key: string]: string },
+  client: PoolClient,
+): Promise<void> {
+  if (Object.keys(userIdToGoogleActivityPersonName).length === 0) {
+    return;
+  }
+  const values = [];
+  for (const userId in userIdToGoogleActivityPersonName) {
+    const googleActivityPersonName = userIdToGoogleActivityPersonName[userId];
+    values.push(`('${userId}', '${googleActivityPersonName}')`);
+  }
+  if (values.length > 0) {
+    await client.query(`
+      UPDATE users AS t SET
+        google_activity_person_name = v.google_activity_person_name
+      FROM (VALUES ${values.join(",")}) AS v(id, google_activity_person_name)
+      WHERE v.id = t.id
+    `);
+  }
+}
+
 app.event("user_change", async ({ event, body }) => {
   try {
     const userChangeEvent = event as UserChangeEvent;
@@ -195,7 +321,7 @@ app.event("user_change", async ({ event, body }) => {
       return;
     }
     const memberName = getMemberName(member);
-    const dbUserResult = await db.query("SELECT id, name FROM users WHERE id = $1", [member.id]);
+    const dbUserResult = await db.query("SELECT * FROM users WHERE id = $1", [member.id]);
     const adminUserIds = await getAdminUserIds();
     const isAdminUser = adminUserIds !== null ? adminUserIds.has(member.id) : true;
     if (dbUserResult.rowCount === 0) {
@@ -203,7 +329,7 @@ app.event("user_change", async ({ event, body }) => {
         "INSERT INTO users(id, name, email, admin) VALUES ($1, $2, $3, $4)",
         [member.id, memberName, member.profile.email, isAdminUser]);
     } else {
-      const dbUser = dbUserResult.rows[0] as User;
+      const dbUser = rowToUser(dbUserResult.rows[0]);
       if (dbUser.name != memberName) {
         await db.query(
           "UPDATE users SET name = $2 WHERE id = $1",

@@ -89,6 +89,10 @@ Everything is configured using environment variables, and they need to be set fo
 - **GOOGLE_MEET_CALENDAR_ID**: The Google Calendar ID of the calendar where per-puzzle events
   should be created. The Google service account must have permissions to make changes to
   this calendar.
+- **ENABLE_SHEET_EDITOR_INVITES**: If set, will attempt to automatically invite a user to the
+  puzzle channel associated with a puzzle sheet they edit if they're not already a member of
+  the channel. Requires both the Google Drive Activity API and the Google People API to be
+  enabled.
 - **AUTO_ARCHIVE**: If set, then puzzle channels will be automatically archived as they become
   solved.
 - **ALLOW_RESET_DATABASE**: If set, then the admin page will have an option to reset the database.
