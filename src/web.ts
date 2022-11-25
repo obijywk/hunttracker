@@ -128,6 +128,30 @@ receiver.app.get("/puzzles/data", async (req, res) => {
       puzzleStatusEmoji: getPuzzleStatusEmoji(p),
       breakout: puzzles.getBreakout(p),
     }));
+  const getTagOrder = (t: tags.Tag) => {
+    if (t.name.startsWith("in/")) {
+      return -3;
+    } else if (t.name.startsWith("priority/")) {
+      return -2;
+    } else if (t.name.startsWith("meta/")) {
+      return -1;
+    } else {
+      return 0;
+    }
+  };
+  for (const p of data) {
+    p.tags.sort((a: tags.Tag, b: tags.Tag) => {
+      const aOrder = getTagOrder(a);
+      const bOrder = getTagOrder(b);
+      if (aOrder < bOrder) {
+        return -1;
+      } else if (bOrder < aOrder) {
+        return 1;
+      } else {
+        return a.name < b.name ? -1 : 1;
+      }
+    });
+  }
   res.end(JSON.stringify({
     data,
   }));

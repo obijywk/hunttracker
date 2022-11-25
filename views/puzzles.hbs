@@ -335,7 +335,6 @@
             {
               data: "tags",
               className: "tag-column",
-              orderable: false,
               render: (data, type, row) => {
                 return data.map(tag => {
                   return `<a class="tag-link ${tag.name}" href="javascript:void(0);">${tag.name}</a>`;

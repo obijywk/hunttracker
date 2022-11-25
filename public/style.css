@@ -20,8 +20,8 @@ html {
 
   --background-tag: hsla(288, 2%, 45%, 0.6);
   --background-tag-hover: #bf360c;
-  --background-tag-meta: #000000;
-  --background-tag-meta-hover: #bf360c;
+  --background-tag-inmeta: #000000;
+  --background-tag-inmeta-hover: #bf360c;
 
   --background-dropdown: #00000055;
 
@@ -37,7 +37,7 @@ html {
   --text-puzzle: #1976d2;
 
   --text-tag: #ffffff;
-  --text-tag-meta: #ffffff;
+  --text-tag-inmeta: #ffffff;
 
   --icon-fill: #000a;
 
@@ -60,7 +60,7 @@ html[data-theme="dark"] {
   --background-puzzle-selected: #424242;
   --background-puzzle-detail: #616161;
 
-  --background-tag-meta: #ffffff;
+  --background-tag-inmeta: #ffffff;
 
   --background-dropdown: #ffffff55;
 
@@ -76,7 +76,7 @@ html[data-theme="dark"] {
   --text-puzzle: #b3e5fc;
 
   --text-tag: #e0e0e0;
-  --text-tag-meta: #000000;
+  --text-tag-inmeta: #000000;
 
   --icon-fill: #fffa;
 
@@ -243,12 +243,12 @@ a.tag-link:hover {
   background: var(--background-tag-hover);
 }
 
-a.tag-link[class*="meta"] {
-  background-color: var(--background-tag-meta);
-  color: var(--text-tag-meta);
+a.tag-link[class*="in/"] {
+  background-color: var(--background-tag-inmeta);
+  color: var(--text-tag-inmeta);
 }
-a.tag-link[class*="meta"]:hover {
-  background-color: var(--background-tag-meta-hover);
+a.tag-link[class*="in/"]:hover {
+  background-color: var(--background-tag-inmeta-hover);
 }
 
 table.task-queue-table {
