@@ -305,6 +305,15 @@ export function buildPuzzleNameMrkdwn(puzzle: Puzzle) {
   }
 }
 
+function buildPuzzleDocName(name: string, complete: boolean): string {
+  let docName = "";
+  if (complete) {
+    docName += "✔️ ";
+  }
+  docName += name;
+  return docName;
+}
+
 function normalizeStringForChannelName(s: string): string {
   s = emoji.unemojify(s);
   return diacritics.remove(s)
@@ -758,7 +767,7 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
   const id = privateMetadata.id as string;
   const channelName = privateMetadata.channelName as string;
   const values = getViewStateValues(view);
-  const answer: string = values["puzzle_answer_input"];
+  const answer: string = values["puzzle_answer_input"] || "";
   const complete: boolean = values["puzzle_solved_input"] === "true";
   const allowLowercase: boolean = values["answer_allow_lowercase_input"].length > 0;
 
@@ -776,6 +785,20 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
   if (puzzle.answer === answer && puzzle.complete === complete) {
     ack();
     return;
+  }
+
+  const renamePromises: Array<Promise<any>> = [];
+  if (puzzle.complete !== complete) {
+    const docName = buildPuzzleDocName(puzzle.name, complete);
+    renamePromises.push(googleDrive.renameSheet(puzzle.sheetUrl, docName));
+    if (puzzle.drawingUrl) {
+      renamePromises.push(googleDrive.renameDrawing(puzzle.drawingUrl, docName));
+    }
+    if (process.env.ENABLE_GOOGLE_MEET) {
+      if (puzzle.calendarEventId.length > 0) {
+        renamePromises.push(googleCalendar.renameEvent(puzzle.calendarEventId, docName));
+      }
+    }
   }
 
   await db.query(
@@ -828,6 +851,10 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
     }
   } else {
     await taskQueue.scheduleTask("refresh_puzzle", {id});
+  }
+
+  for (const p of renamePromises) {
+    await p;
   }
 
   ack();
@@ -1103,6 +1130,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const creatorUserId = payload.creatorUserId;
 
   const channelName = buildChannelName(name);
+  const docName = buildPuzzleDocName(name, false);
 
   const createConversationResult = await app.client.conversations.create({
     token: process.env.SLACK_USER_TOKEN,
@@ -1110,16 +1138,16 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   }) as ConversationsCreateResult;
   const id = createConversationResult.channel.id;
 
-  const sheetUrlPromise = googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, name);
+  const sheetUrlPromise = googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, docName);
 
   const drawingUrlPromise =
       process.env.PUZZLE_DRAWING_TEMPLATE_URL ?
-      googleDrive.copyDrawing(process.env.PUZZLE_DRAWING_TEMPLATE_URL, name) :
+      googleDrive.copyDrawing(process.env.PUZZLE_DRAWING_TEMPLATE_URL, docName) :
       Promise.resolve("");
 
   const calendarEventPromise =
       process.env.ENABLE_GOOGLE_MEET ?
-      googleCalendar.createEvent(name) :
+      googleCalendar.createEvent(docName) :
       Promise.resolve({
         eventId: "",
         googleMeetUrl: "",
@@ -1207,8 +1235,8 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
 
 taskQueue.registerHandler("edit_puzzle", async (client, payload) => {
   const id = payload.id;
-  let name = payload.name;
-  let url = payload.url;
+  let name: string = payload.name;
+  let url: string = payload.url;
   const creatorUserId = payload.creatorUserId;
 
   const puzzle = await get(id);
@@ -1229,13 +1257,14 @@ taskQueue.registerHandler("edit_puzzle", async (client, payload) => {
   }
 
   if (name !== puzzle.name) {
-    await googleDrive.renameSheet(puzzle.sheetUrl, name);
+    const docName = buildPuzzleDocName(name, puzzle.complete);
+    await googleDrive.renameSheet(puzzle.sheetUrl, docName);
     if (puzzle.drawingUrl) {
-      await googleDrive.renameDrawing(puzzle.drawingUrl, name);
+      await googleDrive.renameDrawing(puzzle.drawingUrl, docName);
     }
     if (process.env.ENABLE_GOOGLE_MEET) {
       if (puzzle.calendarEventId.length > 0) {
-        await googleCalendar.renameEvent(puzzle.calendarEventId, name);
+        await googleCalendar.renameEvent(puzzle.calendarEventId, docName);
       }
     }
   }
@@ -1280,16 +1309,25 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
 
   const now = moment().utc();
 
-  let sheetModifiedTimestamp = null;
+  let sheetMetadata = null;
   if (moment.duration(now.diff(puzzle.sheetModifiedTimestamp)).asMinutes() >=
       Number(process.env.MINIMUM_IDLE_MINUTES)) {
-    sheetModifiedTimestamp = await googleDrive.getSheetModifiedTimestamp(puzzle.sheetUrl);
+    sheetMetadata = await googleDrive.getSheetMetadata(puzzle.sheetUrl);
   }
 
-  let drawingModifiedTimestamp = null;
+  let drawingMetadata = null;
   if (moment.duration(now.diff(puzzle.drawingModifiedTimestamp)).asMinutes() >=
       Number(process.env.MINIMUM_IDLE_MINUTES)) {
-    drawingModifiedTimestamp = await googleDrive.getDrawingModifiedTimestamp(puzzle.drawingUrl);
+    drawingMetadata = await googleDrive.getDrawingMetadata(puzzle.drawingUrl);
+  }
+
+  const renameDocPromises = [];
+  const docName = buildPuzzleDocName(puzzle.name, puzzle.complete);
+  if (sheetMetadata !== null && docName !== sheetMetadata.name) {
+    renameDocPromises.push(googleDrive.renameSheet(puzzle.sheetUrl, docName));
+  }
+  if (drawingMetadata !== null && docName !== drawingMetadata.name) {
+    renameDocPromises.push(googleDrive.renameDrawing(puzzle.drawingUrl, docName));
   }
 
   const latestMessageTimestamp = await latestMessageTimestampPromise;
@@ -1322,15 +1360,15 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
     dirty = true;
     puzzle.chatModifiedTimestamp = latestMessageTimestamp;
   }
-  if (sheetModifiedTimestamp !== null &&
-      puzzle.sheetModifiedTimestamp.isBefore(sheetModifiedTimestamp)) {
+  if (sheetMetadata !== null &&
+      puzzle.sheetModifiedTimestamp.isBefore(sheetMetadata.modifiedTimestamp)) {
     dirty = true;
-    puzzle.sheetModifiedTimestamp = sheetModifiedTimestamp;
+    puzzle.sheetModifiedTimestamp = sheetMetadata.modifiedTimestamp;
   }
-  if (drawingModifiedTimestamp !== null &&
-      puzzle.drawingModifiedTimestamp.isBefore(drawingModifiedTimestamp)) {
+  if (drawingMetadata !== null &&
+      puzzle.drawingModifiedTimestamp.isBefore(drawingMetadata.modifiedTimestamp)) {
     dirty = true;
-    puzzle.drawingModifiedTimestamp = drawingModifiedTimestamp;
+    puzzle.drawingModifiedTimestamp = drawingMetadata.modifiedTimestamp;
   }
 
   const updateStatusMessagePromise = updateStatusMessage(puzzle);
@@ -1358,6 +1396,9 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
   }
 
   await updateStatusMessagePromise;
+  for (const p of renameDocPromises) {
+    await p;
+  }
 
   for (const userId of affectedUserIds) {
     await taskQueue.scheduleTask(

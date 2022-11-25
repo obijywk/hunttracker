@@ -73,20 +73,28 @@ export async function renameDrawing(url: string, name: string) {
   await drive.files.update({fileId, requestBody: {name}});
 }
 
-export async function getFileModifiedTimestamp(fileId: string): Promise<moment.Moment | null> {
+export interface DriveFileMetadata {
+  name: string;
+  modifiedTimestamp: moment.Moment;
+}
+
+export async function getFileMetadata(fileId: string): Promise<DriveFileMetadata | null> {
   if (rateLimitExceededTimestamp !== null &&
       moment().diff(rateLimitExceededTimestamp) < rateLimitExceededCooldown.asMilliseconds()) {
-    console.info("Skipping Drive timestamp request for", fileId);
+    console.info("Skipping Drive file metadata request for", fileId);
     return null;
   } else {
     rateLimitExceededTimestamp = null;
   }
 
   try {
-    const response = await drive.files.get({fileId, fields: "modifiedTime"});
-    return moment(response.data.modifiedTime);
+    const response = await drive.files.get({fileId, fields: "name,modifiedTime"});
+    return {
+      name: response.data.name,
+      modifiedTimestamp: moment(response.data.modifiedTime),
+    };
   } catch (e) {
-    console.error("getSheetModifiedTimestamp failed", e);
+    console.error("getFileMetadata failed", e);
     if (e.response && e.response.errors) {
       for (const error of e.response.errors) {
         if (error.reason === "userRateLimitExceeded") {
@@ -98,14 +106,14 @@ export async function getFileModifiedTimestamp(fileId: string): Promise<moment.M
   }
 }
 
-export async function getSheetModifiedTimestamp(url: string): Promise<moment.Moment | null> {
+export async function getSheetMetadata(url: string): Promise<DriveFileMetadata | null> {
   const fileId = getSheetUrlFileId(url);
-  return getFileModifiedTimestamp(fileId);
+  return getFileMetadata(fileId);
 }
 
-export async function getDrawingModifiedTimestamp(url: string): Promise<moment.Moment | null> {
+export async function getDrawingMetadata(url: string): Promise<DriveFileMetadata | null> {
   const fileId = getDrawingUrlFileId(url);
-  return getFileModifiedTimestamp(fileId);
+  return getFileMetadata(fileId);
 }
 
 export async function getSheetFolderFileId(url: string): Promise<string | null> {
