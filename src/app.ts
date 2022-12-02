@@ -72,6 +72,10 @@ receiver.app.set("views", "views");
 
 receiver.app.use("/static", express.static("public"));
 
+receiver.app.get("/_ah/warmup", (req, res) => {
+  return res.status(200).end();
+});
+
 export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   receiver,
