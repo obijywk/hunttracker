@@ -426,7 +426,7 @@ receiver.app.get("/tagger", async (req, res) => {
   const selectedPuzzles = new Set((req.query as any).p || []);
   const puzzleOptions = allPuzzles.map(p => ({
     id: p.id,
-    text: p.name,
+    text: p.answer ? p.name + " (" + p.answer + ")" : p.name,
     selected: selectedPuzzles.has(p.id),
   }));
 
