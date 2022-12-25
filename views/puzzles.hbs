@@ -79,15 +79,46 @@
           return true;
         }
         const selectedTagNames = new Set(selectedTags.map(o => o.text));
-        if (data[colTags].length === 0 && selectedTagNames.has("!untagged")) {
-          return true;
-        }
-        for (const tagName of data[colTags].split(" ")) {
-          if (selectedTagNames.has(tagName)) {
-            return true;
+
+        let anyPositiveTagsSelected = false;
+        for (const selectedTagName of selectedTagNames) {
+          if (selectedTagName[0] !== "-") {
+            anyPositiveTagsSelected = true;
+            break;
           }
         }
-        return false;
+
+        if (data[colTags].length === 0) {
+          if (selectedTagNames.has("!untagged")) {
+            return true;
+          }
+          if (selectedTagNames.has("-!untagged")) {
+            return false;
+          }
+        }
+
+        let hasPositiveMatch = false;
+        let hasNegativeMatch = false;
+        for (const tagName of data[colTags].split(" ")) {
+          if (selectedTagNames.has(tagName)) {
+            hasPositiveMatch = true;
+          }
+          if (selectedTagNames.has("-" + tagName)) {
+            hasNegativeMatch = true;
+          }
+        }
+        if (hasNegativeMatch) {
+          return false;
+        }
+        if (hasPositiveMatch) {
+          return true;
+        }
+
+        if (anyPositiveTagsSelected) {
+          return false;
+        }
+
+        return true;
       });
 
       $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
@@ -411,14 +442,34 @@
 
         table.on("xhr", function() {
           const json = table.ajax.json();
-          const tagNameSet = new Set(["!untagged"]);
+          const tagNameSet = new Set(["!untagged", "-!untagged"]);
           for (const puzzle of json.data) {
             for (const tag of puzzle.tags) {
               tagNameSet.add(tag.name);
+              tagNameSet.add("-" + tag.name);
             }
           }
           const tagNameArray = Array.from(tagNameSet);
-          tagNameArray.sort();
+          tagNameArray.sort((a, b) => {
+            const aNeg = a[0] === "-";
+            const bNeg = b[0] === "-";
+            if (aNeg) {
+              a = a.substring(1);
+            }
+            if (bNeg) {
+              b = b.substring(1);
+            }
+            if (a < b) {
+              return -1;
+            } else if (a > b) {
+              return 1;
+            } else {
+              if (aNeg === true) {
+                return 1;
+              }
+              return -1;
+            }
+          });
           const tagData = [];
           for (const tag of tagNameArray) {
             if (!$(".tags-select").find("option[value='" + tag + "']").length) {
