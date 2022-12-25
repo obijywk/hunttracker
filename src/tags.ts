@@ -31,7 +31,7 @@ export function buildTagsBlock(puzzleId: string, tags: Array<Tag>) {
       },
       "action_id": `tags_click_${tag.id}`,
       "value": JSON.stringify({ puzzleId, tagId: tag.id }),
-      "url": encodeURI(process.env.WEB_SERVER_URL + "puzzles?tags=" + tag.name),
+      "url": encodeURI(process.env.WEB_SERVER_URL + "puzzles?solved=all&tags=" + tag.name),
     });
   }
   if (tagButtons.length === 0) {
@@ -46,7 +46,7 @@ export function buildTagsBlock(puzzleId: string, tags: Array<Tag>) {
 export function buildTagLinks(tags: Array<Tag>): string {
   const tagLinks = [];
   for (const tag of tags) {
-    const tagUrl = encodeURI(process.env.WEB_SERVER_URL + "puzzles?tags=" + tag.name);
+    const tagUrl = encodeURI(process.env.WEB_SERVER_URL + "puzzles?solved=all&tags=" + tag.name);
     tagLinks.push(`<${tagUrl}|:label: ${tag.name}>`);
   }
   return tagLinks.join("   ");
