@@ -126,7 +126,7 @@ receiver.app.get("/puzzles/data", async (req, res) => {
     {}, p, {
       idleDurationMilliseconds: puzzles.getIdleDuration(p).asMilliseconds(),
       puzzleStatusEmoji: getPuzzleStatusEmoji(p),
-      breakout: puzzles.getBreakout(p),
+      location: puzzles.getLocation(p),
     }));
   const getTagOrder = (t: tags.Tag) => {
     if (t.name.startsWith("in/")) {
@@ -463,35 +463,35 @@ receiver.app.post("/tagger/update", async (req, res) => {
   return res.redirect("../tagger");
 });
 
-receiver.app.get("/breakouts", async (req, res) => {
+receiver.app.get("/locations", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
 
   const allPuzzles = await puzzles.list({excludeComplete: true});
 
-  const breakouts: any = [];
+  const locations: any = [];
   for (const puzzle of allPuzzles) {
-    const breakout = puzzles.getBreakout(puzzle);
-    if (breakout === null) {
+    const location = puzzles.getLocation(puzzle);
+    if (location === null) {
       continue;
     }
-    breakouts.push({
-      breakout,
+    locations.push({
+      location,
       puzzle,
     });
   }
-  breakouts.sort((a: any, b: any) => (a.breakout < b.breakout) ? -1 : 1);
+  locations.sort((a: any, b: any) => (a.location.toLowerCase() < b.location.toLowerCase()) ? -1 : 1);
 
-  res.render("breakouts", {
+  res.render("locations", {
     appName: process.env.APP_NAME,
     enableDarkMode: req.session.enableDarkMode,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
-    breakouts: breakouts,
+    locations: locations,
   });
 });
 
-receiver.app.post("/breakouts/remove", async (req, res) => {
+receiver.app.post("/locations/remove", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
@@ -499,10 +499,12 @@ receiver.app.post("/breakouts/remove", async (req, res) => {
   const id = req.body.puzzleId as string;
   const client = await db.connect();
   try {
-    await puzzles.clearBreakout(id, client);
+    const puzzle = await puzzles.get(id, client);
+    await puzzles.clearLocation(puzzle);
+    await puzzles.refreshPuzzle(id, client);
   } finally {
     client.release();
   }
 
-  return res.redirect("../breakouts");
+  return res.redirect("../locations");
 });

@@ -109,22 +109,29 @@ export function buildIdleStatus(puzzle: Puzzle): string {
   return "";
 }
 
-export function getBreakout(puzzle: Puzzle): number | null {
-  const match = puzzle.channelTopic.match(/BR *(\d+)/i);
-  if (!match) {
-    return null;
+export function getLocation(puzzle: Puzzle): string | null {
+  let match = puzzle.channelTopic.match(/loc(ation)? *\(([^)]+)\)/i);
+  if (match) {
+    return match[2];
   }
-  return Number(match[1]);
+  match = puzzle.channelTopic.match(/loc(ation)? +(.*)/i);
+  if (match) {
+    return match[2];
+  }
+  return null;
 }
 
-export async function clearBreakout(id: string, client: PoolClient): Promise<void> {
-  const puzzle = await get(id);
+export async function clearLocation(puzzle: Puzzle): Promise<void> {
+  if (puzzle.channelTopic.match(/loc(ation)? *\(([^)]+)\)/i)) {
+    puzzle.channelTopic = puzzle.channelTopic.replace(/loc(ation)? *\([^)]+\)/i, "");
+  } else if (puzzle.channelTopic.match(/loc(ation)? +(.*)/i)) {
+    puzzle.channelTopic = puzzle.channelTopic.replace(/loc(ation)? *.*/i, "");
+  }
   await app.client.conversations.setTopic({
     token: process.env.SLACK_USER_TOKEN,
-    channel: id,
-    topic: puzzle.channelTopic.replace(/BR *\d+[ .:;]*/i, ""),
+    channel: puzzle.id,
+    topic: puzzle.channelTopic,
   });
-  await refreshPuzzle(id, client);
 }
 
 interface ReadFromDatabaseOptions {
@@ -835,14 +842,8 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
     for (const p of announcementPromises) {
       await p;
     }
+    await clearLocation(puzzle);
     await updateStatusMessage(puzzle);
-    if (puzzle.channelTopic.match(/BR *\d+[ .:;]*/i)) {
-      await app.client.conversations.setTopic({
-        token: process.env.SLACK_USER_TOKEN,
-        channel: id,
-        topic: puzzle.channelTopic.replace(/BR *\d+[ .:;]*/i, ""),
-      });
-    }
     if (process.env.AUTO_ARCHIVE) {
       await app.client.conversations.archive({
         token: process.env.SLACK_USER_TOKEN,

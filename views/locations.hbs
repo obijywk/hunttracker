@@ -1,18 +1,18 @@
 <!doctype html>
 <html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
   <head>
-    <title>Breakouts - {{appName}}</title>
+    <title>Locations - {{appName}}</title>
     <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <script type="text/javascript" charset="utf8" src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
   </head>
   <body>
-    {{> menuheader breakouts=true }}
+    {{> menuheader locations=true }}
     <div class="body-wrapper">
-      <p>Unsolved puzzles that have cited breakout rooms in their topics will appear here.</p>
-      <table class="breakout">
+      <p>Unsolved puzzles that have cited locations in their topics will appear here.</p>
+      <table class="location">
         <thead>
-          <th>Room</th>
+          <th>Location</th>
           <th class="emoji-column">&nbsp;</th>
           <th>Puzzle</th>
           <th>Topic</th>
@@ -24,15 +24,15 @@
           <th>&nbsp;</th>
         </thead>
         <tbody>
-        {{#each breakouts}}
+        {{#each locations}}
         <tr>
-          <td>{{breakout}}</td>
+          <td>{{location}}</td>
           {{#with (puzzleStatusEmoji puzzle)}}
             <td title="{{description}}" class="emoji-column">
               {{unicodeEmoji}}
             </td>
           {{/with}}
-          <td><a href="puzzles?expanded={{puzzle.id}}">{{puzzle.name}}</a></td>
+          <td><a href="puzzles?solved=all&expanded={{puzzle.id}}">{{puzzle.name}}</a></td>
           <td>{{puzzle.channelTopic}}</td>
           <td class="icon-column">{{#if puzzle.url}}<a href="{{puzzle.url}}" target="_blank"><svg class="icon icon-link"><use xlink:href="static/icons.svg#link"></use></svg></a>{{/if}}</td>
           <td class="icon-column"><a href="{{../slackUrlPrefix}}{{puzzle.id}}" target="_blank"><svg class="icon icon-slack"><use xlink:href="static/icons.svg#slack"></use></svg></a></td>
@@ -40,9 +40,9 @@
           <td class="icon-column"><a href="{{puzzle.drawingUrl}}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="static/icons.svg#drawing"></use></svg></a></td>
           <td>({{puzzle.users.length}})&nbsp;{{{commaSeparatedSolvers puzzle 5}}}</td>
           <td>
-            <form action="breakouts/remove" method="POST">
+            <form action="locations/remove" method="POST">
               <input type="hidden" name="puzzleId" value="{{puzzle.id}}">
-              <button type="submit" name="submit">Clear 'BR {{breakout}}' from topic</button>
+              <button type="submit" name="submit">Clear location from topic</button>
             </form>
           </td>
         </tr>

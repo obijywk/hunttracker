@@ -201,7 +201,7 @@ td.icon-column {
   text-align: center;
 }
 
-td.breakout {
+td.location {
   text-align: center;
 }
 
@@ -427,7 +427,7 @@ div.meta-dashboard-icon {
   fill: var(--text-header);
 }
 
-table.breakout {
+table.location {
   width: 100%;
   border-spacing: 0;
 
@@ -436,7 +436,7 @@ table.breakout {
   border-radius: 0.4rem;
 }
 
-table.breakout thead th {
+table.location thead th {
   font-size: 1.1em;
   background: var(--background-header);
   padding: calc(var(--padding-base) / 2);
@@ -444,27 +444,27 @@ table.breakout thead th {
   line-height: 1.4em;
 }
 
-table.breakout thead th:nth-child(n+2) {
+table.location thead th:nth-child(n+2) {
   text-align: left;
 }
 
-table.breakout tbody tr td {
+table.location tbody tr td {
   padding: calc(var(--padding-base) / 4) calc(var(--padding-base) / 2);
 }
 
-table.breakout tbody td {
+table.location tbody td {
   border-top: var(--section-delineate);
 }
 
-table.breakout tbody tr td:first-child {
+table.location tbody tr td:first-child {
   text-align: center;
 }
 
-table.breakout tbody tr td span.solver-name {
+table.location tbody tr td span.solver-name {
   white-space: nowrap;
 }
 
-table.breakout tbody tr td form {
+table.location tbody tr td form {
   margin:0;
 }
 
@@ -474,8 +474,8 @@ td.emoji-column {
   padding: 0 !important;
   text-align: center;
 }
-table.breakout th.icon-column,
-table.breakout td.icon-column {
+table.location th.icon-column,
+table.location td.icon-column {
   width: 2.5rem;
   padding: 0 !important;
   text-align: center;

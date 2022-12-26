@@ -138,10 +138,10 @@ async function buildHomeBlocks(userId: string) {
       type: "button",
       text: {
         type: "plain_text",
-        text: ":door: Breakouts",
+        text: ":door: Locations",
       },
-      "action_id": "home_nav_breakouts",
-      url: process.env.WEB_SERVER_URL + "breakouts",
+      "action_id": "home_nav_locations",
+      url: process.env.WEB_SERVER_URL + "locations",
     },
     {
       type: "button",
@@ -553,7 +553,7 @@ app.action("home_nav_metas", async ({ ack }) => {
   ack();
 });
 
-app.action("home_nav_breakouts", async ({ ack }) => {
+app.action("home_nav_locations", async ({ ack }) => {
   ack();
 });
 

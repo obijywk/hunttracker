@@ -43,7 +43,7 @@
             <th>Solved</th>
             <th>&nbsp;</th>
             <th>Name</th>
-            <th>BR</th>
+            <th>Location</th>
             <th>Answer</th>
             <th>Topic</th>
             <th class="icon-column">&nbsp;</th>
@@ -62,7 +62,7 @@
       const colSolved = 1;
       const colStatusEmoji = 2;
       const colName = 3;
-      const colBreakout = 4;
+      const colLocation = 4;
       const colAnswer = 5;
       const colTopic = 6;
       const colPuzzleLink = 7;
@@ -217,7 +217,7 @@
           searchCols: [
             null, null, null,
             { search: "{{initialSearch}}", smart: false, regex: true },  // name
-            { search: "{{initialSearch}}", smart: false, regex: true },  // breakout
+            { search: "{{initialSearch}}", smart: false, regex: true },  // location
             { search: "{{initialSearch}}", smart: false, regex: true },  // answer
             { search: "{{initialSearch}}", smart: false, regex: true },  // topic
             null, null, null, null, null,
@@ -273,12 +273,12 @@
               },
             },
             {
-              data: "breakout",
-              className: "breakout",
+              data: "location",
+              className: "location",
               render: (data, type, row) => {
                 if (type === 'sort') {
                   if (!data) {
-                    return 999;
+                    return "";
                   }
                   return data;
                 }
