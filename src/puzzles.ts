@@ -110,11 +110,7 @@ export function buildIdleStatus(puzzle: Puzzle): string {
 }
 
 export function getLocation(puzzle: Puzzle): string | null {
-  let match = puzzle.channelTopic.match(/loc(ation)? *\(([^)]+)\)/i);
-  if (match) {
-    return match[2];
-  }
-  match = puzzle.channelTopic.match(/loc(ation)? +(.*)/i);
+  const match = puzzle.channelTopic.match(/loc(ation)? *\(([^)]+)\)/i);
   if (match) {
     return match[2];
   }
@@ -124,8 +120,6 @@ export function getLocation(puzzle: Puzzle): string | null {
 export async function clearLocation(puzzle: Puzzle): Promise<void> {
   if (puzzle.channelTopic.match(/loc(ation)? *\(([^)]+)\)/i)) {
     puzzle.channelTopic = puzzle.channelTopic.replace(/loc(ation)? *\([^)]+\)/i, "");
-  } else if (puzzle.channelTopic.match(/loc(ation)? +(.*)/i)) {
-    puzzle.channelTopic = puzzle.channelTopic.replace(/loc(ation)? *.*/i, "");
   }
   await app.client.conversations.setTopic({
     token: process.env.SLACK_USER_TOKEN,
