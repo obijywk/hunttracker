@@ -340,6 +340,7 @@ div.menu-item {
   padding: 0.2rem var(--padding-base);
   line-height: calc(var(--padding-base) * 1.5);
   height: 100%;
+  user-select: none;
 }
 
 div.menu-item:first-child {
