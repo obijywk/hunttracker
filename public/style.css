@@ -18,10 +18,12 @@ html {
   --background-puzzle-detail: #ffecb3;
   --background-puzzle-solved: hsla(100, 80%, 55%, 0.25);
 
-  --background-tag: hsla(288, 2%, 45%, 0.6);
+  --background-tag-default: #424242;
+  --background-tag-metapuzzle: #0d47a1;
+  --background-tag-inmeta: #616161;
+  --background-tag-priority: #880e4f;
+  
   --background-tag-hover: #bf360c;
-  --background-tag-inmeta: #000000;
-  --background-tag-inmeta-hover: #bf360c;
 
   --background-dropdown: #00000055;
 
@@ -37,7 +39,6 @@ html {
   --text-puzzle: #1976d2;
 
   --text-tag: #ffffff;
-  --text-tag-inmeta: #ffffff;
 
   --icon-fill: #000a;
 
@@ -47,7 +48,7 @@ html {
 }
 
 html[data-theme="dark"] {
-  --background-page: #000000;
+  --background-page: #111111;
   --background-section: #212121;
 
   --background-header: linear-gradient(to bottom, #405977, #32455D);
@@ -57,10 +58,8 @@ html[data-theme="dark"] {
   --background-menu: #212121;
   --background-menu-selected: #bf360c;
 
-  --background-puzzle-selected: #424242;
-  --background-puzzle-detail: #616161;
-
-  --background-tag-inmeta: #ffffff;
+  --background-puzzle-selected: #212121;
+  --background-puzzle-detail: #424242;
 
   --background-dropdown: #ffffff55;
 
@@ -78,7 +77,7 @@ html[data-theme="dark"] {
   --text-tag: #e0e0e0;
   --text-tag-inmeta: #000000;
 
-  --icon-fill: #fffa;
+  --icon-fill: #fffc;
 
   --special-color: #ffffff44;
   --section-shadow: none;
@@ -111,12 +110,8 @@ div.puzzle-filters {
 
 div.filter-solved {
   color: var(--text-deemphasised);
-  width: 30vw;
+  width: 25vw;
   align-self: center;
-}
-
-div.filter-tags {
-  width: 30vw;
 }
 
 select.wide-select {
@@ -126,6 +121,16 @@ select.wide-select {
 table.dataTable thead th {
   background: var(--background-header);
   color: white;
+}
+
+table.dataTable thead th.icon-column,
+table.dataTable thead th.emoji-column,
+table.dataTable thead th.details-control {
+  padding-inline: 0.2rem;
+}
+
+table.dataTable thead th.location {
+  text-align: left;
 }
 
 table.dataTable.no-footer {
@@ -155,12 +160,14 @@ table.dataTable tbody td {
 }
 td.details-control {
   cursor: pointer;
+  width: 3rem;
 }
 td.details-control:before {
   display: block;
   content: ' ';
-  width: 1em;
-  height: 1em;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-left: 0.5rem;
   clip-path: polygon(50% 80%, 100% 35%, 85% 20%, 50% 55%, 15% 20%, 0% 35%);
   background-color: var(--background-dropdown);
 }
@@ -195,13 +202,14 @@ img.emoji {
   width: 1.25rem;
 }
 
-td.icon-column {
+td.icon-column,
+td.emoji-column {
   margin: 0;
-  padding: 0 !important;
+  padding: 0 0.2rem !important;
   text-align: center;
 }
 
-td.location {
+td.breakout {
   text-align: center;
 }
 
@@ -231,24 +239,27 @@ a {
 
 a.tag-link {
   line-height: 2em;
-  padding: 0.2em 0.8em;
-  border-radius: 1em;
+  padding: 0.2em 0.6em;
+  border-radius: 0.25em;
   text-decoration: none;
-  background: var(--background-tag);
+  background: var(--background-tag-default);
   color: var(--text-tag);
   font-size: 0.85em;
   white-space: nowrap;
 }
-a.tag-link:hover {
-  background: var(--background-tag-hover);
-}
 
+a.tag-link[class*="meta/"] {
+  background-color: var(--background-tag-metapuzzle);
+}
 a.tag-link[class*="in/"] {
   background-color: var(--background-tag-inmeta);
-  color: var(--text-tag-inmeta);
 }
-a.tag-link[class*="in/"]:hover {
-  background-color: var(--background-tag-inmeta-hover);
+a.tag-link[class*="priority/"] {
+  background-color: var(--background-tag-priority);
+}
+
+a.tag-link:hover {
+  background: var(--background-tag-hover);
 }
 
 table.task-queue-table {
@@ -500,3 +511,6 @@ table.location td.icon-column {
   color: var(--text-header);
 }
 
+[data-theme="dark"] #puzzles-table_info {
+  color: var(--text-deemphasised);
+}
