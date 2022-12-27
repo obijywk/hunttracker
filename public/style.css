@@ -511,6 +511,10 @@ table.location td.icon-column {
   color: var(--background-puzzle-selected);
 }
 
+[data-theme="dark"] .select2-selection__clear {
+  color: var(--background-page);
+}
+
 [data-theme="dark"] .dataTables_filter {
   color: var(--text-header);
 }
