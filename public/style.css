@@ -114,6 +114,10 @@ div.filter-solved {
   align-self: center;
 }
 
+div.filter-tags {
+  width: 30vw;
+}
+
 select.wide-select {
   width: 100%;
 }
