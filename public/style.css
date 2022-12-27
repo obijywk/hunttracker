@@ -110,12 +110,12 @@ div.puzzle-filters {
 
 div.filter-solved {
   color: var(--text-deemphasised);
-  width: 25vw;
+  width: 20rem;
   align-self: center;
 }
 
 div.filter-tags {
-  width: 30vw;
+  width: 30rem;
 }
 
 select.wide-select {
