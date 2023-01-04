@@ -309,7 +309,7 @@ export function buildPuzzleNameMrkdwn(puzzle: Puzzle) {
 function buildPuzzleDocName(name: string, complete: boolean): string {
   let docName = "";
   if (complete) {
-    docName += "✔️ ";
+    docName += "✅ ";
   }
   docName += name;
   return docName;
