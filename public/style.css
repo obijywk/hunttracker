@@ -89,6 +89,12 @@ html[data-theme="dark"] {
   }
 }
 
+@media screen and (min-width: 2400px){
+  html {
+    --meta-col: 4;
+  }
+}
+
 body {
   font-family: 'Roboto', sans-serif;
   font-size: 14px;
@@ -131,10 +137,7 @@ table.dataTable thead th.icon-column,
 table.dataTable thead th.emoji-column,
 table.dataTable thead th.details-control {
   padding-inline: 0.2rem;
-}
-
-table.dataTable thead th.location {
-  text-align: left;
+  width: 2rem;
 }
 
 table.dataTable.no-footer {
