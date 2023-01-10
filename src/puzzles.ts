@@ -120,12 +120,12 @@ export function getLocation(puzzle: Puzzle): string | null {
 export async function clearLocation(puzzle: Puzzle): Promise<void> {
   if (puzzle.channelTopic.match(/loc(ation)? *\(([^)]+)\)/i)) {
     puzzle.channelTopic = puzzle.channelTopic.replace(/loc(ation)? *\([^)]+\)/i, "");
+    await app.client.conversations.setTopic({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: puzzle.id,
+      topic: puzzle.channelTopic,
+    });
   }
-  await app.client.conversations.setTopic({
-    token: process.env.SLACK_USER_TOKEN,
-    channel: puzzle.id,
-    topic: puzzle.channelTopic,
-  });
 }
 
 interface ReadFromDatabaseOptions {
