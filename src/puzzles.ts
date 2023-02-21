@@ -269,6 +269,16 @@ export async function isPuzzleChannel(channelId: string): Promise<boolean> {
   return result.rowCount > 0 && result.rows[0].exists;
 }
 
+export async function findChannelIdForChannelName(channelName: string): Promise<string | null> {
+  const result = await db.query(
+    "SELECT id FROM puzzles WHERE channel_name = $1",
+    [channelName]);
+  if (result.rowCount < 1) {
+    return null;
+  }
+  return result.rows[0].id;
+}
+
 export async function isIdlePuzzleChannel(channelId: string): Promise<boolean> {
   const result = await db.query(`
     SELECT

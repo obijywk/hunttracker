@@ -3,7 +3,7 @@ import { Block, Button, KnownBlock, Option } from "@slack/types";
 
 import { app } from "./app";
 import * as puzzles from "./puzzles";
-import { PuzzleMetadataErrorField } from "./puzzles";
+import { PuzzleMetadataErrorField, findChannelIdForChannelName } from "./puzzles";
 import { getPuzzleStatusEmoji } from "./puzzle_status_emoji";
 import { MAX_NUM_OPTIONS, getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
@@ -404,15 +404,22 @@ app.view("home_register_puzzle_view", async ({ack, body, view}) => {
 app.action("home_edit_puzzle", async ({ ack, body }) => {
   let allPuzzles = await puzzles.list();
   let puzzlesOmitted = false;
-  if (allPuzzles.length > MAX_NUM_OPTIONS) {
+  if (allPuzzles.length >= MAX_NUM_OPTIONS) {
     puzzlesOmitted = true;
-    allPuzzles = allPuzzles.filter(puzzle => !puzzle.complete);
-  }
-  if (allPuzzles.length > MAX_NUM_OPTIONS) {
-    allPuzzles = allPuzzles.slice(0, 100);
+    allPuzzles = allPuzzles.slice(0, MAX_NUM_OPTIONS - 1);
   }
 
   const options = [];
+  if (allPuzzles.length >= MAX_NUM_OPTIONS - 1) {
+    const option: Option = {
+      text: {
+        type: "plain_text",
+        text: "Other (enter puzzle channel name below)",
+      },
+      value: String("!other"),
+    };
+    options.push(option);
+  }
   for (const puzzle of allPuzzles) {
     const option: Option = {
       text: {
@@ -452,6 +459,24 @@ app.action("home_edit_puzzle", async ({ ack, body }) => {
         },
       },
     );
+    if (puzzlesOmitted) {
+      blocks.push({
+        type: "input",
+        "block_id": "other_puzzle_channel_name_input",
+        optional: true,
+        label: {
+          type: "plain_text",
+          text: "Puzzle channel name",
+        },
+        element: {
+          type: "plain_text_input",
+          placeholder: {
+            type: "plain_text",
+            text: "Enter puzzle channel name (only if 'Other' is selected above)",
+          },
+        },
+      });
+    }
     blocks.push({
       type: "input",
       "block_id": "puzzle_name_input",
@@ -518,8 +543,33 @@ app.action("home_edit_puzzle", async ({ ack, body }) => {
 app.view("home_edit_puzzle_view", async ({ack, body, view}) => {
   const values = getViewStateValues(view);
 
+  let puzzleId = values["puzzle_id_input"];
+  if (puzzleId === "!other") {
+    const channelNameInput = values["other_puzzle_channel_name_input"];
+    if (channelNameInput != "") {
+      puzzleId = await findChannelIdForChannelName(channelNameInput);
+      if (puzzleId === null) {
+        ack({
+          "response_action": "errors",
+          "errors": {
+            "other_puzzle_channel_name_input": "No channel found with this name.",
+          },
+        } as any);
+        return;
+      }
+    } else {
+      ack({
+        "response_action": "errors",
+        "errors": {
+          "other_puzzle_channel_name_input": "You must provide a channel name.",
+        },
+      } as any);
+      return;
+    }
+  }
+
   const editError = await puzzles.edit(
-    values["puzzle_id_input"],
+    puzzleId,
     values["puzzle_name_input"],
     values["puzzle_url_input"],
     values["puzzle_url_allow_duplicate_input"].length > 0,
