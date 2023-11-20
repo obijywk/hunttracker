@@ -73,6 +73,16 @@ export async function renameDrawing(url: string, name: string) {
   await drive.files.update({fileId, requestBody: {name}});
 }
 
+export async function deleteSheet(url: string) {
+  const fileId = getSheetUrlFileId(url);
+  await drive.files.delete({fileId});
+}
+
+export async function deleteDrawing(url: string) {
+  const fileId = getDrawingUrlFileId(url);
+  await drive.files.delete({fileId});
+}
+
 export interface DriveFileMetadata {
   name: string;
   modifiedTimestamp: moment.Moment;

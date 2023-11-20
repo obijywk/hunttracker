@@ -1,4 +1,4 @@
-import { ButtonAction } from "@slack/bolt";
+import { ButtonAction, ViewErrorsResponseAction } from "@slack/bolt";
 import { Block, Button, KnownBlock, Option } from "@slack/types";
 
 import { app } from "./app";
@@ -190,6 +190,14 @@ async function buildHomeBlocks(userId: string) {
             text: ":pencil2: Edit puzzle",
           },
           "action_id": "home_edit_puzzle",
+        },
+        {
+          type: "button",
+          text: {
+            type: "plain_text",
+            text: ":axe: Delete puzzle",
+          },
+          "action_id": "home_delete_puzzle",
         },
         tags.buildRenameTagButton(),
         tags.buildDeleteTagsButton(),
@@ -401,8 +409,7 @@ app.view("home_register_puzzle_view", async ({ack, body, view}) => {
   ack();
 });
 
-app.action("home_edit_puzzle", async ({ ack, body }) => {
-  let allPuzzles = await puzzles.list();
+function buildPuzzleSelectionFormBlocks(allPuzzles: puzzles.Puzzle[]) {
   let puzzlesOmitted = false;
   if (allPuzzles.length >= MAX_NUM_OPTIONS) {
     puzzlesOmitted = true;
@@ -410,7 +417,7 @@ app.action("home_edit_puzzle", async ({ ack, body }) => {
   }
 
   const options = [];
-  if (allPuzzles.length >= MAX_NUM_OPTIONS - 1) {
+  if (puzzlesOmitted) {
     const option: Option = {
       text: {
         type: "plain_text",
@@ -477,6 +484,22 @@ app.action("home_edit_puzzle", async ({ ack, body }) => {
         },
       });
     }
+  } else {
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "No puzzles yet exist.",
+      },
+    });
+  }
+  return blocks;
+}
+
+app.action("home_edit_puzzle", async ({ ack, body }) => {
+  const allPuzzles = await puzzles.list();
+  const blocks = buildPuzzleSelectionFormBlocks(allPuzzles);
+  if (allPuzzles.length > 0) {
     blocks.push({
       type: "input",
       "block_id": "puzzle_name_input",
@@ -510,14 +533,6 @@ app.action("home_edit_puzzle", async ({ ack, body }) => {
       },
     });
     blocks.push(buildAllowDuplicatePuzzleURLBlock());
-  } else {
-    blocks.push({
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: "No puzzles yet exist.",
-      },
-    });
   }
 
   await app.client.views.open({
@@ -540,33 +555,40 @@ app.action("home_edit_puzzle", async ({ ack, body }) => {
   ack();
 });
 
-app.view("home_edit_puzzle_view", async ({ack, body, view}) => {
-  const values = getViewStateValues(view);
-
+async function getPuzzleIdFromPuzzleSelectionForm(values: any): Promise<string | ViewErrorsResponseAction> {
   let puzzleId = values["puzzle_id_input"];
   if (puzzleId === "!other") {
     const channelNameInput = values["other_puzzle_channel_name_input"];
     if (channelNameInput != "") {
       puzzleId = await findChannelIdForChannelName(channelNameInput);
       if (puzzleId === null) {
-        ack({
+        return {
           "response_action": "errors",
           "errors": {
             "other_puzzle_channel_name_input": "No channel found with this name.",
           },
-        } as any);
-        return;
+        };
       }
     } else {
-      ack({
+      return {
         "response_action": "errors",
         "errors": {
           "other_puzzle_channel_name_input": "You must provide a channel name.",
         },
-      } as any);
-      return;
+      };
     }
   }
+  return puzzleId;
+}
+
+app.view("home_edit_puzzle_view", async ({ack, body, view}) => {
+  const values = getViewStateValues(view);
+  const puzzleIdResult = await getPuzzleIdFromPuzzleSelectionForm(values);
+  if (typeof puzzleIdResult !== "string") {
+    ack(puzzleIdResult);
+    return;
+  }
+  const puzzleId = puzzleIdResult;
 
   const editError = await puzzles.edit(
     puzzleId,
@@ -592,6 +614,51 @@ app.view("home_edit_puzzle_view", async ({ack, body, view}) => {
     return;
   }
 
+  ack();
+});
+
+app.action("home_delete_puzzle", async ({ ack, body }) => {
+  const allPuzzles = await puzzles.list();
+  const blocks = buildPuzzleSelectionFormBlocks(allPuzzles);
+  if (allPuzzles.length > 0) {
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "Clicking \"Delete puzzle\" below will permanently delete the selected puzzle. *This cannot be undone!* Double-check you've selected the intended puzzle before proceeding.",
+      },
+    });
+  }
+
+  await app.client.views.open({
+    token: process.env.SLACK_BOT_TOKEN,
+    "trigger_id": (body as any).trigger_id,
+    view: {
+      type: "modal",
+      "callback_id": "home_delete_puzzle_view",
+      title: {
+        type: "plain_text",
+        text: "Delete puzzle",
+      },
+      blocks,
+      submit: {
+        type: "plain_text",
+        text: "Delete puzzle",
+      },
+    },
+  });
+  ack();
+});
+
+app.view("home_delete_puzzle_view", async ({ack, body, view}) => {
+  const values = getViewStateValues(view);
+  const puzzleIdResult = await getPuzzleIdFromPuzzleSelectionForm(values);
+  if (typeof puzzleIdResult !== "string") {
+    ack(puzzleIdResult);
+    return;
+  }
+  const puzzleId = puzzleIdResult;
+  await puzzles.deletePuzzle(puzzleId, body.user.id);
   ack();
 });
 

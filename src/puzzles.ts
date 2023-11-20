@@ -1076,6 +1076,13 @@ export async function edit(
   return null;
 }
 
+export async function deletePuzzle(id: string, creatorUserId: string) {
+  await taskQueue.scheduleTask("delete_puzzle", {
+    id,
+    creatorUserId,
+  });
+}
+
 export async function refreshAll() {
   const result = await db.query("SELECT id FROM puzzles");
   for (const row of result.rows) {
@@ -1289,6 +1296,42 @@ taskQueue.registerHandler("edit_puzzle", async (client, payload) => {
         channelName,
       ]);
     await taskQueue.scheduleTask("refresh_puzzle", {id});
+  }
+
+  if (creatorUserId) {
+    await taskQueue.scheduleTask("publish_home", {
+      userId: creatorUserId,
+    });
+  }
+});
+
+taskQueue.registerHandler("delete_puzzle", async (client, payload) => {
+  const id = payload.id;
+  const creatorUserId = payload.creatorUserId;
+
+  const archiveChannelPromise = app.client.conversations.archive({
+    token: process.env.SLACK_USER_TOKEN,
+    channel: id,
+  });
+
+  const puzzle = await get(id);
+  const deleteSheetPromise = googleDrive.deleteSheet(puzzle.sheetUrl);
+  const deleteDrawingPromise = googleDrive.deleteDrawing(puzzle.drawingUrl);
+
+  await archiveChannelPromise;
+  await deleteSheetPromise;
+  await deleteDrawingPromise;
+
+  await client.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1", [id]);
+  await client.query("DELETE FROM puzzle_user WHERE puzzle_id = $1", [id]);
+  await client.query("DELETE FROM puzzles WHERE id = $1", [id]);
+
+  if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
+    await app.client.chat.postMessage({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
+      text: `The puzzle entry for ${buildPuzzleNameMrkdwn(puzzle)} was deleted.`,
+    });
   }
 
   if (creatorUserId) {
