@@ -34,11 +34,12 @@ export function getViewStateValues(view: ViewOutput) {
         case "plain_text_input":
           values[inputId] = (input as any).value;
           break;
+        case "radio_buttons":
         case "static_select":
           values[inputId] = (input as any)["selected_option"].value;
           break;
-        case "multi_static_select":
         case "checkboxes":
+        case "multi_static_select":
           values[inputId] = [];
           const selectedOptions = (input as any)["selected_options"];
           if (selectedOptions) {

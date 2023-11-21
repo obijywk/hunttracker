@@ -2,7 +2,7 @@ import moment = require("moment");
 import * as diacritics from "diacritics";
 import * as emoji from "node-emoji";
 import { PoolClient } from "pg";
-import { ButtonAction } from "@slack/bolt";
+import { ButtonAction, PlainTextOption } from "@slack/bolt";
 
 import { app } from "./app";
 import * as db from "./db";
@@ -668,6 +668,22 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
   const id = (payload as ButtonAction).value;
   const puzzle = await get(id);
 
+  const puzzleSolvedOption: PlainTextOption = {
+    text: {
+      type: "plain_text",
+      text: "Mark puzzle solved",
+    },
+    value: "true",
+  };
+  const puzzleUnsolvedOption: PlainTextOption = {
+    text: {
+      type: "plain_text",
+      text: "Keep puzzle unsolved (this is unusual)",
+    },
+    value: "false",
+  };
+  const defaultUnsolved = !puzzle.complete && puzzle.answer.length > 0;
+
   await app.client.views.open({
     token: process.env.SLACK_BOT_TOKEN,
     "trigger_id": (body as any).trigger_id,
@@ -716,30 +732,9 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
             text: "Is it solved?",
           },
           element: {
-            type: "static_select",
-            "initial_option": {
-              text: {
-                type: "plain_text",
-                text: "Mark puzzle solved",
-              },
-              value: "true",
-            },
-            options: [
-              {
-                text: {
-                  type: "plain_text",
-                  text: "Mark puzzle solved",
-                },
-                value: "true",
-              },
-              {
-                text: {
-                  type: "plain_text",
-                  text: "Keep puzzle unsolved (this is unusual)",
-                },
-                value: "false",
-              },
-            ],
+            type: "radio_buttons",
+            "initial_option": defaultUnsolved ? puzzleUnsolvedOption : puzzleSolvedOption,
+            options: [puzzleSolvedOption, puzzleUnsolvedOption],
           },
         },
         {
