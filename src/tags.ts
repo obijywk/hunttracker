@@ -368,16 +368,7 @@ app.view("tags_update_view", async ({ack, view, body}) => {
   ack();
 });
 
-async function buildRenameTagBlocks() {
-  const tagsResult = await db.query(`
-    SELECT
-      id,
-      name
-    FROM tags
-    ORDER BY name ASC
-  `);
-
-  let tags = tagsResult.rows;
+function buildRenameTagBlocks(tags: Tag[]) {
   let tagsOmitted: boolean = false;
   if (tags.length > MAX_NUM_OPTIONS) {
     tagsOmitted = true;
@@ -452,6 +443,15 @@ async function buildRenameTagBlocks() {
 }
 
 app.action("tags_rename", async ({ ack, body }) => {
+  const tagsResult = await db.query(`
+    SELECT
+      id,
+      name
+    FROM tags
+    ORDER BY name ASC
+  `);
+  const tags = tagsResult.rows;
+
   await app.client.views.open({
     token: process.env.SLACK_BOT_TOKEN,
     "trigger_id": (body as any).trigger_id,
@@ -462,11 +462,11 @@ app.action("tags_rename", async ({ ack, body }) => {
         type: "plain_text",
         text: "Rename tag",
       },
-      blocks: await buildRenameTagBlocks(),
-      submit: {
+      blocks: buildRenameTagBlocks(tags),
+      submit: tags.length > 0 ? {
         type: "plain_text",
         text: "Rename tag",
-      },
+      } : undefined,
     },
   });
   ack();
@@ -549,16 +549,7 @@ app.view("tags_rename_view", async ({ack, body, view}) => {
   ack();
 });
 
-async function buildDeleteTagsBlocks() {
-  const tagsResult = await db.query(`
-    SELECT
-      id,
-      name
-    FROM tags
-    ORDER BY name ASC
-  `);
-
-  let tags = tagsResult.rows;
+function buildDeleteTagsBlocks(tags: Tag[]) {
   let tagsOmitted: boolean = false;
   if (tags.length > MAX_NUM_OPTIONS) {
     tagsOmitted = true;
@@ -621,6 +612,15 @@ async function buildDeleteTagsBlocks() {
 }
 
 app.action("tags_delete", async ({ ack, body }) => {
+  const tagsResult = await db.query(`
+    SELECT
+      id,
+      name
+    FROM tags
+    ORDER BY name ASC
+  `);
+  const tags = tagsResult.rows;
+
   await app.client.views.open({
     token: process.env.SLACK_BOT_TOKEN,
     "trigger_id": (body as any).trigger_id,
@@ -631,11 +631,11 @@ app.action("tags_delete", async ({ ack, body }) => {
         type: "plain_text",
         text: "Delete tags",
       },
-      blocks: await buildDeleteTagsBlocks(),
-      submit: {
+      blocks: buildDeleteTagsBlocks(tags),
+      submit: tags.length > 0 ? {
         type: "plain_text",
         text: "Delete tags",
-      },
+      } : undefined,
     },
   });
   ack();

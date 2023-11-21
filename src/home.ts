@@ -546,10 +546,10 @@ app.action("home_edit_puzzle", async ({ ack, body }) => {
         text: "Edit puzzle",
       },
       blocks,
-      submit: {
+      submit: allPuzzles.length > 0 ? {
         type: "plain_text",
         text: "Edit puzzle",
-      },
+      } : undefined,
     },
   });
   ack();
@@ -641,10 +641,10 @@ app.action("home_delete_puzzle", async ({ ack, body }) => {
         text: "Delete puzzle",
       },
       blocks,
-      submit: {
+      submit: allPuzzles.length > 0 ? {
         type: "plain_text",
         text: "Delete puzzle",
-      },
+      } : undefined,
     },
   });
   ack();
