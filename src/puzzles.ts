@@ -1130,10 +1130,12 @@ export async function clearEventUsers(channelId: string) {
 
 export async function syncBookmarks(puzzle: Puzzle): Promise<void> {
   const newBookmarks = new Map([
-    { title: "Puzzle", emoji: ":jigsaw:", link: puzzle.url },
     { title: "Spreadsheet", emoji: ":bar_chart:", link: puzzle.sheetUrl },
     { title: "Drawing", emoji: ":pencil2:", link: puzzle.drawingUrl },
   ].map(b => [b.title, b]));
+  if (puzzle.url !== null) {
+    newBookmarks.set("Puzzle", { title: "Puzzle", emoji: ":jigsaw:", link: puzzle.url });
+  }
 
   const existingBookmarks = await app.client.bookmarks.list({
     token: process.env.SLACK_USER_TOKEN,
