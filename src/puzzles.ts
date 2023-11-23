@@ -1128,6 +1128,51 @@ export async function clearEventUsers(channelId: string) {
   }
 }
 
+export async function syncBookmarks(puzzle: Puzzle): Promise<void> {
+  const newBookmarks = new Map([
+    { title: "Puzzle", emoji: ":jigsaw:", link: puzzle.url },
+    { title: "Spreadsheet", emoji: ":bar_chart:", link: puzzle.sheetUrl },
+    { title: "Drawing", emoji: ":pencil2:", link: puzzle.drawingUrl },
+  ].map(b => [b.title, b]));
+
+  const existingBookmarks = await app.client.bookmarks.list({
+    token: process.env.SLACK_USER_TOKEN,
+    channel_id: puzzle.id,
+  });
+
+  const requests = [];
+  if (existingBookmarks.ok === true) {
+    for (const bookmark of existingBookmarks.bookmarks) {
+      const newBookmark = newBookmarks.get(bookmark.title);
+      if (newBookmark !== undefined) {
+        if (bookmark.link !== newBookmark.link) {
+          requests.push(app.client.bookmarks.edit({
+            token: process.env.SLACK_USER_TOKEN,
+            channel_id: puzzle.id,
+            bookmark_id: bookmark.id,
+            link: newBookmark.link,
+          }));
+        }
+        newBookmarks.delete(bookmark.title);
+      }
+    }
+  }
+  for (const title of ["Puzzle", "Spreadsheet", "Drawing"]) {
+    const bookmark = newBookmarks.get(title);
+    if (bookmark !== undefined) {
+      await app.client.bookmarks.add({
+        token: process.env.SLACK_USER_TOKEN,
+        channel_id: puzzle.id,
+        type: "link",
+        ...bookmark,
+      });
+    }
+  }
+  for (const request of requests) {
+    await request;
+  }
+}
+
 taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const name = payload.name;
   const url = payload.url;
@@ -1204,11 +1249,11 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   }) as ChatPostMessageResult;
   puzzle.statusMessageTs = postStatusMessageResult.ts;
 
-  const pinPromise = app.client.pins.add({
+  const pinAndBookmarksPromise = app.client.pins.add({
     token: process.env.SLACK_USER_TOKEN,
     channel: puzzle.id,
     timestamp: puzzle.statusMessageTs,
-  });
+  }).then(() => syncBookmarks(puzzle));
 
   const appendPuzzleRowToTrackingSheetPromise =
       googleDrive.appendPuzzleRowToTrackingSheet(name);
@@ -1222,7 +1267,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   if (setTopicPromise) {
     await setTopicPromise;
   }
-  await pinPromise;
+  await pinAndBookmarksPromise;
   await appendPuzzleRowToTrackingSheetPromise;
 
   if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
@@ -1415,6 +1460,7 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
   }
 
   const updateStatusMessagePromise = updateStatusMessage(puzzle);
+  const bookmarksPromise = syncBookmarks(puzzle);
 
   const affectedUserIds = await refreshUsersPromise;
 
@@ -1439,6 +1485,7 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
   }
 
   await updateStatusMessagePromise;
+  await bookmarksPromise;
   for (const p of renameDocPromises) {
     await p;
   }

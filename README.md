@@ -123,6 +123,8 @@ section of https://api.slack.com/. Your web server URL plus "/auth/slack/callbac
 "Redirect URL" on the "OAuth & Permissions" page.
 
 - bot
+- bookmarks:read
+- bookmarks:write
 - channels:read
 - channels:write
 - channels:history
