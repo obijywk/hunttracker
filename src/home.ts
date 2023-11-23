@@ -24,7 +24,7 @@ function buildPuzzleBlocks(puzzle: puzzles.Puzzle, userId: string) {
     text += `\n${puzzles.buildTopicString(puzzle)}`;
   }
   if (puzzle.users && puzzle.users.length > 0) {
-    let users = puzzle.users.slice(0, maxUsersToList).map(u => u.name).join(", ");
+    let users = puzzle.users.slice(0, maxUsersToList).map(u => `<@${u.id}>`).join(", ");
     if (puzzle.users.length > maxUsersToList) {
       users += " \u{2026}";
     }
