@@ -6,7 +6,7 @@ import moment = require("moment");
 import passport from "passport";
 import { Strategy as SlackStrategy } from "passport-slack-oauth2";
 import { App, ExpressReceiver } from "@slack/bolt";
-import { ErrorCode, WebAPIPlatformError } from "@slack/web-api";
+import { ErrorCode, LogLevel, WebAPIPlatformError } from "@slack/web-api";
 
 import { sessionStore } from "./db";
 
@@ -80,6 +80,7 @@ export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   receiver,
   ignoreSelf: false,
+  logLevel: LogLevel.INFO,
 });
 
 app.error(e => {

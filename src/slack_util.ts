@@ -1,4 +1,4 @@
-import { ViewOutput } from "@slack/bolt";
+import { BlockAction, ButtonAction, SlackAction, ViewOutput } from "@slack/bolt";
 
 import { app } from "./app";
 import { ConversationsListResult } from "./slack_results";
@@ -52,6 +52,20 @@ export function getViewStateValues(view: ViewOutput) {
     }
   }
   return values;
+}
+
+export function getSlackActionValue(slackAction: SlackAction, actionId: string): string | null {
+  const blockAction = slackAction as BlockAction;
+  if (blockAction.actions === undefined) {
+    return null;
+  }
+  for (const action of blockAction.actions) {
+    const buttonAction = action as ButtonAction;
+    if (action.action_id === actionId && buttonAction.value !== undefined) {
+      return buttonAction.value;
+    }
+  }
+  return null;
 }
 
 export function makeSlackChannelUrlPrefix(useSlackWebLinks: boolean): string {

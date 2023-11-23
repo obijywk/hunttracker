@@ -1,11 +1,11 @@
-import { ButtonAction, ViewErrorsResponseAction } from "@slack/bolt";
+import { BlockAction, ButtonAction, ViewErrorsResponseAction } from "@slack/bolt";
 import { Block, Button, KnownBlock, Option } from "@slack/types";
 
 import { app } from "./app";
 import * as puzzles from "./puzzles";
 import { PuzzleMetadataErrorField, findChannelIdForChannelName } from "./puzzles";
 import { getPuzzleStatusEmoji } from "./puzzle_status_emoji";
-import { MAX_NUM_OPTIONS, getViewStateValues } from "./slack_util";
+import { MAX_NUM_OPTIONS, getSlackActionValue, getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
@@ -617,15 +617,37 @@ app.view("home_edit_puzzle_view", async ({ack, body, view}) => {
   ack();
 });
 
+function getDeleteConfirmationChannel(): string | null {
+  if (process.env.SLACK_ADMIN_CHANNEL_ID) {
+    return process.env.SLACK_ADMIN_CHANNEL_ID;
+  }
+  if (process.env.SLACK_SOLVE_ANNOUNCEMENT_CHANNEL_NAME) {
+    return `#${process.env.SLACK_SOLVE_ANNOUNCEMENT_CHANNEL_NAME}`;
+  }
+  if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
+    return `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`;
+  }
+  return null;
+}
+
 app.action("home_delete_puzzle", async ({ ack, body }) => {
   const allPuzzles = await puzzles.list();
   const blocks = buildPuzzleSelectionFormBlocks(allPuzzles);
   if (allPuzzles.length > 0) {
+    let text =
+      "Clicking \"Delete puzzle\" will permanently delete the selected puzzle. " +
+      "*This cannot be undone!* " +
+      "Double-check you've selected the intended puzzle before proceeding.";
+    if (getDeleteConfirmationChannel()) {
+      text =
+        "Clicking \"Delete puzzle\" will send a message to confirm deletion. " +
+        "Another team member should double-check that this deletion should be performed.";
+    }
     blocks.push({
       type: "section",
       text: {
         type: "mrkdwn",
-        text: "Clicking \"Delete puzzle\" below will permanently delete the selected puzzle. *This cannot be undone!* Double-check you've selected the intended puzzle before proceeding.",
+        text,
       },
     });
   }
@@ -658,7 +680,77 @@ app.view("home_delete_puzzle_view", async ({ack, body, view}) => {
     return;
   }
   const puzzleId = puzzleIdResult;
-  await puzzles.deletePuzzle(puzzleId, body.user.id);
+  const deleteConfirmationChannel = getDeleteConfirmationChannel();
+  if (!deleteConfirmationChannel) {
+    await puzzles.deletePuzzle(puzzleId, body.user.id);
+  } else {
+    const puzzle = await puzzles.get(puzzleId);
+    await app.client.chat.postMessage({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: deleteConfirmationChannel,
+      text: `Deletion requested for puzzle ${puzzles.buildPuzzleNameMrkdwn(puzzle)}.`,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text:
+              `Deletion requested for puzzle ${puzzles.buildPuzzleNameMrkdwn(puzzle)} ` +
+              `(<#${puzzleId}>). ` +
+              "*Deleting a puzzle cannot be undone!* " +
+              "Double-check that this puzzle should be deleted, then confirm below.",
+          },
+        },
+        {
+          type: "actions",
+          block_id: `delete_puzzle_confirmation_${puzzleId}`,
+          elements: [
+            {
+              type: "button",
+              text: {
+                type: "plain_text",
+                text: "Delete",
+              },
+              style: "danger",
+              value: puzzleId,
+              action_id: "delete_puzzle_confirm",
+            },
+            {
+              type: "button",
+              text: {
+                type: "plain_text",
+                text: "Cancel",
+              },
+              action_id: "delete_puzzle_cancel",
+            },
+          ],
+        },
+      ],
+    });
+  }
+  ack();
+});
+
+app.action("delete_puzzle_confirm", async ({ ack, body, respond }) => {
+  const puzzleId = getSlackActionValue(body, "delete_puzzle_confirm");
+  if (puzzleId) {
+    try {
+      const puzzle = await puzzles.get(puzzleId);
+      await puzzles.deletePuzzle(puzzleId, body.user.id);
+      respond({
+        response_type: "in_channel",
+        replace_original: true,
+        text: `Deleted puzzle ${puzzles.buildPuzzleNameMrkdwn(puzzle)}.`,
+      });
+    } catch (e) {
+      respond({ delete_original: true });
+    }
+  }
+  ack();
+});
+
+app.action("delete_puzzle_cancel", async ({ ack, body, respond }) => {
+  respond({ delete_original: true });
   ack();
 });
 
