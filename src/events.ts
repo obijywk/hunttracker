@@ -40,7 +40,7 @@ app.event("message", async ({ event, body }) => {
         id: event.channel,
       });
     }
-    if (userExists && isPuzzleChannel) {
+    if (userExists && isPuzzleChannel && event.subtype === undefined) {
       await recordActivity(event.channel, user, ActivityType.MessageChannel);
     }
   }
