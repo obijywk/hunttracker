@@ -27,6 +27,8 @@ html {
 
   --background-dropdown: #00000055;
 
+  --background-solver-activity-row-alternate: #ddd;
+
   --text-link: #21a0a0;
   --text-default: #000000;
   --text-deemphasised: #333333;
@@ -62,6 +64,8 @@ html[data-theme="dark"] {
   --background-puzzle-detail: #424242;
 
   --background-dropdown: #ffffff55;
+
+  --background-solver-activity-row-alternate: #333;
 
   --text-link: #000000;
   --text-default: #ffffff;
@@ -498,6 +502,20 @@ table.location td.icon-column {
   width: 2.5rem;
   padding: 0 !important;
   text-align: center;
+}
+
+table.solver-activity {
+  border: none;
+  border-collapse: collapse;
+}
+table.solver-activity tr:nth-child(even) {
+  background-color: var(--background-solver-activity-row-alternate);
+}
+table.solver-activity td {
+  padding-top: 4px;
+  padding-right: 16px;
+  padding-bottom: 4px;
+  padding-left: 16px;
 }
 
 [data-theme="dark"] .select2-container--default .select2-selection--multiple .select2-selection__choice {

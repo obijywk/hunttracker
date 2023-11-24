@@ -16,7 +16,7 @@ import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
 import { deleteAllPeople } from "./google_people";
-import { ActivityType, listLatestActivity } from "./activity";
+import { ActivityType, getUserActivity, listLatestActivity } from "./activity";
 
 expressHbs.registerPartial(
   "menuheader",
@@ -311,6 +311,39 @@ receiver.app.get("/solvers", async (req, res) => {
     appName: process.env.APP_NAME,
     enableDarkMode: req.session.enableDarkMode,
     users: allUsers,
+    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
+  });
+});
+
+receiver.app.get("/solvers/:userId", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+
+  const userId = req.params.userId;
+  const userPromise = users.get(userId);
+  const activitiesPromise = getUserActivity(userId);
+  const allPuzzlesPromise = puzzles.list();
+
+  const user = await userPromise;
+  const activities: Array<any> = await activitiesPromise;
+  const allPuzzles = await allPuzzlesPromise;
+  const puzzleIdToPuzzle = new Map(allPuzzles.map(p => [p.id, p]));
+
+  if (user === null) {
+    res.sendStatus(404);
+    return;
+  }
+
+  for (const activity of activities) {
+    activity.puzzleName = puzzleIdToPuzzle.get(activity.puzzleId).name;
+  }
+
+  return res.render("solver", {
+    appName: process.env.APP_NAME,
+    enableDarkMode: req.session.enableDarkMode,
+    user,
+    activities,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
   });
 });

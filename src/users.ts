@@ -260,6 +260,16 @@ export async function exists(userId: string): Promise<boolean> {
   return result.rowCount > 0 && result.rows[0].exists;
 }
 
+export async function get(userId: string): Promise<User | null> {
+  const result = await db.query(
+    "SELECT * FROM users WHERE id = $1",
+    [userId]);
+  if (result.rowCount !== 1) {
+    return null;
+  }
+  return rowToUser(result.rows[0]);
+}
+
 export async function list(): Promise<Array<User>> {
   return (await db.query("SELECT * FROM users")).rows.map(rowToUser);
 }

@@ -1,0 +1,42 @@
+<!doctype html>
+<html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
+  <head>
+    <title>Solver - {{user.name}} - {{appName}}</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="/static/twemoji.min.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    {{> menuheader solvers=true }}
+    <div class="body-wrapper">
+      <h2>{{user.name}}</h2>
+      <table class="solver-activity">
+      {{#each activities}}
+        <tr>
+          <td class="timestamp">{{timestamp}}</td>
+          <td>
+            <a href="{{../slackUrlPrefix}}{{puzzleId}}" target="_blank">
+            {{puzzleName}}
+            </a>
+          </td>
+          <td>
+            {{renderActivityType activityType}}
+          </td>
+        </tr>
+      {{/each}}
+      </table>
+    </div>
+    <script type="text/javascript">
+      twemoji.parse(document.body);
+
+      $(document).ready(function() {
+        $("td.timestamp").replaceWith(function() {
+          const timestamp = moment.unix($(this).text() / 1000);
+          return `<td>${timestamp.format("ddd MMM DD HH:mm:ss")}</td>`;
+        });
+      });
+    </script>
+  </body>
+</html>
