@@ -93,6 +93,9 @@ Everything is configured using environment variables, and they need to be set fo
   puzzle channel associated with a puzzle sheet they edit if they're not already a member of
   the channel. Requires both the Google Drive Activity API and the Google People API to be
   enabled.
+- **ENABLE_RECORD_ACTIVITY**: If set, a table of user puzzle interactions will be maintained,
+  enabling features that report data such as the latest puzzle each user is working on, a
+  user's solving history over time, etc.
 - **AUTO_ARCHIVE**: If set, then puzzle channels will be automatically archived as they become
   solved.
 - **ALLOW_RESET_DATABASE**: If set, then the admin page will have an option to reset the database.

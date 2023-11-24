@@ -1,0 +1,44 @@
+<!doctype html>
+<html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
+  <head>
+    <title>Solvers - {{appName}}</title>
+    <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="static/twemoji.min.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    {{> menuheader solvers=true }}
+    <div class="body-wrapper">
+      <table class="location">
+        <thead>
+          <th>Solver</th>
+          <th>Latest activity time</th>
+          <th>Puzzle</th>
+          <th>Activity</th>
+        </thead>
+        <tbody>
+        {{#each users}}
+        <tr>
+          <td>{{name}}</td>
+          <td>{{{timeAgo latestActivity.timestamp}}}</td>
+          <td>
+            {{#if latestActivityPuzzle}}
+            <a href="{{../slackUrlPrefix}}{{latestActivityPuzzle.id}}" target="_blank">
+              {{latestActivityPuzzle.name}}
+            </a>
+            {{/if}}
+          </td>
+          <td>
+            {{renderActivityType latestActivity.activityType}}
+          </td>
+        </tr>
+        {{/each}}
+        </tbody>
+      </table>
+    </div>
+    <script type="text/javascript">
+      twemoji.parse(document.body);
+    </script>
+  </body>
+</html>

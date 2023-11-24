@@ -22,6 +22,7 @@ import {
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
+import { ActivityType, recordActivity } from "./activity";
 
 export interface Puzzle {
   id: string;
@@ -807,6 +808,11 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
     }
   }
 
+  const recordActivityPromise = recordActivity(
+    id,
+    body.user.id,
+    ActivityType.RecordAnswer);
+
   await db.query(
     "UPDATE puzzles SET answer = $2, complete = $3 WHERE id = $1",
     [id, answer, complete]);
@@ -856,6 +862,7 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
   for (const p of renamePromises) {
     await p;
   }
+  await recordActivityPromise;
 
   ack();
 });
@@ -1364,6 +1371,7 @@ taskQueue.registerHandler("delete_puzzle", async (client, payload) => {
   await deleteSheetPromise;
   await deleteDrawingPromise;
 
+  await client.query("DELETE FROM activity WHERE puzzle_id = $1", [id]);
   await client.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1", [id]);
   await client.query("DELETE FROM puzzle_user WHERE puzzle_id = $1", [id]);
   await client.query("DELETE FROM puzzles WHERE id = $1", [id]);

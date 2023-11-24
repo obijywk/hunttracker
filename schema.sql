@@ -5,6 +5,10 @@ DROP FUNCTION IF EXISTS task_queue_add_notify;
 DROP TABLE IF EXISTS task_queue;
 DROP TYPE IF EXISTS task_type;
 
+DROP INDEX IF EXISTS activity_user_index;
+DROP TABLE IF EXISTS activity CASCADE;
+DROP TYPE IF EXISTS activity_type;
+
 DROP TABLE IF EXISTS puzzle_tag CASCADE;
 DROP TABLE IF EXISTS puzzle_user CASCADE;
 
@@ -60,6 +64,26 @@ CREATE TABLE puzzle_user (
   PRIMARY KEY (puzzle_id, user_id)
 );
 
+CREATE TYPE activity_type AS ENUM (
+  'join_channel',
+  'message_channel',
+  'edit_sheet',
+  'record_answer'
+);
+
+CREATE TABLE activity (
+  puzzle_id text REFERENCES puzzles(id),
+  user_id text REFERENCES users(id),
+  timestamp timestamp with time zone,
+  activity_type activity_type,
+  PRIMARY KEY (puzzle_id, user_id, timestamp)
+);
+
+CREATE INDEX activity_user_index ON activity (
+  user_id,
+  timestamp DESC NULLS LAST
+);
+
 CREATE TYPE task_type AS ENUM (
   'create_puzzle',
   'edit_puzzle',
@@ -67,7 +91,7 @@ CREATE TYPE task_type AS ENUM (
   'refresh_puzzle',
   'publish_home',
   'refresh_users',
-  'send_sheet_editor_invites'
+  'check_sheet_editors'
 );
 
 CREATE TABLE task_queue (

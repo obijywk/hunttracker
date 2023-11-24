@@ -11,6 +11,7 @@ import { app } from "./app";
 import * as puzzles from "./puzzles";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
+import { ActivityType, recordActivity } from "./activity";
 
 const refreshPuzzleSubtypes = new Set([
   "channel_topic",
@@ -27,14 +28,20 @@ app.event("message", async ({ event, body }) => {
       id: event.channel,
     });
   } else if (!isBotMessage) {
-    const userExistsPromise = users.exists((event as GenericMessageEvent).user);
+    const user = (event as GenericMessageEvent).user;
+    const userExistsPromise = users.exists(user);
+    const isPuzzleChannelPromise = puzzles.isPuzzleChannel(event.channel);
     const isIdlePuzzleChannelPromise = puzzles.isIdlePuzzleChannel(event.channel);
     const userExists = await userExistsPromise;
+    const isPuzzleChannel = await isPuzzleChannelPromise;
     const isIdlePuzzleChannel = await isIdlePuzzleChannelPromise;
     if (userExists && isIdlePuzzleChannel) {
       await taskQueue.scheduleTask("refresh_puzzle", {
         id: event.channel,
       });
+    }
+    if (userExists && isPuzzleChannel) {
+      await recordActivity(event.channel, user, ActivityType.MessageChannel);
     }
   }
   if (body.eventAck) {
@@ -48,6 +55,12 @@ app.event("member_joined_channel", async ({ event, body }) => {
     await taskQueue.scheduleTask("refresh_puzzle", {
       id: memberJoinedChannelEvent.channel,
     });
+    if (await users.exists(memberJoinedChannelEvent.user)) {
+      await recordActivity(
+        memberJoinedChannelEvent.channel,
+        memberJoinedChannelEvent.user,
+        ActivityType.JoinChannel);
+    }
   }
   if (memberJoinedChannelEvent.channel === process.env.SLACK_ADMIN_CHANNEL_ID) {
     await taskQueue.scheduleTask("refresh_users", {});

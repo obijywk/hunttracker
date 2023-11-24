@@ -260,6 +260,10 @@ export async function exists(userId: string): Promise<boolean> {
   return result.rowCount > 0 && result.rows[0].exists;
 }
 
+export async function list(): Promise<Array<User>> {
+  return (await db.query("SELECT * FROM users")).rows.map(rowToUser);
+}
+
 export async function findUsersByGoogleActivityPersonName(
   googleActivityPersonNames: Array<string>,
   client: PoolClient,

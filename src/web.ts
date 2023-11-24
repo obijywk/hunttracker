@@ -1,3 +1,4 @@
+import moment = require("moment");
 import { Request, Response } from "express";
 import expressHbs = require("express-hbs");
 import * as path from "path";
@@ -15,6 +16,7 @@ import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
 import { deleteAllPeople } from "./google_people";
+import { ActivityType, listLatestActivity } from "./activity";
 
 expressHbs.registerPartial(
   "menuheader",
@@ -35,6 +37,32 @@ function commaSeparatedSolvers(puzzle: puzzles.Puzzle, limit: number): string {
   return s;
 }
 expressHbs.registerHelper("commaSeparatedSolvers", commaSeparatedSolvers);
+
+function timeAgo(timestamp: moment.Moment | undefined): string {
+  if (timestamp !== undefined) {
+    const idleDuration = moment.duration(moment().utc().diff(timestamp));
+    return Math.floor(idleDuration.asHours()) + "h"
+      + String(idleDuration.minutes()).padStart(2, "0") + "m ago";
+  }
+  return "";
+}
+expressHbs.registerHelper("timeAgo", timeAgo);
+
+function renderActivityType(activityType: ActivityType | undefined): string {
+  switch (activityType) {
+    case ActivityType.EditSheet:
+      return "Working in spreadsheet";
+    case ActivityType.MessageChannel:
+      return "Slack chat";
+    case ActivityType.JoinChannel:
+      return "Join Slack channel";
+    case ActivityType.RecordAnswer:
+      return "Record confirmed answer";
+    default:
+      return "";
+  }
+}
+expressHbs.registerHelper("renderActivityType", renderActivityType);
 
 function checkAuth(req: Request, res: Response) {
   if (process.env.DISABLE_WEB_AUTH !== undefined) {
@@ -240,6 +268,49 @@ receiver.app.get("/metas", async(req, res) => {
     appName: process.env.APP_NAME,
     enableDarkMode: req.session.enableDarkMode,
     metas,
+    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
+  });
+});
+
+receiver.app.get("/solvers", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+
+  const latestActivityPromise = listLatestActivity();
+  const allPuzzlesPromise = puzzles.list();
+  const allUsersPromise = users.list();
+
+  const allUsers: Array<any> = await allUsersPromise;
+  const allPuzzles = await allPuzzlesPromise;
+  const latestActivity = await latestActivityPromise;
+
+  const userIdToLatestActivity = new Map(latestActivity.map(a => [a.userId, a]));
+  const puzzleIdToPuzzle = new Map(allPuzzles.map(p => [p.id, p]));
+
+  for (const user of allUsers) {
+    user.latestActivity = userIdToLatestActivity.get(user.id);
+    if (user.latestActivity !== undefined) {
+      user.latestActivityPuzzle = puzzleIdToPuzzle.get(user.latestActivity.puzzleId);
+    }
+  }
+  allUsers.sort((a: any, b: any) => {
+    if (a.latestActivity === undefined) {
+      return 1;
+    }
+    if (b.latestActivity === undefined) {
+      return -1;
+    }
+    if (a.latestActivity.timestamp < b.latestActivity.timestamp) {
+      return 1;
+    }
+    return -1;
+  });
+
+  return res.render("solvers", {
+    appName: process.env.APP_NAME,
+    enableDarkMode: req.session.enableDarkMode,
+    users: allUsers,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
   });
 });

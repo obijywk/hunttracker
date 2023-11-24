@@ -24,11 +24,16 @@ function getItemNameSheetUrl(itemName: string): string {
 
 let puzzleFolderFileId: string | null = null;
 
-export async function getRecentPuzzleSheetEditors(): Promise<{ [key: string]: Set<string> }> {
+// Map from sheet URL to map from person resource to latest edit timestamp.
+type SheetEditsMap = Map<string, Map<string, moment.Moment>>;
+
+export async function getRecentPuzzleSheetEditors(): Promise<SheetEditsMap> {
+  const sheetEditsMap: SheetEditsMap = new Map();
+
   if (puzzleFolderFileId === null) {
     puzzleFolderFileId = await getSheetFolderFileId(process.env.PUZZLE_SHEET_TEMPLATE_URL);
     if (puzzleFolderFileId === null) {
-      return {};
+      return sheetEditsMap;
     }
   }
   const minTimestamp = moment().utc().subtract(moment.duration(10, "minute")).valueOf();
@@ -39,10 +44,9 @@ export async function getRecentPuzzleSheetEditors(): Promise<{ [key: string]: Se
     },
   });
   if (!response.data.activities) {
-    return {};
+    return sheetEditsMap;
   }
 
-  const editorSets: { [key: string]: Set<string> } = {};
   for (const activity of response.data.activities) {
     if (activity.targets.length === 0 || !activity.targets[0].driveItem) {
       continue;
@@ -50,12 +54,20 @@ export async function getRecentPuzzleSheetEditors(): Promise<{ [key: string]: Se
     if (activity.actors.length === 0 || !activity.actors[0].user || !activity.actors[0].user.knownUser) {
       continue;
     }
+
     const sheetUrl = getItemNameSheetUrl(activity.targets[0].driveItem.name);
-    const personResource = activity.actors[0].user.knownUser.personName;
-    if (!editorSets[sheetUrl]) {
-      editorSets[sheetUrl] = new Set();
+    let editsMap = sheetEditsMap.get(sheetUrl);
+    if (editsMap === undefined) {
+      editsMap = new Map<string, moment.Moment>();
+      sheetEditsMap.set(sheetUrl, editsMap);
     }
-    editorSets[sheetUrl].add(personResource);
+
+    const personResource = activity.actors[0].user.knownUser.personName;
+    const newTimestamp = moment.utc(activity.timestamp);
+    const currentTimestamp = editsMap.get(personResource);
+    if (currentTimestamp === undefined || newTimestamp > currentTimestamp) {
+      editsMap.set(personResource, newTimestamp);
+    }
   }
-  return editorSets;
+  return sheetEditsMap;
 }
