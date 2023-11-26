@@ -432,6 +432,9 @@ div.meta-dashboard-icon {
   --slack-3: #2EB67D;
   --slack-4: #ECB22E;
 }
+.icon-huddle:hover {
+  fill: #0F9D58;
+}
 .icon-sheet:hover {
   fill: #0F9D58;
 }

@@ -74,3 +74,7 @@ export function makeSlackChannelUrlPrefix(useSlackWebLinks: boolean): string {
   }
   return `slack://channel?team=${process.env.SLACK_TEAM_ID}&id=`;
 }
+
+export function makeSlackHuddleUrlPrefix(): string {
+  return `https://app.slack.com/huddle/${process.env.SLACK_TEAM_ID}/`;
+}

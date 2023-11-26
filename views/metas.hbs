@@ -47,6 +47,11 @@
                   <svg class="icon icon-drawing"><use xlink:href="static/icons.svg#drawing"></use></svg>
                 </a>
               {{/if}}
+              {{#if huddleThreadMessageTs}}
+                <a href="{{../slackHuddleUrlPrefix}}{{id}}" target="_blank">
+                  <svg class="icon icon-huddle"><use xlink:href="static/icons.svg#huddle"></use></svg>
+                </a>
+              {{/if}}
             </div>
             {{#each puzzles}}
               {{#with (puzzleStatusEmoji this)}}

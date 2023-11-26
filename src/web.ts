@@ -11,7 +11,7 @@ import * as home from "./home";
 import * as puzzles from "./puzzles";
 import { getPuzzleStatusEmoji, PuzzleStatusEmoji } from "./puzzle_status_emoji";
 import * as refreshPolling from "./refresh_polling";
-import { makeSlackChannelUrlPrefix } from "./slack_util";
+import { makeSlackChannelUrlPrefix, makeSlackHuddleUrlPrefix } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
@@ -138,6 +138,7 @@ receiver.app.get("/puzzles", async (req, res) => {
     appName: process.env.APP_NAME,
     enableDarkMode: req.session.enableDarkMode,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
+    slackHuddleUrlPrefix: makeSlackHuddleUrlPrefix(),
     minimumIdleMinutes: process.env.MINIMUM_IDLE_MINUTES,
     initialSearch: req.query.search || "",
     initialTags: req.query.tags || "",
@@ -271,6 +272,7 @@ receiver.app.get("/metas", async(req, res) => {
     enableDarkMode: req.session.enableDarkMode,
     metas,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
+    slackHuddleUrlPrefix: makeSlackHuddleUrlPrefix(),
   });
 });
 
