@@ -22,26 +22,33 @@ app.event("message", async ({ event, body }) => {
   if (event.subtype === "message_changed") {
     isBotMessage = (event as MessageChangedEvent).message.subtype === "bot_message";
   }
-  if (refreshPuzzleSubtypes.has(event.subtype) &&
-      await puzzles.isPuzzleChannel(event.channel)) {
-    await taskQueue.scheduleTask("refresh_puzzle", {
-      id: event.channel,
-    });
-  } else if (!isBotMessage) {
-    const user = (event as GenericMessageEvent).user;
-    const userExistsPromise = users.exists(user);
-    const isPuzzleChannelPromise = puzzles.isPuzzleChannel(event.channel);
-    const isIdlePuzzleChannelPromise = puzzles.isIdlePuzzleChannel(event.channel);
-    const userExists = await userExistsPromise;
-    const isPuzzleChannel = await isPuzzleChannelPromise;
-    const isIdlePuzzleChannel = await isIdlePuzzleChannelPromise;
-    if (userExists && isIdlePuzzleChannel) {
+  const isPuzzleChannel = await puzzles.isPuzzleChannel(event.channel);
+  if (isPuzzleChannel) {
+    if ((event as any).subtype === "huddle_thread") {
+      await puzzles.updateHuddleThreadMessageTs(event.channel, event.event_ts);
       await taskQueue.scheduleTask("refresh_puzzle", {
         id: event.channel,
       });
-    }
-    if (userExists && isPuzzleChannel && event.subtype === undefined) {
-      await recordActivity(event.channel, user, ActivityType.MessageChannel);
+    } else if (refreshPuzzleSubtypes.has(event.subtype)) {
+      await taskQueue.scheduleTask("refresh_puzzle", {
+        id: event.channel,
+      });
+    } else if (!isBotMessage) {
+      const user = (event as GenericMessageEvent).user;
+      const userExistsPromise = users.exists(user);
+      const isIdlePuzzleChannelPromise = puzzles.isIdlePuzzleChannel(event.channel);
+      const userExists = await userExistsPromise;
+      const isIdlePuzzleChannel = await isIdlePuzzleChannelPromise;
+      if (userExists) {
+        if (isIdlePuzzleChannel) {
+          await taskQueue.scheduleTask("refresh_puzzle", {
+            id: event.channel,
+          });
+        }
+        if (event.subtype === undefined) {
+          await recordActivity(event.channel, user, ActivityType.MessageChannel);
+        }
+      }
     }
   }
   if (body.eventAck) {

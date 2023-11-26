@@ -45,6 +45,7 @@ export interface Puzzle {
   drawingModifiedTimestamp: moment.Moment;
   manualPokeTimestamp: moment.Moment;
   statusMessageTs?: string;
+  huddleThreadMessageTs?: string;
 }
 
 export function chooseConsistentlyForPuzzle<T>(puzzle: Puzzle, choices: Array<T>): T {
@@ -177,7 +178,8 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       sheet_modified_timestamp,
       drawing_modified_timestamp,
       manual_poke_timestamp,
-      status_message_ts
+      status_message_ts,
+      huddle_thread_message_ts
     FROM puzzles`;
   const whereConditions = [];
   const params = [];
@@ -231,6 +233,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       drawingModifiedTimestamp: moment.utc(row.drawing_modified_timestamp),
       manualPokeTimestamp: moment.utc(row.manual_poke_timestamp),
       statusMessageTs: row.status_message_ts,
+      huddleThreadMessageTs: row.huddle_thread_message_ts,
     });
   }
   return puzzles;
@@ -896,8 +899,9 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       sheet_modified_timestamp,
       drawing_modified_timestamp,
       manual_poke_timestamp,
-      status_message_ts
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+      status_message_ts,
+      huddle_thread_message_ts
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
     [
       puzzle.id,
       puzzle.name,
@@ -916,6 +920,7 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       puzzle.drawingModifiedTimestamp.format(),
       puzzle.manualPokeTimestamp.format(),
       puzzle.statusMessageTs || "",
+      puzzle.huddleThreadMessageTs || "",
     ]);
 }
 
@@ -935,6 +940,29 @@ async function getLatestMessageTimestamp(id: string): Promise<moment.Moment | nu
     return moment.utc(moment.unix(Number(message.ts)));
   }
   return null;
+}
+
+async function getHuddleParticipantUserIds(puzzle: Puzzle): Promise<string[]> {
+  if (!puzzle.huddleThreadMessageTs || puzzle.huddleThreadMessageTs.length === 0) {
+    return [];
+  }
+  const channelHistoryResult = await app.client.conversations.history({
+    token: process.env.SLACK_USER_TOKEN,
+    channel: puzzle.id,
+    inclusive: true,
+    latest: puzzle.huddleThreadMessageTs,
+    limit: 1,
+  }) as ConversationsHistoryResult;
+  for (const message of channelHistoryResult.messages) {
+    if (message.ts !== puzzle.huddleThreadMessageTs) {
+      continue;
+    }
+    const room = (message as any).room;
+    if (room && room.participants) {
+      return room.participants;
+    }
+  }
+  return [];
 }
 
 async function validatePuzzleName(name: string): Promise<string | null> {
@@ -1085,6 +1113,15 @@ export async function deletePuzzle(id: string, creatorUserId: string) {
   });
 }
 
+export async function updateHuddleThreadMessageTs(id: string, eventTs: string) {
+  await db.query(`
+    UPDATE puzzles
+    SET
+      huddle_thread_message_ts = $2
+    WHERE id = $1`,
+    [ id, eventTs ]);
+}
+
 export async function refreshAll() {
   const result = await db.query("SELECT id FROM puzzles");
   for (const row of result.rows) {
@@ -1135,7 +1172,7 @@ export async function clearEventUsers(channelId: string) {
   }
 }
 
-export async function syncBookmarks(puzzle: Puzzle): Promise<void> {
+async function syncBookmarks(puzzle: Puzzle): Promise<void> {
   const newBookmarks = new Map([
     { title: "Spreadsheet", emoji: ":bar_chart:", link: puzzle.sheetUrl },
     { title: "Drawing", emoji: ":pencil2:", link: puzzle.drawingUrl },
@@ -1404,6 +1441,7 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
   const puzzle = await get(id, client);
   const refreshUsersPromise = users.refreshPuzzleUsers(id, client);
   const latestMessageTimestampPromise = getLatestMessageTimestamp(id);
+  const huddleParticipantUserIdsPromise = getHuddleParticipantUserIds(puzzle);
 
   const now = moment().utc();
 
@@ -1474,6 +1512,21 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
 
   const affectedUserIds = await refreshUsersPromise;
 
+  const huddleParticipantUserIds = await huddleParticipantUserIdsPromise;
+  if (huddleParticipantUserIds.length === 0 && (
+      puzzle.huddleThreadMessageTs && puzzle.huddleThreadMessageTs.length > 0)) {
+    dirty = true;
+    puzzle.huddleThreadMessageTs = "";
+  }
+  const recordActivityPromises = [];
+  for (const userId of huddleParticipantUserIds) {
+    recordActivityPromises.push(users.exists(userId).then(exists => {
+      if (exists) {
+        return recordActivity(puzzle.id, userId, ActivityType.JoinHuddle);
+      }
+    }));
+  }
+
   if (dirty) {
     await client.query(`
       UPDATE puzzles
@@ -1482,7 +1535,8 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
         channel_topic_modified_timestamp = $3,
         chat_modified_timestamp = $4,
         sheet_modified_timestamp = $5,
-        drawing_modified_timestamp = $6
+        drawing_modified_timestamp = $6,
+        huddle_thread_message_ts = $7
       WHERE id = $1`,
       [
         id,
@@ -1491,12 +1545,16 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
         puzzle.chatModifiedTimestamp.format(),
         puzzle.sheetModifiedTimestamp.format(),
         puzzle.drawingModifiedTimestamp.format(),
+        puzzle.huddleThreadMessageTs,
       ]);
   }
 
   await updateStatusMessagePromise;
   await bookmarksPromise;
   for (const p of renameDocPromises) {
+    await p;
+  }
+  for (const p of recordActivityPromises) {
     await p;
   }
 

@@ -50,12 +50,14 @@ expressHbs.registerHelper("timeAgo", timeAgo);
 
 function renderActivityType(activityType: ActivityType | undefined): string {
   switch (activityType) {
-    case ActivityType.EditSheet:
-      return "Working in spreadsheet";
-    case ActivityType.MessageChannel:
-      return "Slack chat";
     case ActivityType.JoinChannel:
       return "Join Slack channel";
+    case ActivityType.MessageChannel:
+      return "Slack chat";
+    case ActivityType.JoinHuddle:
+      return "Join huddle";
+    case ActivityType.EditSheet:
+      return "Working in spreadsheet";
     case ActivityType.RecordAnswer:
       return "Record confirmed answer";
     default:

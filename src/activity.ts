@@ -5,6 +5,7 @@ import * as db from "./db";
 export enum ActivityType {
   JoinChannel = "join_channel",
   MessageChannel = "message_channel",
+  JoinHuddle = "join_huddle",
   EditSheet = "edit_sheet",
   RecordAnswer = "record_answer"
 }

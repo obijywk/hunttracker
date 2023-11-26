@@ -34,7 +34,8 @@ CREATE TABLE puzzles (
   sheet_modified_timestamp timestamp with time zone,
   drawing_modified_timestamp timestamp with time zone,
   manual_poke_timestamp timestamp with time zone,
-  status_message_ts text
+  status_message_ts text,
+  huddle_thread_message_ts text
 );
 
 CREATE TABLE tags (
@@ -67,6 +68,7 @@ CREATE TABLE puzzle_user (
 CREATE TYPE activity_type AS ENUM (
   'join_channel',
   'message_channel',
+  'join_huddle',
   'edit_sheet',
   'record_answer'
 );
