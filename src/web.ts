@@ -294,7 +294,8 @@ receiver.app.get("/solvers", async (req, res) => {
       user.latestActivityPuzzle = puzzleIdToPuzzle.get(user.latestActivity.puzzleId);
     }
   }
-  allUsers.sort((a: any, b: any) => {
+  const activeUsers = allUsers.filter(user => user.latestActivity);
+  activeUsers.sort((a: any, b: any) => {
     if (a.latestActivity === undefined) {
       return 1;
     }
@@ -310,7 +311,7 @@ receiver.app.get("/solvers", async (req, res) => {
   return res.render("solvers", {
     appName: process.env.APP_NAME,
     enableDarkMode: req.session.enableDarkMode,
-    users: allUsers,
+    users: activeUsers,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
   });
 });
