@@ -4,7 +4,9 @@ import { Client, PoolClient } from "pg";
 import { SNSClient } from "@aws-sdk/client-sns-node/SNSClient";
 import { PublishCommand } from "@aws-sdk/client-sns-node/commands/PublishCommand";
 
+import { app } from "./app";
 import * as db from "./db";
+import { ChatPostMessageResult } from "./slack_results";
 
 const handlers: { [key: string]: (client: PoolClient, payload: any) => Promise<void>} = {};
 export function registerHandler(
@@ -90,6 +92,19 @@ export async function processTaskQueue() {
         await client.query(
           "INSERT INTO task_queue (task_type, payload, error) VALUES ($1, $2, $3)",
           [task.task_type, task.payload, JSON.stringify(e)]);
+        if (process.env.SLACK_ERROR_CHANNEL_NAME) {
+          const postMessageResult = await app.client.chat.postMessage({
+            token: process.env.SLACK_USER_TOKEN,
+            channel: `#${process.env.SLACK_ERROR_CHANNEL_NAME}`,
+            text: `ERROR! Task queue handler failed for ${task.task_type} (${JSON.stringify(task.payload)}).`,
+          }) as ChatPostMessageResult;
+          await app.client.chat.postMessage({
+            token: process.env.SLACK_USER_TOKEN,
+            channel: `#${process.env.SLACK_ERROR_CHANNEL_NAME}`,
+            "thread_ts": postMessageResult.ts,
+            text: JSON.stringify(e),
+          });
+        }
       }
       await client.query("COMMIT");
     }
