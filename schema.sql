@@ -86,6 +86,11 @@ CREATE INDEX activity_user_index ON activity (
   timestamp DESC NULLS LAST
 );
 
+CREATE INDEX activity_puzzle_index ON activity (
+  puzzle_id,
+  timestamp DESC NULLS LAST
+);
+
 CREATE TYPE task_type AS ENUM (
   'create_puzzle',
   'edit_puzzle',

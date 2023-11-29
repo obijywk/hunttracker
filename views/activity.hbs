@@ -1,13 +1,13 @@
 <!doctype html>
 <html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
   <head>
-    <title>Solvers - {{appName}}</title>
+    <title>Activity - {{appName}}</title>
     <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
     <link rel="stylesheet" type="text/css" href="static/style.css">
     <script type="text/javascript" charset="utf8" src="static/twemoji.min.js" crossorigin="anonymous"></script>
   </head>
   <body>
-    {{> menuheader solvers=true }}
+    {{> menuheader activity=true }}
     <div class="body-wrapper">
       <p>
         These pages present a &ldquo;best guess&rdquo; of per-person solving activity
@@ -24,11 +24,11 @@
         <tbody>
         {{#each users}}
         <tr>
-          <td><a href="/solvers/{{id}}">{{name}}</a></td>
+          <td><a href="/useractivity/{{id}}">{{name}}</a></td>
           <td>{{{timeAgo latestActivity.timestamp}}}</td>
           <td>
             {{#if latestActivityPuzzle}}
-            <a href="{{../slackUrlPrefix}}{{latestActivityPuzzle.id}}" target="_blank">
+            <a href="/puzzleactivity/{{latestActivityPuzzle.id}}">
               {{latestActivityPuzzle.name}}
             </a>
             {{/if}}

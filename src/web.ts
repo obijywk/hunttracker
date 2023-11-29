@@ -16,7 +16,7 @@ import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
 import { deleteAllPeople } from "./google_people";
-import { ActivityType, getUserActivity, listLatestActivity } from "./activity";
+import { ActivityType, getPuzzleActivity, getUserActivity, listLatestActivity } from "./activity";
 
 expressHbs.registerPartial(
   "menuheader",
@@ -276,7 +276,7 @@ receiver.app.get("/metas", async(req, res) => {
   });
 });
 
-receiver.app.get("/solvers", async (req, res) => {
+receiver.app.get("/activity", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
@@ -312,7 +312,7 @@ receiver.app.get("/solvers", async (req, res) => {
     return -1;
   });
 
-  return res.render("solvers", {
+  return res.render("activity", {
     appName: process.env.APP_NAME,
     enableDarkMode: req.session.enableDarkMode,
     users: activeUsers,
@@ -320,7 +320,7 @@ receiver.app.get("/solvers", async (req, res) => {
   });
 });
 
-receiver.app.get("/solvers/:userId", async (req, res) => {
+receiver.app.get("/useractivity/:userId", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
@@ -344,10 +344,43 @@ receiver.app.get("/solvers/:userId", async (req, res) => {
     activity.puzzleName = puzzleIdToPuzzle.get(activity.puzzleId).name;
   }
 
-  return res.render("solver", {
+  return res.render("useractivity", {
     appName: process.env.APP_NAME,
     enableDarkMode: req.session.enableDarkMode,
     user,
+    activities,
+    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
+  });
+});
+
+receiver.app.get("/puzzleactivity/:puzzleId", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+
+  const puzzleId = req.params.puzzleId;
+  const puzzlePromise = puzzles.get(puzzleId);
+  const activitiesPromise = getPuzzleActivity(puzzleId);
+  const allUsersPromise = users.list();
+
+  const puzzle = await puzzlePromise;
+  const activities: Array<any> = await activitiesPromise;
+  const allUsers = await allUsersPromise;
+  const userIdToUser = new Map(allUsers.map(u => [u.id, u]));
+
+  if (puzzle === null) {
+    res.sendStatus(404);
+    return;
+  }
+
+  for (const activity of activities) {
+    activity.userName = userIdToUser.get(activity.userId).name;
+  }
+
+  return res.render("puzzleactivity", {
+    appName: process.env.APP_NAME,
+    enableDarkMode: req.session.enableDarkMode,
+    puzzle,
     activities,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
   });

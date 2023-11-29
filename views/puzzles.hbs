@@ -367,15 +367,19 @@
               searchable: false,
               render: (data, type, row) => {
                 if (type === "display" || type === "filter") {
+                  let v = "";
                   if (data === 0) {
-                    return "n/a";
+                    v = "n/a";
+                  } else {
+                    const idleDuration = moment.duration(data);
+                    if (idleDuration.asMinutes() < {{minimumIdleMinutes}}) {
+                      v = "active";
+                    } else {
+                      v = Math.floor(idleDuration.asHours()) + "h"
+                        + String(idleDuration.minutes()).padStart(2, "0") + "m";
+                    }
                   }
-                  const idleDuration = moment.duration(data);
-                  if (idleDuration.asMinutes() < {{minimumIdleMinutes}}) {
-                    return "active";
-                  }
-                  return Math.floor(idleDuration.asHours()) + "h"
-                    + String(idleDuration.minutes()).padStart(2, "0") + "m";
+                  return `<a href="/puzzleactivity/${row.id}">${v}</a>`;
                 }
                 return data;
               },

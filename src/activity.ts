@@ -118,3 +118,21 @@ export async function getUserActivity(userId: string): Promise<Activity[]> {
     timestamp: moment.utc(r.timestamp),
   }));
 }
+
+export async function getPuzzleActivity(puzzleId: string): Promise<Activity[]> {
+  const result = await db.query(`
+    SELECT
+      user_id,
+      activity_type,
+      timestamp
+    FROM activity
+    WHERE puzzle_id = $1
+    ORDER BY timestamp DESC NULLS LAST`,
+    [puzzleId]);
+  return result.rows.map(r => ({
+    userId: r.user_id,
+    puzzleId,
+    activityType: activityTypeLookup.get(r.activity_type),
+    timestamp: moment.utc(r.timestamp),
+  }));
+}
