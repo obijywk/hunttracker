@@ -96,7 +96,7 @@ export async function processTaskQueue() {
           const postMessageResult = await app.client.chat.postMessage({
             token: process.env.SLACK_USER_TOKEN,
             channel: `#${process.env.SLACK_ERROR_CHANNEL_NAME}`,
-            text: `ERROR! Task queue handler failed for ${task.task_type} (${JSON.stringify(task.payload)}).`,
+            text: `ERROR! <${process.env.WEB_SERVER_URL + "taskqueue"}|Task queue> handler failed for ${task.task_type} ${JSON.stringify(task.payload)}.`,
           }) as ChatPostMessageResult;
           await app.client.chat.postMessage({
             token: process.env.SLACK_USER_TOKEN,
