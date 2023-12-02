@@ -17,7 +17,12 @@
         <tr>
           <td class="timestamp">{{timestamp}}</td>
           <td>
-            <a href="/puzzleactivity/{{puzzleId}}">{{puzzleName}}</a>
+            <a href="/puzzleactivity/{{puzzle.id}}">
+              {{#with (puzzleStatusEmoji puzzle)}}
+                {{unicodeEmoji}}
+              {{/with}}
+              {{puzzle.name}}
+            </a>
           </td>
           <td>
             {{renderActivityType activityType}}

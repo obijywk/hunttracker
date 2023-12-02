@@ -341,7 +341,7 @@ receiver.app.get("/useractivity/:userId", async (req, res) => {
   }
 
   for (const activity of activities) {
-    activity.puzzleName = puzzleIdToPuzzle.get(activity.puzzleId).name;
+    activity.puzzle = puzzleIdToPuzzle.get(activity.puzzleId);
   }
 
   return res.render("useractivity", {

@@ -11,7 +11,12 @@
   <body>
     {{> menuheader activity=true }}
     <div class="body-wrapper">
-      <h2>{{puzzle.name}}</h2>
+      <h2>
+        {{#with (puzzleStatusEmoji puzzle)}}
+          {{unicodeEmoji}}
+        {{/with}}
+        {{puzzle.name}}
+      </h2>
       <table class="solver-activity">
       {{#each activities}}
         <tr>

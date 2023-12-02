@@ -29,6 +29,9 @@
           <td>
             {{#if latestActivityPuzzle}}
             <a href="/puzzleactivity/{{latestActivityPuzzle.id}}">
+              {{#with (puzzleStatusEmoji latestActivityPuzzle)}}
+                {{unicodeEmoji}}
+              {{/with}}
               {{latestActivityPuzzle.name}}
             </a>
             {{/if}}
