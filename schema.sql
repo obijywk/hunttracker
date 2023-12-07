@@ -76,19 +76,19 @@ CREATE TYPE activity_type AS ENUM (
 CREATE TABLE activity (
   puzzle_id text REFERENCES puzzles(id),
   user_id text REFERENCES users(id),
-  timestamp timestamp with time zone,
-  activity_type activity_type,
+  timestamp timestamp with time zone NOT NULL,
+  activity_type activity_type NOT NULL,
   PRIMARY KEY (puzzle_id, user_id, timestamp)
 );
 
 CREATE INDEX activity_user_index ON activity (
   user_id,
-  timestamp DESC NULLS LAST
+  timestamp DESC
 );
 
 CREATE INDEX activity_puzzle_index ON activity (
   puzzle_id,
-  timestamp DESC NULLS LAST
+  timestamp DESC
 );
 
 CREATE TYPE task_type AS ENUM (

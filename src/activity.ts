@@ -37,7 +37,7 @@ export async function recordActivity(
     WHERE
       user_id = $1
       AND activity_type = $2
-    ORDER BY user_id, activity_type, timestamp DESC NULLS LAST
+    ORDER BY user_id, activity_type, timestamp DESC
     LIMIT 1`,
     [userId, activityType]);
 
@@ -89,7 +89,7 @@ export async function listLatestActivity(): Promise<Activity[]> {
         puzzle_id,
         activity_type,
         timestamp,
-        rank() OVER (PARTITION BY user_id ORDER BY timestamp DESC NULLS LAST) AS r
+        rank() OVER (PARTITION BY user_id ORDER BY timestamp DESC) AS r
       FROM activity
     ) AS subselect
     WHERE r = 1`);
@@ -109,7 +109,7 @@ export async function getUserActivity(userId: string): Promise<Activity[]> {
       timestamp
     FROM activity
     WHERE user_id = $1
-    ORDER BY timestamp DESC NULLS LAST`,
+    ORDER BY timestamp DESC`,
     [userId]);
   return result.rows.map(r => ({
     userId,
@@ -127,7 +127,7 @@ export async function getPuzzleActivity(puzzleId: string): Promise<Activity[]> {
       timestamp
     FROM activity
     WHERE puzzle_id = $1
-    ORDER BY timestamp DESC NULLS LAST`,
+    ORDER BY timestamp DESC`,
     [puzzleId]);
   return result.rows.map(r => ({
     userId: r.user_id,
