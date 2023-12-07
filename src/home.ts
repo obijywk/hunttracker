@@ -107,52 +107,7 @@ async function buildHomeBlocks(userId: string) {
 
   const isAdmin = await isAdminPromise;
 
-  const actionsElements = [
-    {
-      type: "button",
-      text: {
-        type: "plain_text",
-        text: ":repeat: Refresh",
-      },
-      "action_id": "home_refresh",
-    },
-    {
-      type: "button",
-      text: {
-        type: "plain_text",
-        text: ":jigsaw: Puzzles",
-      },
-      "action_id": "home_nav_puzzles",
-      url: process.env.WEB_SERVER_URL + "puzzles",
-    },
-    {
-      type: "button",
-      text: {
-        type: "plain_text",
-        text: ":the_horns: Metas",
-      },
-      "action_id": "home_nav_metas",
-      url: process.env.WEB_SERVER_URL + "metas",
-    },
-    {
-      type: "button",
-      text: {
-        type: "plain_text",
-        text: ":door: Locations",
-      },
-      "action_id": "home_nav_locations",
-      url: process.env.WEB_SERVER_URL + "locations",
-    },
-    {
-      type: "button",
-      text: {
-        type: "plain_text",
-        text: ":bookmark: Update tags",
-      },
-      "action_id": "home_nav_tagger",
-      url: process.env.WEB_SERVER_URL + "tagger",
-    },
-  ];
+  const actionsElements = [];
 
   if (process.env.HELP_URL) {
     actionsElements.push({
@@ -165,6 +120,79 @@ async function buildHomeBlocks(userId: string) {
       url: process.env.HELP_URL,
     });
   }
+
+  actionsElements.push(
+    {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":repeat: Refresh",
+      },
+      "action_id": "home_refresh",
+    },
+  );
+
+  actionsElements.push(
+    {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":jigsaw: Puzzles",
+      },
+      "action_id": "home_nav_puzzles",
+      url: process.env.WEB_SERVER_URL + "puzzles",
+    },
+  );
+
+  actionsElements.push(
+    {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":the_horns: Metas",
+      },
+      "action_id": "home_nav_metas",
+      url: process.env.WEB_SERVER_URL + "metas",
+    },
+  );
+
+  if (process.env.ENABLE_RECORD_ACTIVITY) {
+    actionsElements.push({
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":eyes: Activity",
+      },
+      "action_id": "home_nav_activity",
+      url: process.env.WEB_SERVER_URL + "activity",
+    });
+  }
+
+  actionsElements.push(
+    {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":door: Locations",
+      },
+      "action_id": "home_nav_locations",
+      url: process.env.WEB_SERVER_URL + "locations",
+    },
+  );
+
+  /*
+  actionsElements.push(
+    {
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":bookmark: Update tags",
+      },
+      "action_id": "home_nav_tagger",
+      url: process.env.WEB_SERVER_URL + "tagger",
+    }
+  );
+  */
 
   const blocks: Array<any> = [{
     type: "actions",
@@ -767,6 +795,10 @@ app.action("home_nav_locations", async ({ ack }) => {
 });
 
 app.action("home_nav_tagger", async ({ ack }) => {
+  ack();
+});
+
+app.action("home_nav_activity", async ({ ack }) => {
   ack();
 });
 

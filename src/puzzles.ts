@@ -456,6 +456,18 @@ function buildStatusMessageBlocks(puzzle: Puzzle): any {
     });
   }
 
+  if (process.env.ENABLE_RECORD_ACTIVITY) {
+    fileButtons.push({
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: ":eyes: Activity",
+      },
+      "action_id": "puzzle_open_activity",
+      url: `${process.env.WEB_SERVER_URL}puzzleactivity/${puzzle.id}`,
+    });
+  }
+
   const fileLinksBlock = {
     type: "actions",
     elements: fileButtons,
@@ -558,6 +570,10 @@ app.action("puzzle_open_spreadsheet", async ({ack}) => {
 });
 
 app.action("puzzle_open_drawing", async ({ack}) => {
+  ack();
+});
+
+app.action("puzzle_open_activity", async ({ack}) => {
   ack();
 });
 
