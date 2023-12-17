@@ -35,6 +35,9 @@ taskQueue.registerHandler("check_sheet_editors", async (client, _) => {
     if (user.email) {
       emailToUser[user.email] = user;
     }
+    if (user.googleEmail) {
+      emailToUser[user.googleEmail] = user;
+    }
   }
 
   const googleActivityPersonNamesToGet: Array<string> = [];
@@ -48,6 +51,9 @@ taskQueue.registerHandler("check_sheet_editors", async (client, _) => {
   for (const user of unknownUsers) {
     if (user.email) {
       emailToUser[user.email] = user;
+    }
+    if (user.googleEmail) {
+      emailToUser[user.googleEmail] = user;
     }
   }
 

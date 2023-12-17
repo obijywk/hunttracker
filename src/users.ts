@@ -14,6 +14,7 @@ export interface User {
   admin: boolean;
   googlePeopleResourceName: string;
   googleActivityPersonName: string;
+  googleEmail: string;
 }
 
 const ignoredUserIds = new Set(process.env.SLACK_IGNORED_USER_IDS.split(","));
@@ -26,6 +27,7 @@ export function rowToUser(row: any): User {
     admin: row.admin,
     googlePeopleResourceName: row.google_people_resource_name || "",
     googleActivityPersonName: row.google_activity_person_name || "",
+    googleEmail: row.google_email || "",
   };
 }
 
@@ -122,7 +124,7 @@ async function refreshAllInternal(client: PoolClient) {
     }
   }
 
-  if (process.env.ENABLE_SHEET_EDITOR_INVITES) {
+  if (process.env.ENABLE_SHEET_EDITOR_INVITES || process.env.ENABLE_RECORD_ACTIVITY) {
     await syncGooglePeople(client);
   }
 }
@@ -159,23 +161,28 @@ async function syncGooglePeople(client: PoolClient) {
     if (user.email) {
       emailToUser[user.email] = user;
     }
+    if (user.googleEmail) {
+      emailToUser[user.googleEmail] = user;
+    }
   }
 
   const peopleToCreate: Array<GooglePerson> = [];
   const userIdToGooglePeopleResourceName: { [key: string]: string } = {};
   for (const user of users) {
-    if (!user.email) {
-      continue;
-    }
-    const person = emailToPeople[user.email];
-    if (!person) {
-      peopleToCreate.push({
-        email: user.email,
-        name: user.name,
-      });
-    } else {
-      if (person.resourceName !== user.googlePeopleResourceName) {
-        userIdToGooglePeopleResourceName[user.id] = person.resourceName;
+    for (const email of [user.email, user.googleEmail]) {
+      if (!email) {
+        continue;
+      }
+      const person = emailToPeople[email];
+      if (!person) {
+        peopleToCreate.push({
+          email: email,
+          name: user.name,
+        });
+      } else {
+        if (person.resourceName !== user.googlePeopleResourceName) {
+          userIdToGooglePeopleResourceName[user.id] = person.resourceName;
+        }
       }
     }
   }
@@ -300,7 +307,10 @@ export async function findUsersByEmail(emails: Array<string>, client: PoolClient
     values.push(`'${email}'`);
   }
   const results = await client.query(`
-    SELECT * FROM users WHERE email IN (${values.join(",")})
+    SELECT * FROM users
+    WHERE
+      email IN (${values.join(",")})
+      OR google_email IN (${values.join(",")})
   `);
   return results.rows.map(rowToUser);
 }

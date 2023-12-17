@@ -49,7 +49,8 @@ CREATE TABLE users (
   email text,
   admin boolean,
   google_people_resource_name text,  -- A person resourceName as returned by the Google People API
-  google_activity_person_name text   -- A knownUser personName as returned by the Google Drive Activity API
+  google_activity_person_name text,  -- A knownUser personName as returned by the Google Drive Activity API
+  google_email text  -- can be used if the user's Slack email is different than their Google account
 );
 
 CREATE TABLE puzzle_tag (

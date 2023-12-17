@@ -1,0 +1,58 @@
+<!doctype html>
+<html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
+  <head>
+    <title>People List - {{appName}}</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <style>
+      table.peopletable {
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      table.peopletable thead {
+        text-align: center;
+      }
+      table.peopletable td {
+        border: 1px solid black;
+        padding: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    {{> menuheader }}
+    <div class="body-wrapper">
+      <table class="peopletable">
+        <thead>
+          <tr>
+            <td colspan="3">Google People API</td>
+            <td colspan="6">Passport DB</td>
+          </tr>
+          <tr>
+            <td>Resource name</td>
+            <td>Name</td>
+            <td>E-mail</td>
+            <td>Slack ID</td>
+            <td>Name</td>
+            <td>E-mail</td>
+            <td>Google People API<br>resource name</td>
+            <td>Google Drive Activity API<br>resource name</td>
+            <td>Google E-mail</td>
+          </tr>
+        </thead>
+      {{#each peopleAndUsers}}
+        <tr>
+          <td>{{person.resourceName}}</td>
+          <td>{{person.name}}</td>
+          <td>{{person.email}}</td>
+          <td>{{user.id}}</td>
+          <td>{{user.name}}</td>
+          <td>{{user.email}}</td>
+          <td>{{user.googlePeopleResourceName}}</td>
+          <td>{{user.googleActivityPersonName}}</td>
+          <td>{{user.googleEmail}}</td>
+        </tr>
+      {{/each}}
+      </table>
+    </div>
+  </body>
+</html>

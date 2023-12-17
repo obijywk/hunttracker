@@ -7,6 +7,7 @@ import * as url from "url";
 
 import { app, receiver } from "./app";
 import * as db from "./db";
+import * as google_people from "./google_people";
 import * as home from "./home";
 import * as puzzles from "./puzzles";
 import { getPuzzleStatusEmoji, PuzzleStatusEmoji } from "./puzzle_status_emoji";
@@ -15,7 +16,6 @@ import { makeSlackChannelUrlPrefix, makeSlackHuddleUrlPrefix } from "./slack_uti
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
-import { deleteAllPeople } from "./google_people";
 import { ActivityType, getPuzzleActivity, getUserActivity, listLatestActivity } from "./activity";
 
 expressHbs.registerPartial(
@@ -454,7 +454,7 @@ receiver.app.post("/admin/deletecontacts", async (req, res) => {
     res.redirect("../puzzles");
     return;
   }
-  await deleteAllPeople();
+  await google_people.deleteAllPeople();
   return res.redirect("../admin");
 });
 
@@ -480,6 +480,72 @@ receiver.app.post("/admin/publishhome", async (req, res) => {
   }
   await home.publish(req.body.userId);
   return res.redirect("../admin");
+});
+
+receiver.app.get("/admin/listpeople", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+  if (!await checkAdmin(req)) {
+    res.redirect("../puzzles");
+    return;
+  }
+
+  const peoplePromise = google_people.getAllPeople();
+  const usersPromise = users.list();
+  const allPeople = await peoplePromise;
+  const allUsers = await usersPromise;
+
+  const emailToPersonAndUser = new Map<string, any>();
+  for (const person of allPeople) {
+    if (!person.email) {
+      continue;
+    }
+    if (!emailToPersonAndUser.has(person.email)) {
+      emailToPersonAndUser.set(person.email, {});
+    }
+    emailToPersonAndUser.get(person.email).person = person;
+  }
+  for (const user of allUsers) {
+    if (user.email) {
+      if (!emailToPersonAndUser.has(user.email)) {
+        emailToPersonAndUser.set(user.email, {});
+      }
+      emailToPersonAndUser.get(user.email).user = user;
+    }
+    if (user.googleEmail) {
+      if (!emailToPersonAndUser.has(user.googleEmail)) {
+        emailToPersonAndUser.set(user.googleEmail, {});
+      }
+      emailToPersonAndUser.get(user.googleEmail).user = user;
+    }
+  }
+
+  const peopleAndUsers = Array.from(emailToPersonAndUser.values());
+  peopleAndUsers.sort((a: any, b: any) => {
+    let aName = "", bName = "";
+    if (a.user && a.user.name) {
+      aName = a.user.name.toLowerCase();
+    } else if (a.person && a.person.name) {
+      aName = a.person.name.toLowerCase();
+    }
+    if (b.user && b.user.name) {
+      bName = b.user.name.toLowerCase();
+    } else if (a.person && a.person.name) {
+      bName = b.person.name.toLowerCase();
+    }
+    if (aName < bName) {
+      return -1;
+    } else {
+      return 1;
+    }
+  });
+
+  return res.render("listpeople", {
+    appName: process.env.APP_NAME,
+    enableDarkMode: req.session.enableDarkMode,
+    peopleAndUsers,
+  });
 });
 
 receiver.app.get("/taskqueue", async (req, res) => {
