@@ -511,6 +511,13 @@ table.solver-activity {
   border: none;
   border-collapse: collapse;
 }
+table.solver-activity thead th {
+  font-size: 1.1em;
+  background: var(--background-header);
+  padding: calc(var(--padding-base) / 2);
+  color: var(--text-header);
+  line-height: 1.4em;
+}
 table.solver-activity tr:nth-child(even) {
   background-color: var(--background-solver-activity-row-alternate);
 }
