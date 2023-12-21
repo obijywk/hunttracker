@@ -211,6 +211,10 @@ table.puzzleDetails tr {
   background: #fff0 !important;
 }
 
+table.puzzleDetails .icon {
+	fill: var(--icon-fill);
+}
+
 img.emoji {
   aspect-ratio: 1 / 1;
   width: 1.25rem;
@@ -431,10 +435,7 @@ div.meta-dashboard-icon {
   fill: #4285F4;
 }
 .icon-slack:hover {
-  --slack-1: #E01E5A;
-  --slack-2: #36C5F0;
-  --slack-3: #2EB67D;
-  --slack-4: #ECB22E;
+  fill: #ECB22E;
 }
 .icon-huddle:hover {
   fill: #0F9D58;
@@ -453,7 +454,9 @@ div.meta-dashboard-icon {
 }
 
 .icon-idle,
-.icon-tags {
+.icon-tags,
+.icon-topic,
+.icon-location {
   fill: var(--text-header);
 }
 
