@@ -106,10 +106,13 @@ body {
   padding: 0;
   background-color: var(--background-page);
   color: var(--text-default);
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  grid-template-rows: 100vh;
 }
 
 div.body-wrapper {
-  padding: calc(var(--padding-base) / 4) calc(var(--padding-base) * 2);
+  padding: calc(var(--padding-base) / 4) calc(var(--padding-base) * 1);
 }
 
 div.puzzle-filters {
@@ -348,33 +351,30 @@ div.meta-puzzle {
 div.menu-header {
   background: var(--background-menu);
   display: flex;
-  line-height: 1.8rem;
   margin: 0;
-  padding: calc(var(--padding-base) / 8) calc(var(--padding-base) * 2);
+  padding: calc(var(--padding-base) / 8) 0;
   font-size: 1.1em;
   flex-wrap: nowrap;
   align-items: center;
   color: var(--text-menu);
-  height: calc(var(--padding-base) * 1.5);
+  flex-direction: column;
+  gap: calc(var(--padding-base) / 4);
 }
 
 div.menu-item {
-  padding: 0.2rem var(--padding-base);
-  line-height: calc(var(--padding-base) * 1.5);
-  height: 100%;
+  padding: 0.4rem calc(var(--padding-base) / 2);
   user-select: none;
-}
-
-div.menu-item:first-child {
-  margin-left: calc(var(--padding-base) * -1);
+  white-space: nowrap;
 }
 
 div.menu-item svg {
-  height: 2rem;
+  height: 1.5rem;
   aspect-ratio: 1 / 1;
   fill: var(--text-menu);
   position: relative;
-  top: 0.3em;
+}
+div.menu-item a span {
+  font-size: 0.75rem;
 }
 
 div.menu-item button {
@@ -396,6 +396,10 @@ div.menu-header a,
 div.menu-header a:visited {
   color: var(--text-menu);
   height: 100%;
+  display: grid;
+  align-content: center;
+  justify-content: center;
+  gap: calc(var(--padding-base) / 4);
 }
 
 
@@ -552,4 +556,45 @@ table.solver-activity td {
 
 [data-theme="dark"] #puzzles-table_info {
   color: var(--text-deemphasised);
+}
+
+@media (orientation: portrait) {
+  body {
+    grid-template-rows: min-content 1fr;
+    grid-template-columns: 100vw;
+  }
+  div.menu-header {
+    flex-direction: row;
+  }
+  div.menu-item a {
+    grid-template-columns: min-content 1fr;
+    justify-content: center;
+  }
+  div.menu-item a svg,
+  div.menu-item a span {
+    top: 0;
+    justify-self: center;
+    align-self: center;
+  }
+  
+}
+
+@media (orientation: landscape) {
+  body {
+    grid-template-rows: 100vh;
+    grid-template-columns: min-content 1fr;
+  }
+  div.menu-header {
+    flex-direction: column;
+  }
+  div.menu-item a {
+    grid-template-rows: min-content 1fr;
+    justify-content: center;
+  }
+  div.menu-item a svg,
+  div.menu-item a span {
+    top: 0;
+    justify-self: center;
+    align-self: center;
+  }
 }
