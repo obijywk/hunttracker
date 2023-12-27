@@ -212,7 +212,7 @@ table.puzzleDetails tr {
 }
 
 table.puzzleDetails .icon {
-	fill: var(--icon-fill);
+  fill: var(--icon-fill);
 }
 
 img.emoji {
@@ -389,6 +389,11 @@ div.menu-item button {
 
 div.menu-item button:hover svg {
   fill: var(--background-menu-selected);
+}
+
+div.menu-item span.app-name {
+  text-wrap: wrap;
+  text-align: center;
 }
 
 div.menu-selected {
@@ -579,7 +584,6 @@ table.solver-activity td {
     justify-self: center;
     align-self: center;
   }
-  
 }
 
 @media (orientation: landscape) {
