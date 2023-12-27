@@ -43,16 +43,16 @@
             <th>Solved</th>
             <th>&nbsp;</th>
             <th>Name</th>
-            <th>Location</th>
+            <th><svg class="icon icon-location"><title>Idle</title><use xlink:href="/static/icons.svg#location"></use></svg></th>
             <th>Answer</th>
-            <th>Topic</th>
+            <th><svg class="icon icon-topic"><title>Idle</title><use xlink:href="/static/icons.svg#topic"></use></svg></th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
-            <th><svg class="icon icon-idle"><title>Idle</title><use xlink:href="static/icons.svg#idle"></use></svg></th>
-            <th><svg class="icon icon-tags"><title>Tags</title><use xlink:href="static/icons.svg#tags"></use></svg></th>
+            <th><svg class="icon icon-idle"><title>Idle</title><use xlink:href="/static/icons.svg#idle"></use></svg></th>
+            <th><svg class="icon icon-tags"><title>Tags</title><use xlink:href="/static/icons.svg#tags"></use></svg></th>
             <th>Solvers</th>
           </tr>
         </thead>
@@ -139,7 +139,7 @@
         if (data.url) {
           puzzleRow = `
             <tr>
-              <td class="detail-icon-column"><a href="${data.url}" target="_blank"><svg class="icon icon-link"><use xlink:href="static/icons.svg#link"></use></svg></a></td>
+              <td class="detail-icon-column"><a href="${data.url}" target="_blank"><svg class="icon icon-link"><use xlink:href="/static/icons.svg#link"></use></svg></a></td>
               <td>Puzzle</td>
               <td><a href="${data.url}" target="_blank">${data.url}</a></td>
             </tr>
@@ -149,27 +149,27 @@
           <table class="puzzleDetails">
             ${puzzleRow}
             <tr>
-              <td class="detail-icon-column"><a href="{{slackUrlPrefix}}${data.id}" target="_blank"><svg class="icon icon-slack"><use xlink:href="static/icons.svg#slack"></use></svg></a></td>
+              <td class="detail-icon-column"><a href="{{slackUrlPrefix}}${data.id}" target="_blank"><svg class="icon icon-slack"><use xlink:href="/static/icons.svg#slack"></use></svg></a></td>
               <td>Channel</td>
               <td><a href="{{slackUrlPrefix}}${data.id}" target="_blank">#${data.channelName}</a></td>
             </tr>
             <tr>
-              <td class="detail-icon-column"><a href="${data.sheetUrl}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="static/icons.svg#sheet"></use></svg></a></td>
+              <td class="detail-icon-column"><a href="${data.sheetUrl}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="/static/icons.svg#sheet"></use></svg></a></td>
               <td>Sheet</td>
               <td><a href="${data.sheetUrl}" target="_blank">${data.sheetUrl}</a></td>
             </tr>
             <tr>
-              <td class="detail-icon-column"><a href="${data.drawingUrl}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="static/icons.svg#drawing"></use></svg></a></td>
+              <td class="detail-icon-column"><a href="${data.drawingUrl}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="/static/icons.svg#drawing"></use></svg></a></td>
               <td>Drawing</td>
               <td><a href="${data.drawingUrl}" target="_blank">${data.drawingUrl}</a></td>
             </tr>
             <tr>
-              <td><svg class="icon icon-people"><use xlink:href="static/icons.svg#people"></use></svg></td>
+              <td><svg class="icon icon-people"><use xlink:href="/static/icons.svg#people"></use></svg></td>
               <td>Solvers</td>
               <td>${data.users.map(u => u.name).join(", ")}</td>
             </tr>
             <tr>
-              <td><svg class="icon icon-topic"><use xlink:href="static/icons.svg#topic"></use></svg></td>
+              <td><svg class="icon icon-topic"><use xlink:href="/static/icons.svg#topic"></use></svg></td>
               <td>Topic</td>
               <td>${data.channelTopic}</td>
             </tr>
@@ -303,7 +303,7 @@
               render: (data, type, row) => {
                 if (type === "display") {
                   if (data) {
-                    return `<a href="${data}" target="_blank"><svg class="icon icon-link"><use xlink:href="static/icons.svg#link"></use></svg></a>`;
+                    return `<a href="${data}" target="_blank"><svg class="icon icon-link"><use xlink:href="/static/icons.svg#link"></use></svg></a>`;
                   }
                   return "&nbsp;";
                 }
@@ -317,7 +317,7 @@
               searchable: false,
               render: (data, type, row) => {
                 if (type === "display") {
-                  return `<a href="{{slackUrlPrefix}}${data}" target="_blank"><svg class="icon icon-slack"><use xlink:href="static/icons.svg#slack"></use></svg></a>`;
+                  return `<a href="{{slackUrlPrefix}}${data}" target="_blank"><svg class="icon icon-slack"><use xlink:href="/static/icons.svg#slack"></use></svg></a>`;
                 }
                 return data;
               },
@@ -329,7 +329,7 @@
               searchable: false,
               render: (data, type, row) => {
                 if (type === "display") {
-                  return `<a href="${data}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="static/icons.svg#sheet"></use></svg></a>`;
+                  return `<a href="${data}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="/static/icons.svg#sheet"></use></svg></a>`;
                 }
                 return data;
               },
@@ -341,7 +341,7 @@
               searchable: false,
               render: (data, type, row) => {
                 if (type === "display") {
-                  return `<a href="${data}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="static/icons.svg#drawing"></use></svg></a>`;
+                  return `<a href="${data}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="/static/icons.svg#drawing"></use></svg></a>`;
                 }
                 return data;
               },
@@ -356,7 +356,7 @@
                   return "";
                 }
                 if (type === "display") {
-                  return `<a href="{{slackHuddleUrlPrefix}}${row.id}" target="_blank"><svg class="icon icon-huddle"><use xlink:href="static/icons.svg#huddle"></use></svg></a>`;
+                  return `<a href="{{slackHuddleUrlPrefix}}${row.id}" target="_blank"><svg class="icon icon-huddle"><use xlink:href="/static/icons.svg#huddle"></use></svg></a>`;
                 }
                 return data;
               },
