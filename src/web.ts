@@ -66,6 +66,14 @@ function renderActivityType(activityType: ActivityType | undefined): string {
 }
 expressHbs.registerHelper("renderActivityType", renderActivityType);
 
+function staticUrl(filename: string) {
+  if (process.env.GAE_VERSION) {
+    return "/static/" + filename + "?" + process.env.GAE_VERSION;
+  }
+  return "/static/" + filename;
+}
+expressHbs.registerHelper("staticUrl", staticUrl);
+
 function checkAuth(req: Request, res: Response) {
   if (process.env.DISABLE_WEB_AUTH !== undefined) {
     return true;

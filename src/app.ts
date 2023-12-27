@@ -70,7 +70,7 @@ receiver.app.engine("hbs", hbs);
 
 receiver.app.set("views", "views");
 
-receiver.app.use("/static", express.static("public"));
+receiver.app.use("/static", express.static("public", { maxAge: 1000 * 60 * 60 * 24 }));
 
 receiver.app.get("/_ah/warmup", (req, res) => {
   return res.status(200).end();

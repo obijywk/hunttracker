@@ -2,9 +2,9 @@
 <html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
   <head>
     <title>Activity - {{appName}}</title>
-    <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
-    <link rel="stylesheet" type="text/css" href="static/style.css">
-    <script type="text/javascript" charset="utf8" src="static/twemoji.min.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/svg+xml" href="{{staticUrl "favicon.svg"}}">
+    <link rel="stylesheet" type="text/css" href="{{staticUrl "style.css"}}">
+    <script type="text/javascript" charset="utf8" src="{{staticUrl "twemoji.min.js"}}" crossorigin="anonymous"></script>
   </head>
   <body>
     {{> menuheader activity=true }}

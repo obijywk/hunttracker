@@ -2,9 +2,9 @@
 <html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
   <head>
     <title>Metas - {{appName}}</title>
-    <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
-    <link rel="stylesheet" type="text/css" href="static/style.css">
-    <script type="text/javascript" charset="utf8" src="static/twemoji.min.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/svg+xml" href="{{staticUrl "favicon.svg"}}">
+    <link rel="stylesheet" type="text/css" href="{{staticUrl "style.css"}}">
+    <script type="text/javascript" charset="utf8" src="{{staticUrl "twemoji.min.js"}}" crossorigin="anonymous"></script>
   </head>
   <body>
     {{> menuheader metas=true }}
@@ -29,27 +29,27 @@
             <div class="meta-header meta-header-icons">
               {{#if url}}
                 <a href="{{url}}" target="_blank">
-                  <svg class="icon icon-link"><use xlink:href="static/icons.svg#link"></use></svg>
+                  <svg class="icon icon-link"><use xlink:href="{{staticUrl "icons.svg"}}#link"></use></svg>
                 </a>
               {{/if}}
               {{#if id}}
                 <a href="{{../slackUrlPrefix}}{{id}}" target="_blank">
-                  <svg class="icon icon-slack"><use xlink:href="static/icons.svg#slack"></use></svg>
+                  <svg class="icon icon-slack"><use xlink:href="{{staticUrl "icons.svg"}}#slack"></use></svg>
                 </a>
               {{/if}}
               {{#if sheetUrl}}
                 <a href="{{sheetUrl}}" target="_blank">
-                  <svg class="icon icon-sheet"><use xlink:href="static/icons.svg#sheet"></use></svg>
+                  <svg class="icon icon-sheet"><use xlink:href="{{staticUrl "icons.svg"}}#sheet"></use></svg>
                 </a>
               {{/if}}
               {{#if drawingUrl}}
                 <a href="{{drawingUrl}}" target="_blank">
-                  <svg class="icon icon-drawing"><use xlink:href="static/icons.svg#drawing"></use></svg>
+                  <svg class="icon icon-drawing"><use xlink:href="{{staticUrl "icons.svg"}}#drawing"></use></svg>
                 </a>
               {{/if}}
               {{#if huddleThreadMessageTs}}
                 <a href="{{../slackHuddleUrlPrefix}}{{id}}" target="_blank">
-                  <svg class="icon icon-huddle"><use xlink:href="static/icons.svg#huddle"></use></svg>
+                  <svg class="icon icon-huddle"><use xlink:href="{{staticUrl "icons.svg"}}#huddle"></use></svg>
                 </a>
               {{/if}}
             </div>

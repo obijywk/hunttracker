@@ -2,16 +2,16 @@
 <html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
   <head>
     <title>Activity - {{user.name}} - {{appName}}</title>
-    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <link rel="icon" type="image/svg+xml" href="{{staticUrl "favicon.svg"}}">
+    <link rel="stylesheet" type="text/css" href="{{staticUrl "style.css"}}">
     <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="/static/twemoji.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf8" src="{{staticUrl "twemoji.min.js"}}" crossorigin="anonymous"></script>
   </head>
   <body>
     {{> menuheader activity=true }}
     <div class="body-wrapper">
-      <h2><svg class="icon icon-people"><use xlink:href="/static/icons.svg#people"></use></svg> {{user.name}}</h2>
+      <h2><svg class="icon icon-people"><use xlink:href="{{staticUrl "icons.svg"}}#people"></use></svg> {{user.name}}</h2>
       <table class="solver-activity">
         <thead>
           <tr>

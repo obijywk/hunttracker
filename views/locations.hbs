@@ -2,9 +2,9 @@
 <html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
   <head>
     <title>Locations - {{appName}}</title>
-    <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
-    <link rel="stylesheet" type="text/css" href="static/style.css">
-    <script type="text/javascript" charset="utf8" src="static/twemoji.min.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/svg+xml" href="{{staticUrl "favicon.svg"}}">
+    <link rel="stylesheet" type="text/css" href="{{staticUrl "style.css"}}">
+    <script type="text/javascript" charset="utf8" src="{{staticUrl "twemoji.min.js"}}" crossorigin="anonymous"></script>
   </head>
   <body>
     {{> menuheader locations=true }}
@@ -34,10 +34,10 @@
           {{/with}}
           <td><a href="puzzles?solved=all&expanded={{puzzle.id}}">{{puzzle.name}}</a></td>
           <td>{{puzzle.channelTopic}}</td>
-          <td class="icon-column">{{#if puzzle.url}}<a href="{{puzzle.url}}" target="_blank"><svg class="icon icon-link"><use xlink:href="static/icons.svg#link"></use></svg></a>{{/if}}</td>
-          <td class="icon-column"><a href="{{../slackUrlPrefix}}{{puzzle.id}}" target="_blank"><svg class="icon icon-slack"><use xlink:href="static/icons.svg#slack"></use></svg></a></td>
-          <td class="icon-column"><a href="{{puzzle.sheetUrl}}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="static/icons.svg#sheet"></use></svg></a></td>
-          <td class="icon-column"><a href="{{puzzle.drawingUrl}}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="static/icons.svg#drawing"></use></svg></a></td>
+          <td class="icon-column">{{#if puzzle.url}}<a href="{{puzzle.url}}" target="_blank"><svg class="icon icon-link"><use xlink:href="{{staticUrl "icons.svg"}}#link"></use></svg></a>{{/if}}</td>
+          <td class="icon-column"><a href="{{../slackUrlPrefix}}{{puzzle.id}}" target="_blank"><svg class="icon icon-slack"><use xlink:href="{{staticUrl "icons.svg"}}#slack"></use></svg></a></td>
+          <td class="icon-column"><a href="{{puzzle.sheetUrl}}" target="_blank"><svg class="icon icon-sheet"><use xlink:href="{{staticUrl "icons.svg"}}#sheet"></use></svg></a></td>
+          <td class="icon-column"><a href="{{puzzle.drawingUrl}}" target="_blank"><svg class="icon icon-drawing"><use xlink:href="{{staticUrl "icons.svg"}}#drawing"></use></svg></a></td>
           <td>({{puzzle.users.length}})&nbsp;{{{commaSeparatedSolvers puzzle 5}}}</td>
           <td>
             <form action="locations/remove" method="POST">
