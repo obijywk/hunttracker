@@ -148,6 +148,10 @@ export async function refreshAll() {
   }
 }
 
+taskQueue.registerHandler("sync_google_people", async (client) => {
+  await syncGooglePeople(client);
+});
+
 async function syncGooglePeople(client: PoolClient) {
   const existingPeople = await getAllPeople();
   const emailToPeople: { [key: string]: GooglePerson } = {};
@@ -348,16 +352,19 @@ app.event("user_change", async ({ event, body }) => {
     const dbUserResult = await db.query("SELECT * FROM users WHERE id = $1", [member.id]);
     const adminUserIds = await getAdminUserIds();
     const isAdminUser = adminUserIds !== null ? adminUserIds.has(member.id) : true;
+    let shouldSyncGooglePeople = false;
     if (dbUserResult.rowCount === 0) {
       await db.query(
         "INSERT INTO users(id, name, email, admin) VALUES ($1, $2, $3, $4)",
         [member.id, memberName, member.profile.email, isAdminUser]);
+      shouldSyncGooglePeople = true;
     } else {
       const dbUser = rowToUser(dbUserResult.rows[0]);
       if (dbUser.name != memberName) {
         await db.query(
           "UPDATE users SET name = $2 WHERE id = $1",
           [dbUser.id, memberName]);
+        shouldSyncGooglePeople = true;
       }
       if (dbUser.admin != isAdminUser) {
         await db.query(
@@ -368,7 +375,11 @@ app.event("user_change", async ({ event, body }) => {
         await db.query(
           "UPDATE users SET email = $2 WHERE id = $1",
           [dbUser.id, member.profile.email]);
+        shouldSyncGooglePeople = true;
       }
+    }
+    if (shouldSyncGooglePeople && (process.env.ENABLE_SHEET_EDITOR_INVITES || process.env.ENABLE_RECORD_ACTIVITY)) {
+      await taskQueue.scheduleTask("sync_google_people", {});
     }
   } finally {
     if (body.eventAck) {

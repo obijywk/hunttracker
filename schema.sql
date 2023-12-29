@@ -99,7 +99,8 @@ CREATE TYPE task_type AS ENUM (
   'refresh_puzzle',
   'publish_home',
   'refresh_users',
-  'check_sheet_editors'
+  'check_sheet_editors',
+  'sync_google_people'
 );
 
 CREATE TABLE task_queue (
