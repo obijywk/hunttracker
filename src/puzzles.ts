@@ -117,6 +117,9 @@ export function getLocation(puzzle: Puzzle): string | null {
   if (match) {
     return match[2];
   }
+  if (puzzle.huddleThreadMessageTs) {
+    return "Slack huddle";
+  }
   return null;
 }
 

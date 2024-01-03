@@ -703,6 +703,7 @@ receiver.app.get("/locations", async (req, res) => {
     appName: process.env.APP_NAME,
     enableDarkMode: req.session.enableDarkMode,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
+    slackHuddleUrlPrefix: makeSlackHuddleUrlPrefix(),
     locations: locations,
   });
 });
