@@ -15,7 +15,7 @@
         {{#with (puzzleStatusEmoji puzzle)}}
           {{unicodeEmoji}}
         {{/with}}
-        {{puzzle.name}}
+        <a href="/puzzles?solved=all&expanded={{puzzle.id}}">{{puzzle.name}}</a>
       </h2>
       <table class="solver-activity">
         <thead>
