@@ -34,6 +34,7 @@ export interface Puzzle {
   channelTopic: string;
   channelTopicModifiedTimestamp: moment.Moment;
   users: Array<users.User>;
+  huddleUsers: Array<users.User>;
   tags: Array<tags.Tag>;
   sheetUrl: string;
   drawingUrl: string;
@@ -160,6 +161,12 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
         WHERE puzzle_user.puzzle_id = puzzles.id
       ) users,
       (
+        SELECT json_agg(row_to_json(users))
+        FROM users
+        JOIN puzzle_huddle_user ON puzzle_huddle_user.user_id = users.id
+        WHERE puzzle_huddle_user.puzzle_id = puzzles.id
+      ) huddle_users,
+      (
         SELECT
           json_agg(
             json_build_object(
@@ -222,6 +229,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       channelTopic: row.channel_topic,
       channelTopicModifiedTimestamp: moment.utc(row.channel_topic_modified_timestamp),
       users: (row.users || []).map(users.rowToUser),
+      huddleUsers: (row.huddle_users || []).map(users.rowToUser),
       tags: row.tags || [],
       sheetUrl: row.sheet_url,
       drawingUrl: row.drawing_url,
@@ -1154,18 +1162,16 @@ export async function refreshAll() {
 export async function refreshStale() {
   const puzzles = await list();
   for (const puzzle of puzzles) {
-    if (puzzle.complete) {
-      continue;
+    const hasHuddle = puzzle.huddleThreadMessageTs && puzzle.huddleThreadMessageTs.length > 0;
+    const hasLowIdleDuration = getIdleDuration(puzzle).asMinutes() < Number(process.env.MINIMUM_IDLE_MINUTES);
+    if (hasHuddle || (!puzzle.complete && !hasLowIdleDuration)) {
+      await taskQueue.scheduleTask(
+        "refresh_puzzle",
+        { id: puzzle.id },
+        undefined  /* client */,
+        false,  /* notify */
+      );
     }
-    if (getIdleDuration(puzzle).asMinutes() < Number(process.env.MINIMUM_IDLE_MINUTES)) {
-      continue;
-    }
-    await taskQueue.scheduleTask(
-      "refresh_puzzle",
-      { id: puzzle.id },
-      undefined  /* client */,
-      false,  /* notify */
-    );
   }
   await taskQueue.notifyQueue();
 }
@@ -1282,6 +1288,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     channelTopic: topic,
     channelTopicModifiedTimestamp: now,
     users: [],
+    huddleUsers: [],
     tags: [],
     sheetUrl,
     drawingUrl,
@@ -1523,25 +1530,19 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
     puzzle.drawingModifiedTimestamp = drawingMetadata.modifiedTimestamp;
   }
 
-  const updateStatusMessagePromise = updateStatusMessage(puzzle);
-  const bookmarksPromise = syncBookmarks(puzzle);
-
-  const affectedUserIds = await refreshUsersPromise;
-
   const huddleParticipantUserIds = await huddleParticipantUserIdsPromise;
   if (huddleParticipantUserIds.length === 0 && (
       puzzle.huddleThreadMessageTs && puzzle.huddleThreadMessageTs.length > 0)) {
     dirty = true;
     puzzle.huddleThreadMessageTs = "";
   }
-  const recordActivityPromises = [];
-  for (const userId of huddleParticipantUserIds) {
-    recordActivityPromises.push(users.exists(userId).then(exists => {
-      if (exists) {
-        return recordActivity(puzzle.id, userId, ActivityType.JoinHuddle);
-      }
-    }));
-  }
+  const syncPuzzleHuddleUsersPromise = users.syncPuzzleHuddleUsers(
+    id, huddleParticipantUserIds, client);
+
+  const updateStatusMessagePromise = updateStatusMessage(puzzle);
+  const bookmarksPromise = syncBookmarks(puzzle);
+
+  const affectedUserIds = await refreshUsersPromise;
 
   if (dirty) {
     await client.query(`
@@ -1570,9 +1571,7 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
   for (const p of renameDocPromises) {
     await p;
   }
-  for (const p of recordActivityPromises) {
-    await p;
-  }
+  await syncPuzzleHuddleUsersPromise;
 
   for (const userId of affectedUserIds) {
     await taskQueue.scheduleTask(

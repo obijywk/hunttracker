@@ -11,6 +11,7 @@ DROP TYPE IF EXISTS activity_type;
 
 DROP TABLE IF EXISTS puzzle_tag CASCADE;
 DROP TABLE IF EXISTS puzzle_user CASCADE;
+DROP TABLE IF EXISTS puzzle_huddle_user CASCADE;
 
 DROP TABLE IF EXISTS puzzles CASCADE;
 DROP TABLE IF EXISTS tags CASCADE;
@@ -61,6 +62,12 @@ CREATE TABLE puzzle_tag (
 );
 
 CREATE TABLE puzzle_user (
+  puzzle_id text REFERENCES puzzles(id),
+  user_id text REFERENCES users(id),
+  PRIMARY KEY (puzzle_id, user_id)
+);
+
+CREATE TABLE puzzle_huddle_user (
   puzzle_id text REFERENCES puzzles(id),
   user_id text REFERENCES users(id),
   PRIMARY KEY (puzzle_id, user_id)

@@ -1,6 +1,7 @@
 import { PoolClient, QueryResult } from "pg";
 import { UserChangeEvent } from "@slack/bolt";
 
+import { ActivityType, recordActivity } from "./activity";
 import { app } from "./app";
 import * as db from "./db";
 import { createPeople, getAllPeople, GooglePerson } from "./google_people";
@@ -254,6 +255,50 @@ export async function refreshPuzzleUsers(
   }
 
   return affectedUserIds;
+}
+
+export async function syncPuzzleHuddleUsers(
+  puzzleId: string,
+  huddleParticipantUserIds: string[],
+  client: PoolClient): Promise<void> {
+
+  const dbUserIdsResult = await client.query(
+    "SELECT user_id FROM puzzle_huddle_user WHERE puzzle_id = $1", [puzzleId]);
+  const dbUserIds: Set<string> = new Set();
+  for (const row of dbUserIdsResult.rows) {
+    dbUserIds.add(row.user_id);
+  }
+
+  const huddleUserIds: Set<string> = new Set();
+  for (const userId of huddleParticipantUserIds) {
+    huddleUserIds.add(userId);
+  }
+
+  const promises = [];
+  for (const huddleUserId of huddleUserIds) {
+    if (!dbUserIds.has(huddleUserId)) {
+      promises.push(client.query(`
+        INSERT INTO puzzle_huddle_user (puzzle_id, user_id)
+        SELECT $1, id FROM users
+        WHERE id = $2
+        ON CONFLICT DO NOTHING`,
+        [puzzleId, huddleUserId]).then(async result => {
+          if (result.rowCount > 0) {
+            await recordActivity(puzzleId, huddleUserId, ActivityType.JoinHuddle);
+          }
+        }));
+    }
+  }
+  for (const dbUserId of dbUserIds) {
+    if (!huddleUserIds.has(dbUserId)) {
+      promises.push(client.query(
+        "DELETE FROM puzzle_huddle_user WHERE puzzle_id = $1 AND user_id = $2",
+        [puzzleId, dbUserId]));
+    }
+  }
+  for (const promise of promises) {
+    await promise;
+  }
 }
 
 export async function isAdmin(userId: string): Promise<boolean> {
