@@ -1,10 +1,14 @@
     <div class="menu-header">
       <div class="menu-item{{#if index}} menu-selected{{/if}}">
         <a href="/">
-          <svg>
-            <title>{{appName}}</title>
-            <use xlink:href="{{staticUrl "icons.svg"}}#logo"></use>
-          </svg>
+          {{#if appIconFilename}}
+            <img src="{{staticUrl "customicons/"}}{{appIconFilename}}">
+          {{else}}
+            <svg>
+              <title>{{appName}}</title>
+              <use xlink:href="{{staticUrl "icons.svg"}}#logo"></use>
+            </svg>
+          {{/if}}
           <span class="app-name">{{appName}}</span>
         </a>
       </div>

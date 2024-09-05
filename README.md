@@ -34,6 +34,8 @@ Everything is configured using environment variables, and they need to be set fo
 
 - **PORT**: The server HTTP port. The default is 3000.
 - **APP_NAME**: The user-visible name of this deployment of this application.
+- **APP_ICON_FILENAME**: If set, a filename within public/customicons/ to use for the favicon
+  and app menu icon instead of the default.
 - **WEB_SERVER_URL**: The publicly accessible URL for this server, with trailing slash.
   Used to build links.
 - **HELP_URL**: A link to help instructions for how to use this.

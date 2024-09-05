@@ -19,6 +19,10 @@ import * as users from "./users";
 import { ActivityType, getPuzzleActivity, getUserActivity, listLatestActivity } from "./activity";
 
 expressHbs.registerPartial(
+  "favicon",
+  fs.readFileSync("views/favicon.hbs", "utf-8"));
+
+  expressHbs.registerPartial(
   "menuheader",
   fs.readFileSync("views/menuheader.hbs", "utf-8"));
 
@@ -91,13 +95,30 @@ async function checkAdmin(req: Request) {
     return true;
   }
   const user = req.user as any;
+  if (!user) {
+    return false;
+  }
   return await users.isAdmin(user.id);
+}
+
+async function commonRenderOptions(req: Request) {
+  return {
+    appName: process.env.APP_NAME,
+    appIconFilename: process.env.APP_ICON_FILENAME,
+    user: req.user,
+    helpUrl: process.env.HELP_URL,
+    isAdmin: await checkAdmin(req),
+    useSlackWebLinks: req.session.useSlackWebLinks,
+    enableDarkMode: req.session.enableDarkMode,
+    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
+    slackHuddleUrlPrefix: makeSlackHuddleUrlPrefix(),
+  };
 }
 
 receiver.app.get("/login", async (req, res) => {
   return res.render("login", {
+    ...await commonRenderOptions(req),
     slackClientId: process.env.SLACK_CLIENT_ID,
-    enableDarkMode: req.session.enableDarkMode,
   });
 });
 
@@ -111,22 +132,11 @@ receiver.app.get("/logout", async (req, res) => {
   return res.redirect("login");
 });
 
-async function indexRenderOptions(req: Request) {
-  return {
-    appName: process.env.APP_NAME,
-    user: req.user,
-    helpUrl: process.env.HELP_URL,
-    isAdmin: await checkAdmin(req),
-    useSlackWebLinks: req.session.useSlackWebLinks,
-    enableDarkMode: req.session.enableDarkMode,
-  };
-}
-
 receiver.app.get("/", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
-  return res.render("index", await indexRenderOptions(req));
+  return res.render("index", await commonRenderOptions(req));
 });
 
 receiver.app.post("/", async (req, res) => {
@@ -135,7 +145,7 @@ receiver.app.post("/", async (req, res) => {
   }
   req.session.useSlackWebLinks = req.body.useSlackWebLinks !== undefined;
   req.session.enableDarkMode = req.body.enableDarkMode !== undefined;
-  return res.render("index", await indexRenderOptions(req));
+  return res.render("index", await commonRenderOptions(req));
 });
 
 receiver.app.get("/puzzles", async (req, res) => {
@@ -143,10 +153,7 @@ receiver.app.get("/puzzles", async (req, res) => {
     return;
   }
   return res.render("puzzles", {
-    appName: process.env.APP_NAME,
-    enableDarkMode: req.session.enableDarkMode,
-    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
-    slackHuddleUrlPrefix: makeSlackHuddleUrlPrefix(),
+    ...await commonRenderOptions(req),
     minimumIdleMinutes: process.env.MINIMUM_IDLE_MINUTES,
     initialSearch: req.query.search || "",
     initialTags: req.query.tags || "",
@@ -276,11 +283,8 @@ receiver.app.get("/metas", async(req, res) => {
   }
   metas.sort(sortMetas);
   return res.render("metas", {
-    appName: process.env.APP_NAME,
-    enableDarkMode: req.session.enableDarkMode,
+    ...await commonRenderOptions(req),
     metas,
-    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
-    slackHuddleUrlPrefix: makeSlackHuddleUrlPrefix(),
   });
 });
 
@@ -321,10 +325,8 @@ receiver.app.get("/activity", async (req, res) => {
   });
 
   return res.render("activity", {
-    appName: process.env.APP_NAME,
-    enableDarkMode: req.session.enableDarkMode,
+    ...await commonRenderOptions(req),
     users: activeUsers,
-    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
   });
 });
 
@@ -353,11 +355,9 @@ receiver.app.get("/useractivity/:userId", async (req, res) => {
   }
 
   return res.render("useractivity", {
-    appName: process.env.APP_NAME,
-    enableDarkMode: req.session.enableDarkMode,
+    ...await commonRenderOptions(req),
     user,
     activities,
-    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
   });
 });
 
@@ -386,11 +386,9 @@ receiver.app.get("/puzzleactivity/:puzzleId", async (req, res) => {
   }
 
   return res.render("puzzleactivity", {
-    appName: process.env.APP_NAME,
-    enableDarkMode: req.session.enableDarkMode,
+    ...await commonRenderOptions(req),
     puzzle,
     activities,
-    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
   });
 });
 
@@ -408,8 +406,7 @@ receiver.app.get("/admin", async (req, res) => {
     return;
   }
   return res.render("admin", {
-    appName: process.env.APP_NAME,
-    enableDarkMode: req.session.enableDarkMode,
+    ...await commonRenderOptions(req),
     allowResetDatabase: process.env.ALLOW_RESET_DATABASE !== undefined,
   });
 });
@@ -550,8 +547,7 @@ receiver.app.get("/admin/listpeople", async (req, res) => {
   });
 
   return res.render("listpeople", {
-    appName: process.env.APP_NAME,
-    enableDarkMode: req.session.enableDarkMode,
+    ...await commonRenderOptions(req),
     peopleAndUsers,
   });
 });
@@ -570,8 +566,7 @@ receiver.app.get("/taskqueue", async (req, res) => {
     error: t.error ? JSON.stringify(t.error) : null,
   }));
   return res.render("taskqueue", {
-    appName: process.env.APP_NAME,
-    enableDarkMode: req.session.enableDarkMode,
+    ...await commonRenderOptions(req),
     tasks: displayTasks,
   });
 });
@@ -647,8 +642,7 @@ receiver.app.get("/tagger", async (req, res) => {
   }));
 
   res.render("tagger", {
-    appName: process.env.APP_NAME,
-    enableDarkMode: req.session.enableDarkMode,
+    ...await commonRenderOptions(req),
     puzzleOptions: JSON.stringify(puzzleOptions),
     tagOptions: JSON.stringify(tagOptions),
   });
@@ -700,10 +694,7 @@ receiver.app.get("/locations", async (req, res) => {
   locations.sort((a: any, b: any) => (a.location.toLowerCase() < b.location.toLowerCase()) ? -1 : 1);
 
   res.render("locations", {
-    appName: process.env.APP_NAME,
-    enableDarkMode: req.session.enableDarkMode,
-    slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
-    slackHuddleUrlPrefix: makeSlackHuddleUrlPrefix(),
+    ...await commonRenderOptions(req),
     locations: locations,
   });
 });

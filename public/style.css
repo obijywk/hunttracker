@@ -371,7 +371,7 @@ div.menu-item {
   white-space: nowrap;
 }
 
-div.menu-item svg {
+div.menu-item svg, div.menu-item img {
   height: 1.5rem;
   aspect-ratio: 1 / 1;
   fill: var(--text-menu);
@@ -579,6 +579,7 @@ table.solver-activity td {
     justify-content: center;
   }
   div.menu-item a svg,
+  div.menu-item a img,
   div.menu-item a span {
     top: 0;
     justify-self: center;
@@ -599,6 +600,7 @@ table.solver-activity td {
     justify-content: center;
   }
   div.menu-item a svg,
+  div.menu-item a img,
   div.menu-item a span {
     top: 0;
     justify-self: center;

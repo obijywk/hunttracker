@@ -1,9 +1,10 @@
 /app*.yaml
-/config.env
+/config*.env
 /cron.yaml
 /dist
 .gcloudignore
 /node_modules
+/public/customicons
 serverless*.yml
 .serverless
 .vagrant
