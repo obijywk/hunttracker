@@ -1568,8 +1568,12 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
   const huddleParticipantUserIds = await huddleParticipantUserIdsPromise;
   if (huddleParticipantUserIds.length === 0 && (
       puzzle.huddleThreadMessageTs && puzzle.huddleThreadMessageTs.length > 0)) {
-    dirty = true;
-    puzzle.huddleThreadMessageTs = "";
+    const huddleThreadMessageMoment = moment.utc(moment.unix(Number(puzzle.huddleThreadMessageTs)));
+    const huddleThreadMessageAgeSeconds = now.diff(huddleThreadMessageMoment, "seconds");
+    if (huddleThreadMessageAgeSeconds > 30) {
+      dirty = true;
+      puzzle.huddleThreadMessageTs = "";
+    }
   }
   const syncPuzzleHuddleUsersPromise = users.syncPuzzleHuddleUsers(
     id, huddleParticipantUserIds, client);
