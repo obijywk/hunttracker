@@ -35,6 +35,7 @@ export interface Puzzle {
   channelTopicModifiedTimestamp: moment.Moment;
   users: Array<users.User>;
   huddleUsers: Array<users.User>;
+  formerUsers: Array<users.User>;
   tags: Array<tags.Tag>;
   sheetUrl: string;
   drawingUrl: string;
@@ -180,6 +181,22 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
         WHERE puzzle_huddle_user.puzzle_id = puzzles.id
       ) huddle_users,
       (
+        SELECT json_agg(row_to_json(users))
+        FROM (
+          SELECT
+            users.*
+          FROM users
+          JOIN puzzle_former_user ON
+            puzzle_former_user.user_id = users.id
+          LEFT JOIN activity_latest_for_puzzle_and_user ON
+            activity_latest_for_puzzle_and_user.user_id = users.id
+          WHERE
+            puzzle_former_user.puzzle_id = puzzles.id AND
+            activity_latest_for_puzzle_and_user.puzzle_id = puzzles.id
+          ORDER BY activity_latest_for_puzzle_and_user.timestamp DESC
+        ) AS users
+      ) former_users,
+      (
         SELECT
           json_agg(
             json_build_object(
@@ -243,6 +260,7 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       channelTopicModifiedTimestamp: moment.utc(row.channel_topic_modified_timestamp),
       users: (row.users || []).map(users.rowToUser),
       huddleUsers: (row.huddle_users || []).map(users.rowToUser),
+      formerUsers: (row.former_users || []).map(users.rowToUser),
       tags: row.tags || [],
       sheetUrl: row.sheet_url,
       drawingUrl: row.drawing_url,
@@ -1302,6 +1320,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     channelTopicModifiedTimestamp: now,
     users: [],
     huddleUsers: [],
+    formerUsers: [],
     tags: [],
     sheetUrl,
     drawingUrl,
@@ -1447,6 +1466,8 @@ taskQueue.registerHandler("delete_puzzle", async (client, payload) => {
   await client.query("DELETE FROM activity WHERE puzzle_id = $1", [id]);
   await client.query("DELETE FROM puzzle_tag WHERE puzzle_id = $1", [id]);
   await client.query("DELETE FROM puzzle_user WHERE puzzle_id = $1", [id]);
+  await client.query("DELETE FROM puzzle_huddle_user WHERE puzzle_id = $1", [id]);
+  await client.query("DELETE FROM puzzle_former_user WHERE puzzle_id = $1", [id]);
   await client.query("DELETE FROM puzzles WHERE id = $1", [id]);
 
   if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {

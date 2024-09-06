@@ -172,6 +172,11 @@
               <td>${data.huddleUsers.map(u => u.name).join(", ")}</td>
             </tr>
             <tr>
+              <td><svg class="icon icon-people"><use xlink:href="{{staticUrl "icons.svg"}}#people"></use></svg></td>
+              <td>Former Solvers</td>
+              <td>${data.formerUsers.map(u => u.name).join(", ")}</td>
+            </tr>
+            <tr>
               <td><svg class="icon icon-topic"><use xlink:href="{{staticUrl "icons.svg"}}#topic"></use></svg></td>
               <td>Topic</td>
               <td>${data.channelTopic}</td>

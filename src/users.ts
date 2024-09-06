@@ -217,10 +217,12 @@ export async function refreshPuzzleUsers(
   puzzleId: string,
   client: PoolClient,
 ): Promise<Array<string>> {
-  const affectedUserIds: Array<string> = [];
+  const affectedUserIds: Set<string> = new Set();
 
   const dbUsersResultPromise = client.query(
     "SELECT user_id FROM puzzle_user WHERE puzzle_id = $1", [puzzleId]);
+  const dbFormerUsersResultPromise = client.query(
+    "SELECT user_id FROM puzzle_former_user WHERE puzzle_id = $1", [puzzleId]);
 
   const channelUsers = await getConversationMemberUserIds(puzzleId);
 
@@ -228,6 +230,12 @@ export async function refreshPuzzleUsers(
   const dbUsers: Set<string> = new Set();
   for (const row of dbUsersResult.rows) {
     dbUsers.add(row.user_id);
+  }
+
+  const dbFormerUsersResult = await dbFormerUsersResultPromise;
+  const dbFormerUsers: Set<string> = new Set();
+  for (const row of dbFormerUsersResult.rows) {
+    dbFormerUsers.add(row.user_id);
   }
 
   for (const channelUser of channelUsers) {
@@ -239,7 +247,15 @@ export async function refreshPuzzleUsers(
         ON CONFLICT DO NOTHING`,
         [puzzleId, channelUser]);
       if (result.rowCount > 0) {
-        affectedUserIds.push(channelUser);
+        affectedUserIds.add(channelUser);
+      }
+    }
+    if (dbFormerUsers.has(channelUser)) {
+      const result = await client.query(
+        "DELETE FROM puzzle_former_user WHERE puzzle_id = $1 AND user_id = $2",
+        [puzzleId, channelUser]);
+      if (result.rowCount > 0) {
+        affectedUserIds.add(channelUser);
       }
     }
   }
@@ -249,12 +265,21 @@ export async function refreshPuzzleUsers(
         "DELETE FROM puzzle_user WHERE puzzle_id = $1 AND user_id = $2",
         [puzzleId, dbUser]);
       if (result.rowCount > 0) {
-        affectedUserIds.push(dbUser);
+        affectedUserIds.add(dbUser);
+      }
+      const formerUserResult = await client.query(`
+        INSERT INTO puzzle_former_user (puzzle_id, user_id)
+        SELECT $1, id FROM users
+        WHERE id = $2
+        ON CONFLICT DO NOTHING`,
+        [puzzleId, dbUser]);
+      if (result.rowCount > 0) {
+        affectedUserIds.add(dbUser);
       }
     }
   }
 
-  return affectedUserIds;
+  return Array.from(affectedUserIds.values());
 }
 
 export async function syncPuzzleHuddleUsers(

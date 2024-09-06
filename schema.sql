@@ -75,6 +75,12 @@ CREATE TABLE puzzle_huddle_user (
   PRIMARY KEY (puzzle_id, user_id)
 );
 
+CREATE TABLE puzzle_former_user (
+  puzzle_id text REFERENCES puzzles(id),
+  user_id text REFERENCES users(id),
+  PRIMARY KEY (puzzle_id, user_id)
+);
+
 CREATE TYPE activity_type AS ENUM (
   'join_channel',
   'message_channel',
