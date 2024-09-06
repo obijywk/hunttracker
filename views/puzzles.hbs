@@ -43,9 +43,8 @@
             <th>Solved</th>
             <th>&nbsp;</th>
             <th>Name</th>
-            <th><svg class="icon icon-location"><title>Idle</title><use xlink:href="{{staticUrl "icons.svg"}}#location"></use></svg></th>
             <th>Answer</th>
-            <th><svg class="icon icon-topic"><title>Idle</title><use xlink:href="{{staticUrl "icons.svg"}}#topic"></use></svg></th>
+            <th><svg class="icon icon-topic"><title>Topic</title><use xlink:href="{{staticUrl "icons.svg"}}#topic"></use></svg></th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
             <th class="icon-column">&nbsp;</th>
@@ -63,17 +62,16 @@
       const colSolved = 1;
       const colStatusEmoji = 2;
       const colName = 3;
-      const colLocation = 4;
-      const colAnswer = 5;
-      const colTopic = 6;
-      const colPuzzleLink = 7;
-      const colChannelLink = 8;
-      const colSheetLink = 9;
-      const colDrawingLink = 10;
-      const colHuddleLink = 11;
-      const colIdle = 12;
-      const colTags = 13;
-      const colSolvers = 14;
+      const colAnswer = 4;
+      const colTopic = 5;
+      const colPuzzleLink = 6;
+      const colChannelLink = 7;
+      const colSheetLink = 8;
+      const colDrawingLink = 9;
+      const colHuddleLink = 10;
+      const colIdle = 11;
+      const colTags = 12;
+      const colSolvers = 13;
 
       $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
         const selectedTags = $(".tags-select").select2("data");
@@ -224,7 +222,6 @@
           searchCols: [
             null, null, null,
             { search: "{{initialSearch}}", smart: false, regex: true },  // name
-            { search: "{{initialSearch}}", smart: false, regex: true },  // location
             { search: "{{initialSearch}}", smart: false, regex: true },  // answer
             { search: "{{initialSearch}}", smart: false, regex: true },  // topic
             null, null, null, null, null,
@@ -275,19 +272,6 @@
               render: (data, type, row) => {
                 if (type === "display") {
                   return `<a href="javascript:void(0);" class="puzzle-name-link">${data}</a>`;
-                }
-                return data;
-              },
-            },
-            {
-              data: "location",
-              className: "location",
-              render: (data, type, row) => {
-                if (type === 'sort') {
-                  if (!data) {
-                    return "";
-                  }
-                  return data;
                 }
                 return data;
               },
