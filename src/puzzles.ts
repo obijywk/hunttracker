@@ -878,13 +878,14 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
   puzzle.complete = complete;
 
   if (complete) {
+    const tagText = puzzle.tags.length > 0 ? ` (${tags.buildTagLinks(puzzle.tags)})` : "";
     let text;
     let spoilerText;
     if (answer) {
-      text = `${buildPuzzleNameMrkdwn(puzzle)} solved!`;
+      text = `${buildPuzzleNameMrkdwn(puzzle)} solved!${tagText}`;
       spoilerText = `${buildPuzzleNameMrkdwn(puzzle)} solved with answer *${puzzle.answer}*.`;
     } else {
-      text = `${buildPuzzleNameMrkdwn(puzzle)} completed.`;
+      text = `${buildPuzzleNameMrkdwn(puzzle)} completed.${tagText}`;
       spoilerText = text;
     }
     const announcementPromises: Array<Promise<any>> = [
