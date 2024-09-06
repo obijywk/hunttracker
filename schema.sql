@@ -5,6 +5,8 @@ DROP FUNCTION IF EXISTS task_queue_add_notify;
 DROP TABLE IF EXISTS task_queue;
 DROP TYPE IF EXISTS task_type;
 
+DROP VIEW IF EXISTS activity_latest_for_puzzle_and_user;
+DROP INDEX IF EXISTS activity_puzzle_index;
 DROP INDEX IF EXISTS activity_user_index;
 DROP TABLE IF EXISTS activity CASCADE;
 DROP TYPE IF EXISTS activity_type;
@@ -98,6 +100,18 @@ CREATE INDEX activity_puzzle_index ON activity (
   puzzle_id,
   timestamp DESC
 );
+
+CREATE VIEW activity_latest_for_puzzle_and_user AS
+SELECT
+  puzzle_id,
+  user_id,
+  MAX(timestamp) AS timestamp
+FROM
+  activity
+GROUP BY
+  puzzle_id,
+  user_id
+;
 
 CREATE TYPE task_type AS ENUM (
   'create_puzzle',

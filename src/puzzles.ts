@@ -159,9 +159,19 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       google_meet_url,
       (
         SELECT json_agg(row_to_json(users))
-        FROM users
-        JOIN puzzle_user ON puzzle_user.user_id = users.id
-        WHERE puzzle_user.puzzle_id = puzzles.id
+        FROM (
+          SELECT
+            users.*
+          FROM users
+          JOIN puzzle_user ON
+            puzzle_user.user_id = users.id
+          LEFT JOIN activity_latest_for_puzzle_and_user ON
+            activity_latest_for_puzzle_and_user.user_id = users.id
+          WHERE
+            puzzle_user.puzzle_id = puzzles.id AND
+            activity_latest_for_puzzle_and_user.puzzle_id = puzzles.id
+          ORDER BY activity_latest_for_puzzle_and_user.timestamp DESC
+        ) AS users
       ) users,
       (
         SELECT json_agg(row_to_json(users))
