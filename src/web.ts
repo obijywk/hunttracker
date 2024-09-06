@@ -104,7 +104,7 @@ async function checkAdmin(req: Request) {
 async function commonRenderOptions(req: Request) {
   return {
     appName: process.env.APP_NAME,
-    appIconFilename: process.env.APP_ICON_FILENAME,
+    appIconUrl: process.env.APP_ICON_FILENAME ? staticUrl("customicons/" + process.env.APP_ICON_FILENAME) : undefined,
     user: req.user,
     helpUrl: process.env.HELP_URL,
     isAdmin: await checkAdmin(req),

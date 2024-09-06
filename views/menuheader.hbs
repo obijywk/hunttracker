@@ -1,8 +1,8 @@
     <div class="menu-header">
       <div class="menu-item{{#if index}} menu-selected{{/if}}">
         <a href="/">
-          {{#if appIconFilename}}
-            <img src="{{staticUrl "customicons/"}}{{appIconFilename}}">
+          {{#if appIconUrl}}
+            <img src="{{appIconUrl}}">
           {{else}}
             <svg>
               <title>{{appName}}</title>
