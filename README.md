@@ -6,7 +6,7 @@ The app's [Home tab](https://api.slack.com/surfaces/tabs) is its main entry poin
 
 A "puzzle" may be used to represent a normal puzzle, a metapuzzle, an event, or any other solvable thing you want to track. This app maintains a Slack channel per puzzle. For each unsolved puzzle, the Home tab lists the puzzle channel's topic (useful as a quick summary of the puzzle content and current status of the solve), which team members are working on it, and any tags associated with the puzzle. It provides _Join channel_ buttons to make it easy to start working on a puzzle from this view, but it's also OK for a user to join a puzzle's channel via normal Slack features.
 
-The _Register puzzle_ button on the Home tab is used to create a Slack channel, Google Sheet, and (if configured) a Google Meet for a puzzle. It presents a dialog for entering information about the puzzle including its name, a URL for the puzzle content, tags to associate with the puzzle, and an initial topic. All fields are optional other than a unique puzzle name, and tags and a topic can be set and changed later. The puzzle registration feature may be optionally configured only for "admin" users who are members of a private admin channel.
+The _Register puzzle_ button on the Home tab is used to create a Slack channel, Google Sheet, and Google Drawing for a puzzle. It presents a dialog for entering information about the puzzle including its name, a URL for the puzzle content, tags to associate with the puzzle, and an initial topic. All fields are optional other than a unique puzzle name, and tags and a topic can be set and changed later. The puzzle registration feature may be optionally configured only for "admin" users who are members of a private admin channel.
 
 This app pins and maintains a _status message_ at the top of each puzzle channel. This message contains links to the puzzle content and the Google Sheet for the puzzle, as well as tracking for how long the puzzle's been "idle" (no activity in its channel or spreadsheet, or no manual indication that its still being worked on), its tags and functionality to edit them, and functionality for recording the puzzle as solved and providing its answer. The _status message_ is continuously updated by the app.
 
@@ -17,7 +17,6 @@ There are many more features that have not yet been thoroughly documented here:
  * archiving channels of solved puzzles
  * the activity log channel
  * the admin channel
- * Google Meet integration
 
 ## Serving requirements
 
@@ -26,7 +25,7 @@ To set up this app, you'll need:
  * Your own new Slack app to configure and install in your workspace
  * A PostgreSQL database
  * A Javascript serving solution (I've successfully set this up with AWS Lambda and with Google App Engine)
- * A Google Cloud Platform service account for accessing the Google Drive and Calendar (for Google Meet creation) APIs
+ * A Google Cloud Platform service account for accessing the Google Drive and People APIs
 
 ## Environment variables
 
@@ -56,7 +55,7 @@ Everything is configured using environment variables, and they need to be set fo
   token in various calls, we can clean this up later.
 - **GOOGLE_SERVICE_ACCOUNT_EMAIL**: This is the e-mail address of a Google Cloud Platform
   service account used to access the Google Drive API for managing spreadsheets and the Google
-  Calendar API for creating Google Meets. You can create a service account for a GCP project
+  People API for identifying user activity. You can create a service account for a GCP project
   [here](https://console.cloud.google.com/iam-admin/serviceaccounts). The Google Drive folder
   storing the spreadsheets should be shared with this account.
 - **GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY**: This is the private_key associated with the Google
@@ -88,11 +87,6 @@ Everything is configured using environment variables, and they need to be set fo
   Platform service account, and this folder is where the drawings will be created as well.
 - **PUZZLE_TRACKING_SHEET_ID**: If set, then each time a puzzle is registered, a row
   containing the name of the puzzle will be appended to the Google Spreadsheet with this sheet ID.
-- **ENABLE_GOOGLE_MEET**: If set, creates a calendar event with a Google Meet entry point
-  for each puzzle.
-- **GOOGLE_MEET_CALENDAR_ID**: The Google Calendar ID of the calendar where per-puzzle events
-  should be created. The Google service account must have permissions to make changes to
-  this calendar.
 - **ENABLE_SHEET_EDITOR_INVITES**: If set, will attempt to automatically invite a user to the
   puzzle channel associated with a puzzle sheet they edit if they're not already a member of
   the channel. Requires both the Google Drive Activity API and the Google People API to be
@@ -148,8 +142,6 @@ section of https://api.slack.com/. The "Request URL" on the "Event Subscriptions
 your web server URL plus "/slack/events".
 
 - app_home_opened
-- channel_archive
-- channel_unarchive
 - member_joined_channel
 - member_left_channel
 - message.channels

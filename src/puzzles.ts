@@ -7,7 +7,6 @@ import { ButtonAction, PlainTextOption } from "@slack/bolt";
 import { app } from "./app";
 import * as db from "./db";
 import * as googleDrive from "./google_drive";
-import * as googleCalendar from "./google_calendar";
 import {
   ChatPostMessageResult,
   ConversationsCreateResult,
@@ -39,8 +38,6 @@ export interface Puzzle {
   tags: Array<tags.Tag>;
   sheetUrl: string;
   drawingUrl: string;
-  calendarEventId: string;
-  googleMeetUrl: string;
   registrationTimestamp: moment.Moment;
   chatModifiedTimestamp: moment.Moment;
   sheetModifiedTimestamp: moment.Moment;
@@ -156,8 +153,6 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       channel_topic_modified_timestamp,
       sheet_url,
       drawing_url,
-      calendar_event_id,
-      google_meet_url,
       (
         SELECT json_agg(row_to_json(users))
         FROM (
@@ -264,8 +259,6 @@ async function readFromDatabase(options: ReadFromDatabaseOptions): Promise<Array
       tags: row.tags || [],
       sheetUrl: row.sheet_url,
       drawingUrl: row.drawing_url,
-      calendarEventId: row.calendar_event_id,
-      googleMeetUrl: row.google_meet_url,
       registrationTimestamp: moment.utc(row.registration_timestamp),
       chatModifiedTimestamp: moment.utc(row.chat_modified_timestamp),
       sheetModifiedTimestamp: moment.utc(row.sheet_modified_timestamp),
@@ -447,18 +440,6 @@ function buildIdleStatusBlock(puzzle: Puzzle) {
 function buildStatusMessageBlocks(puzzle: Puzzle): any {
   const actionButtons = [];
 
-  if (puzzle.googleMeetUrl.length > 0) {
-    actionButtons.push({
-      type: "button",
-      text: {
-        type: "plain_text",
-        text: ":movie_camera: Video chat",
-      },
-      "action_id": "puzzle_video_chat",
-      url: puzzle.googleMeetUrl,
-    });
-  }
-
   actionButtons.push(tags.buildUpdateTagsButton(puzzle.id));
 
   const puzzleLinkBlock = {
@@ -613,10 +594,6 @@ app.action("puzzle_open_drawing", async ({ack}) => {
 });
 
 app.action("puzzle_open_activity", async ({ack}) => {
-  ack();
-});
-
-app.action("puzzle_video_chat", async ({ack}) => {
   ack();
 });
 
@@ -859,11 +836,6 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
     if (puzzle.drawingUrl) {
       renamePromises.push(googleDrive.renameDrawing(puzzle.drawingUrl, docName));
     }
-    if (process.env.ENABLE_GOOGLE_MEET) {
-      if (puzzle.calendarEventId.length > 0) {
-        renamePromises.push(googleCalendar.renameEvent(puzzle.calendarEventId, docName));
-      }
-    }
   }
 
   const recordActivityPromise = recordActivity(
@@ -948,8 +920,6 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       channel_topic,
       sheet_url,
       drawing_url,
-      calendar_event_id,
-      google_meet_url,
       registration_timestamp,
       chat_modified_timestamp,
       sheet_modified_timestamp,
@@ -957,7 +927,7 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       manual_poke_timestamp,
       status_message_ts,
       huddle_thread_message_ts
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
     [
       puzzle.id,
       puzzle.name,
@@ -968,8 +938,6 @@ async function insert(puzzle: Puzzle, client: PoolClient) {
       puzzle.channelTopic,
       puzzle.sheetUrl,
       puzzle.drawingUrl,
-      puzzle.calendarEventId,
-      puzzle.googleMeetUrl,
       puzzle.registrationTimestamp.format(),
       puzzle.chatModifiedTimestamp.format(),
       puzzle.sheetModifiedTimestamp.format(),
@@ -1208,24 +1176,6 @@ export async function refreshStale() {
   await taskQueue.notifyQueue();
 }
 
-export async function refreshEventUsers(channelId: string, client?: PoolClient) {
-  if (process.env.ENABLE_GOOGLE_MEET) {
-    const puzzle = await get(channelId, client);
-    if (puzzle.calendarEventId.length > 0) {
-      await googleCalendar.updateEventUsers(puzzle.calendarEventId, puzzle.users);
-    }
-  }
-}
-
-export async function clearEventUsers(channelId: string) {
-  if (process.env.ENABLE_GOOGLE_MEET) {
-    const puzzle = await get(channelId);
-    if (puzzle.calendarEventId.length > 0) {
-      await googleCalendar.updateEventUsers(puzzle.calendarEventId, []);
-    }
-  }
-}
-
 async function syncBookmarks(puzzle: Puzzle): Promise<void> {
   const newBookmarks = new Map([
     { title: "Spreadsheet", emoji: ":bar_chart:", link: puzzle.sheetUrl },
@@ -1297,17 +1247,8 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
       googleDrive.copyDrawing(process.env.PUZZLE_DRAWING_TEMPLATE_URL, docName) :
       Promise.resolve("");
 
-  const calendarEventPromise =
-      process.env.ENABLE_GOOGLE_MEET ?
-      googleCalendar.createEvent(docName) :
-      Promise.resolve({
-        eventId: "",
-        googleMeetUrl: "",
-      });
-
   const sheetUrl = await sheetUrlPromise;
   const drawingUrl = await drawingUrlPromise;
-  const calendarEvent = await calendarEventPromise;
 
   const now = moment().utc();
   let puzzle: Puzzle = {
@@ -1325,8 +1266,6 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
     tags: [],
     sheetUrl,
     drawingUrl,
-    calendarEventId: calendarEvent.eventId,
-    googleMeetUrl: calendarEvent.googleMeetUrl,
     registrationTimestamp: now,
     chatModifiedTimestamp: now,
     sheetModifiedTimestamp: now,
@@ -1415,11 +1354,6 @@ taskQueue.registerHandler("edit_puzzle", async (client, payload) => {
     await googleDrive.renameSheet(puzzle.sheetUrl, docName);
     if (puzzle.drawingUrl) {
       await googleDrive.renameDrawing(puzzle.drawingUrl, docName);
-    }
-    if (process.env.ENABLE_GOOGLE_MEET) {
-      if (puzzle.calendarEventId.length > 0) {
-        await googleCalendar.renameEvent(puzzle.calendarEventId, docName);
-      }
     }
   }
 
@@ -1621,7 +1555,6 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
     );
   }
   if (affectedUserIds.length > 0) {
-    refreshEventUsers(id, client);
     await taskQueue.notifyQueue();
   }
 }

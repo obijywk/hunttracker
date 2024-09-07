@@ -30,8 +30,6 @@ CREATE TABLE puzzles (
   channel_topic_modified_timestamp timestamp with time zone,
   sheet_url text,
   drawing_url text,
-  calendar_event_id text,
-  google_meet_url text,
   registration_timestamp timestamp with time zone,
   chat_modified_timestamp timestamp with time zone,
   sheet_modified_timestamp timestamp with time zone,

@@ -1,6 +1,4 @@
 import {
-  ChannelArchiveEvent,
-  ChannelUnarchiveEvent,
   GenericMessageEvent,
   MemberJoinedChannelEvent,
   MemberLeftChannelEvent,
@@ -86,26 +84,6 @@ app.event("member_left_channel", async ({ event, body }) => {
   }
   if (memberLeftChannelEvent.channel === process.env.SLACK_ADMIN_CHANNEL_ID) {
     await taskQueue.scheduleTask("refresh_users", {});
-  }
-  if (body.eventAck) {
-    body.eventAck();
-  }
-});
-
-app.event("channel_archive", async({ event, body }) => {
-  const channelArchiveEvent = event as unknown as ChannelArchiveEvent;
-  if (await puzzles.isPuzzleChannel(channelArchiveEvent.channel)) {
-    await puzzles.clearEventUsers(channelArchiveEvent.channel);
-  }
-  if (body.eventAck) {
-    body.eventAck();
-  }
-});
-
-app.event("channel_unarchive", async({ event, body }) => {
-  const channelUnarchiveEvent = event as unknown as ChannelUnarchiveEvent;
-  if (await puzzles.isPuzzleChannel(channelUnarchiveEvent.channel)) {
-    await puzzles.refreshEventUsers(channelUnarchiveEvent.channel);
   }
   if (body.eventAck) {
     body.eventAck();
