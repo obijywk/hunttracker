@@ -15,6 +15,7 @@ declare module "express-session" {
     postLoginUrl?: string;
     useSlackWebLinks?: boolean;
     enableDarkMode?: boolean;
+    hideAnswers?: boolean;
   }
 }
 

@@ -39,6 +39,17 @@
               Enable dark mode
             </label>
           </p>
+          <p>
+            <input
+              type="checkbox"
+              id="hideAnswers"
+              name="hideAnswers"
+              {{#if hideAnswers}}checked{{/if}}
+              onchange="this.form.submit()">
+            <label for="hideAnswers">
+              Hide solved puzzle answers in web views (spoiler-free mode)
+            </label>
+          </p>
         </form>
       </p>
       {{#if isAdmin}}

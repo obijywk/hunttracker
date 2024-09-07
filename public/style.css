@@ -246,6 +246,12 @@ span.answer:hover {
   text-transform: none;
 }
 
+td.hidden-answer,
+div.hidden-answer,
+span.hidden-answer {
+  color: transparent;
+}
+
 td.idle-column {
   text-align: right;
 }
@@ -309,8 +315,10 @@ div.meta-header {
   font-size: 1.1em;
   background: var(--background-header);
   padding: 0.6em 1em;
-  color: var(--text-header);
   line-height: 1.4em;
+}
+div.meta-header :not(div.hidden-answer) {
+  color: var(--text-header);
 }
 div.meta-complete .meta-header {
   background: var(--background-header-solved);

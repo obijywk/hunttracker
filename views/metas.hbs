@@ -23,7 +23,7 @@
             <div class="meta-header title">
               <a class="meta-link" href="puzzles?solved=all&tags=in/{{tagSuffix}}&tags=meta/{{tagSuffix}}{{#if id}}&expanded={{id}}{{/if}}">{{name}}</a>
             </div>
-            <div class="meta-header answer">
+            <div class="meta-header answer{{#if ../hideAnswers}} hidden-answer{{/if}}">
               {{#if answer}}{{answer}}{{/if}}
             </div>
             <div class="meta-header meta-header-icons">
@@ -64,7 +64,7 @@
                   {{name}}
                 </a>
               </div>
-              <div class="meta-puzzle answer{{#if complete}} puzzle-complete{{/if}}">
+              <div class="meta-puzzle answer{{#if complete}} puzzle-complete{{/if}}{{#if ../../hideAnswers}} hidden-answer{{/if}}">
                 {{#if answer}}{{answer}}{{/if}}
               </div>
             {{/each}}

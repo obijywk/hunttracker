@@ -110,6 +110,7 @@ async function commonRenderOptions(req: Request) {
     isAdmin: await checkAdmin(req),
     useSlackWebLinks: req.session.useSlackWebLinks,
     enableDarkMode: req.session.enableDarkMode,
+    hideAnswers: req.session.hideAnswers,
     slackUrlPrefix: makeSlackChannelUrlPrefix(req.session.useSlackWebLinks),
     slackHuddleUrlPrefix: makeSlackHuddleUrlPrefix(),
   };
@@ -145,6 +146,7 @@ receiver.app.post("/", async (req, res) => {
   }
   req.session.useSlackWebLinks = req.body.useSlackWebLinks !== undefined;
   req.session.enableDarkMode = req.body.enableDarkMode !== undefined;
+  req.session.hideAnswers = req.body.hideAnswers !== undefined;
   return res.render("index", await commonRenderOptions(req));
 });
 
@@ -637,7 +639,7 @@ receiver.app.get("/tagger", async (req, res) => {
   const selectedPuzzles = new Set((req.query as any).p || []);
   const puzzleOptions = allPuzzles.map(p => ({
     id: p.id,
-    text: p.answer ? p.name + " (" + p.answer + ")" : p.name,
+    text: p.answer && !req.session.hideAnswers ? p.name + " (" + p.answer + ")" : p.name,
     selected: selectedPuzzles.has(p.id),
   }));
 
