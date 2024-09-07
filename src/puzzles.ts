@@ -4,7 +4,9 @@ import * as emoji from "node-emoji";
 import { PoolClient } from "pg";
 import { ButtonAction, PlainTextOption } from "@slack/bolt";
 
+import { ActivityType, recordActivity } from "./activity";
 import { app } from "./app";
+import { scheduleAutoRegisterPuzzles } from "./auto_register_puzzles";
 import * as db from "./db";
 import * as googleDrive from "./google_drive";
 import {
@@ -21,7 +23,6 @@ import {
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
-import { ActivityType, recordActivity } from "./activity";
 
 export interface Puzzle {
   id: string;
@@ -886,6 +887,7 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
         channel: id,
       });
     }
+    await scheduleAutoRegisterPuzzles();
   } else {
     await taskQueue.scheduleTask("refresh_puzzle", {id});
   }

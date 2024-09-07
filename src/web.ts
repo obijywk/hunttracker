@@ -9,6 +9,7 @@ import { app, receiver } from "./app";
 import * as db from "./db";
 import * as google_people from "./google_people";
 import * as home from "./home";
+import * as huntSiteScraper from "./hunt_site_scraper";
 import * as puzzles from "./puzzles";
 import { getPuzzleStatusEmoji, PuzzleStatusEmoji } from "./puzzle_status_emoji";
 import * as refreshPolling from "./refresh_polling";
@@ -552,6 +553,72 @@ receiver.app.get("/admin/listpeople", async (req, res) => {
     ...await commonRenderOptions(req),
     peopleAndUsers,
   });
+});
+
+receiver.app.get("/admin/huntsitescraper", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+  if (!await checkAdmin(req)) {
+    res.redirect("puzzles");
+    return;
+  }
+  const settings = await huntSiteScraper.loadSettings();
+  return res.render("huntsitescraper", {
+    ...await commonRenderOptions(req),
+    ...settings,
+    requestHeaders: JSON.stringify(settings.requestHeaders, null, 2),
+  });
+});
+
+receiver.app.post("/admin/huntsitescraper", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+  if (!await checkAdmin(req)) {
+    res.redirect("puzzles");
+    return;
+  }
+
+  let settings: huntSiteScraper.HuntSiteScraperSettings;
+  try {
+    settings = {
+      enableScraping: req.body.enableScraping !== undefined,
+      requestHeaders: JSON.parse(req.body.requestHeaders),
+      puzzleListUrl: req.body.puzzleListUrl,
+      puzzleLinkSelector: req.body.puzzleLinkSelector,
+      puzzleNameSelector: req.body.puzzleNameSelector,
+      puzzleLinkDenyRegex: req.body.puzzleLinkDenyRegex,
+      puzzleNameDenyRegex: req.body.puzzleNameDenyRegex,
+      puzzleContentSelector: req.body.puzzleContentSelector,
+    };
+  } catch (e) {
+    res.status(400).send({
+      status: 400,
+      message: e.toString(),
+    });
+    return;
+  }
+
+  if (req.body.test_puzzle_list !== undefined) {
+    const debugOutput: huntSiteScraper.DebugOutput = {
+      matchedPuzzleLinks: [],
+      matchedPuzzleNames: [],
+    };
+    const puzzleList = await huntSiteScraper.scrapePuzzleList({
+      settings,
+      debugOutput,
+    });
+    res.contentType("application/json");
+    res.end(JSON.stringify({ puzzleList, debugOutput }, null, 2));
+    return;
+  }
+
+  if (req.body.save !== undefined) {
+    await huntSiteScraper.saveSettings(settings);
+    res.redirect("/admin/huntsitescraper");
+    return;
+  }
 });
 
 receiver.app.get("/taskqueue", async (req, res) => {

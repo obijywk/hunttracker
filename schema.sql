@@ -5,6 +5,9 @@ DROP FUNCTION IF EXISTS task_queue_add_notify;
 DROP TABLE IF EXISTS task_queue;
 DROP TYPE IF EXISTS task_type;
 
+DROP TABLE IF EXISTS auto_register_notified_puzzles;
+DROP TABLE IF EXISTS hunt_site_scraper_settings;
+
 DROP VIEW IF EXISTS activity_latest_for_puzzle_and_user;
 DROP INDEX IF EXISTS activity_puzzle_index;
 DROP INDEX IF EXISTS activity_user_index;
@@ -117,6 +120,21 @@ GROUP BY
   user_id
 ;
 
+CREATE TABLE hunt_site_scraper_settings (
+  enable_scraping boolean,
+  request_headers jsonb,
+  puzzle_list_url text,
+  puzzle_link_selector text,
+  puzzle_name_selector text,
+  puzzle_link_deny_regex text,
+  puzzle_name_deny_regex text,
+  puzzle_content_selector text
+);
+
+CREATE TABLE auto_register_notified_puzzles (
+  url text PRIMARY KEY
+);
+
 CREATE TYPE task_type AS ENUM (
   'create_puzzle',
   'edit_puzzle',
@@ -125,7 +143,8 @@ CREATE TYPE task_type AS ENUM (
   'publish_home',
   'refresh_users',
   'check_sheet_editors',
-  'sync_google_people'
+  'sync_google_people',
+  'auto_register_puzzles'
 );
 
 CREATE TABLE task_queue (

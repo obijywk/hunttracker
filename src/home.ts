@@ -1,10 +1,11 @@
-import { BlockAction, ButtonAction, ViewErrorsResponseAction } from "@slack/bolt";
+import { ButtonAction, ViewErrorsResponseAction } from "@slack/bolt";
 import { Block, Button, KnownBlock, Option } from "@slack/types";
 
 import { app } from "./app";
 import * as puzzles from "./puzzles";
 import { PuzzleMetadataErrorField, findChannelIdForChannelName } from "./puzzles";
 import { getPuzzleStatusEmoji } from "./puzzle_status_emoji";
+import { buildAllowDuplicatePuzzleURLBlock, openRegisterPuzzleDialog } from "./register_puzzle";
 import { MAX_NUM_OPTIONS, getSlackActionValue, getViewStateValues } from "./slack_util";
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
@@ -288,152 +289,8 @@ app.action("home_refresh", async ({ ack, body }) => {
   ack();
 });
 
-function buildAllowDuplicatePuzzleURLBlock() {
-  return {
-    type: "input",
-    "block_id": "puzzle_url_allow_duplicate_input",
-    optional: true,
-    label: {
-      type: "plain_text",
-      text: "Puzzle URL options",
-    },
-    element: {
-      type: "checkboxes",
-      options: [
-        {
-          text: {
-            type: "plain_text",
-            text: "Allow this to be a puzzle URL that's already been used",
-          },
-          value: "puzzle_url_allow_duplicate",
-        },
-      ],
-    },
-  };
-}
-
 app.action("home_register_puzzle", async ({ ack, body }) => {
-  await app.client.views.open({
-    token: process.env.SLACK_BOT_TOKEN,
-    "trigger_id": (body as any).trigger_id,
-    view: {
-      type: "modal",
-      "callback_id": "home_register_puzzle_view",
-      title: {
-        type: "plain_text",
-        text: "Register puzzle",
-      },
-      blocks: [
-        {
-          type: "input",
-          "block_id": "puzzle_name_input",
-          label: {
-            type: "plain_text",
-            text: "Puzzle name",
-          },
-          element: {
-            type: "plain_text_input",
-            placeholder: {
-              type: "plain_text",
-              text: "Enter puzzle name",
-            },
-          },
-        },
-        {
-          type: "input",
-          "block_id": "puzzle_url_input",
-          optional: true,
-          label: {
-            type: "plain_text",
-            text: "Puzzle URL",
-          },
-          element: {
-            type: "plain_text_input",
-            placeholder: {
-              type: "plain_text",
-              text: "Enter puzzle URL",
-            },
-          },
-        },
-        buildAllowDuplicatePuzzleURLBlock(),
-        ...await tags.buildUpdateTagsBlocks("" /* no puzzle ID assigned yet */),
-        {
-          type: "input",
-          "block_id": "puzzle_topic_input",
-          optional: true,
-          label: {
-            type: "plain_text",
-            text: "Topic",
-          },
-          hint: {
-            type: "plain_text",
-            text: "Consider including an initial summary of the puzzle content, if known.",
-          },
-          element: {
-            type: "plain_text_input",
-            placeholder: {
-              type: "plain_text",
-              text: "Enter initial topic",
-            },
-            multiline: true,
-          },
-        },
-      ],
-      submit: {
-        type: "plain_text",
-        text: "Register puzzle",
-      },
-    },
-  });
-  ack();
-});
-
-app.view("home_register_puzzle_view", async ({ack, body, view}) => {
-  const values = getViewStateValues(view);
-  const selectedTags = tags.getUpdateTagsViewStateValues(values);
-
-  if (selectedTags.errors) {
-    ack({
-      "response_action": "errors",
-      errors: selectedTags.errors,
-    } as any);
-    return;
-  }
-
-  const createError = await puzzles.create(
-    values["puzzle_name_input"],
-    values["puzzle_url_input"],
-    values["puzzle_url_allow_duplicate_input"].length > 0,
-    selectedTags.selectedTagIds,
-    selectedTags.newTagNames,
-    values["puzzle_topic_input"],
-    body.user.id);
-
-  if (createError) {
-    const errors: any = {};
-    switch (createError.field) {
-      case PuzzleMetadataErrorField.Name:
-        errors["puzzle_name_input"] = createError.message;
-        break;
-      case PuzzleMetadataErrorField.Url:
-        errors["puzzle_url_input"] = createError.message;
-        break;
-    }
-    ack({
-      "response_action": "errors",
-      errors,
-    } as any);
-    return;
-  }
-
-  if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
-    await app.client.chat.postMessage({
-      token: process.env.SLACK_USER_TOKEN,
-      channel: `#${process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME}`,
-      text: `Registering ${values["puzzle_name_input"]}, please wait...`,
-    });
-  }
-
+  await openRegisterPuzzleDialog((body as any).trigger_id);
   ack();
 });
 

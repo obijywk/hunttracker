@@ -1,0 +1,116 @@
+<!doctype html>
+<html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
+  <head>
+    <title>Hunt Site Scraper Settings - {{appName}}</title>
+    {{> favicon }}
+    <link rel="stylesheet" type="text/css" href="{{staticUrl "style.css"}}">
+  </head>
+  <body>
+    {{> menuheader }}
+    <div class="body-wrapper">
+      <p>
+        <form method="POST">
+          <p>
+            <input
+              type="checkbox"
+              id="enableScraping"
+              name="enableScraping"
+              {{#if enableScraping}}checked{{/if}}>
+            <label for="enableScraping">
+              Enabe scraping
+            </label>
+          </p>
+          <p>
+            <label for="requestHeaders">
+              Request headers (as JSON)
+            </label>
+            <br>
+            <textarea
+              id="requestHeaders"
+              name="requestHeaders"
+              rows="4" cols="50">{{requestHeaders}}</textarea>
+          </p>
+          <p>
+            <label for="puzzleListUrl">
+              URL of puzzle list page
+            </label>
+            <input
+              type="text"
+              id="puzzleListUrl"
+              name="puzzleListUrl"
+              size="80"
+              value="{{puzzleListUrl}}"
+            >
+          </p>
+          <p>
+            <label for="puzzleLinkSelector">
+              CSS selector for puzzle links on the puzzle list page
+            </label>
+            <input
+              type="text"
+              id="puzzleLinkSelector"
+              name="puzzleLinkSelector"
+              size="80"
+              value="{{puzzleLinkSelector}}"
+            >
+          </p>
+          <p>
+            <label for="puzzleNameSelector">
+              CSS selector for puzzle names on the puzzle list page
+            </label>
+            <input
+              type="text"
+              id="puzzleNameSelector"
+              name="puzzleNameSelector"
+              size="80"
+              value="{{puzzleNameSelector}}"
+            >
+          </p>
+          <p>
+            <label for="puzzleLinkDenyRegex">
+              Regex for puzzle URLs to skip
+            </label>
+            <input
+              type="text"
+              id="puzzleLinkDenyRegex"
+              name="puzzleLinkDenyRegex"
+              size="80"
+              value="{{puzzleLinkDenyRegex}}"
+            >
+          </p>
+          <p>
+            <label for="puzzleNameDenyRegex">
+              Regex for puzzle names to skip
+            </label>
+            <input
+              type="text"
+              id="puzzleNameDenyRegex"
+              name="puzzleNameDenyRegex"
+              size="80"
+              value="{{puzzleNameDenyRegex}}"
+            >
+          </p>
+          <p></p>
+            <label for="puzzleContentSelector">
+              CSS selector for extracting puzzle content
+            </label>
+            <input
+              type="text"
+              id="puzzleContentSelector"
+              name="puzzleContentSelector"
+              size="80"
+              value="{{puzzleContentSelector}}"
+            >
+          </p>
+          <input
+            type="submit"
+            name="test_puzzle_list"
+            value="Test Puzzle List Scrape"
+            formtarget="_blank">
+          &nbsp;&nbsp;
+          <input type="submit" name="save" value="Update Settings">
+        </form>
+      </p>
+    </div>
+  </body>
+</html>

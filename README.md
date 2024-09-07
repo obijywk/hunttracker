@@ -94,6 +94,8 @@ Everything is configured using environment variables, and they need to be set fo
 - **ENABLE_RECORD_ACTIVITY**: If set, a table of user puzzle interactions will be maintained,
   enabling features that report data such as the latest puzzle each user is working on, a
   user's solving history over time, etc.
+- **ENABLE_AUTO_REGISTER_PUZZLES**: If set, scrape a configured puzzle list page to
+  automatically detect new puzzles and prompt for them to be registered.
 - **AUTO_ARCHIVE**: If set, then puzzle channels will be automatically archived as they become
   solved.
 - **ALLOW_RESET_DATABASE**: If set, then the admin page will have an option to reset the database.
