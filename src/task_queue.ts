@@ -1,8 +1,5 @@
-import moment = require("moment");
+import * as moment from "moment";
 import { Client, PoolClient } from "pg";
-
-import { SNSClient } from "@aws-sdk/client-sns-node/SNSClient";
-import { PublishCommand } from "@aws-sdk/client-sns-node/commands/PublishCommand";
 
 import { app } from "./app";
 import * as db from "./db";
@@ -16,18 +13,7 @@ export function registerHandler(
   handlers[taskType] = handler;
 }
 
-export async function notifyQueue() {
-  if (process.env.AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN) {
-    const snsClient = new SNSClient({ region: process.env.AWS_REGION });
-    const publishCommand = new PublishCommand({
-      Message: "NOTIFY",
-      TopicArn: process.env.AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN,
-    });
-    await snsClient.send(publishCommand);
-  }
-}
-
-export async function scheduleTask(taskType: string, payload: any, client?: PoolClient, notify: boolean = true) {
+export async function scheduleTask(taskType: string, payload: any, client?: PoolClient) {
   const existsResult = await db.query(`
     SELECT EXISTS (
       SELECT 1
@@ -44,9 +30,6 @@ export async function scheduleTask(taskType: string, payload: any, client?: Pool
     "INSERT INTO task_queue (task_type, payload) VALUES ($1, $2)",
     [taskType, payload],
     client);
-  if (notify) {
-    await notifyQueue();
-  }
 }
 
 let processTaskQueueRunning = false;
@@ -58,10 +41,10 @@ export async function processTaskQueue() {
     return;
   }
   processTaskQueueRunning = true;
-  const startTime = moment();
+  const startTime = moment.utc();
   const client = await db.connect();
   try {
-    while (moment().diff(startTime) < maxProcessTaskQueueExecutionTime.asMilliseconds()) {
+    while (moment.utc().diff(startTime) < maxProcessTaskQueueExecutionTime.asMilliseconds()) {
       await client.query("BEGIN");
       const result = await client.query(
         `
@@ -117,7 +100,6 @@ export async function processTaskQueue() {
     processTaskQueueRunning = false;
     client.release();
   }
-  await notifyQueue();
   await db.query("NOTIFY task_queue_add");
 }
 

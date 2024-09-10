@@ -1,7 +1,7 @@
 import connectPgSimple from "connect-pg-simple";
 import expressSession from "express-session";
 import { readFile } from "fs";
-import moment = require("moment");
+import * as moment from "moment";
 import { Client, Pool, PoolClient, QueryResult } from "pg";
 import { promisify } from "util";
 
@@ -18,7 +18,7 @@ const idleClients: Array<TrackedClient> = [];
 const logDatabaseClientUsage = process.env.LOG_DATABASE_CLIENT_USAGE !== undefined;
 
 async function getClient() {
-  const now = moment();
+  const now = moment.utc();
   while (idleClients.length > 0) {
     const trackedClient = idleClients.shift();
     const age = now.diff(trackedClient.lastActive);
@@ -43,7 +43,7 @@ async function getClient() {
 function cacheClient(client: Client) {
   idleClients.push({
     client,
-    lastActive: moment(),
+    lastActive: moment.utc(),
   });
   while (idleClients.length > maxIdleClients) {
     const trackedClient = idleClients.shift();

@@ -2,7 +2,6 @@ import {
   GenericMessageEvent,
   MemberJoinedChannelEvent,
   MemberLeftChannelEvent,
-  MessageChangedEvent,
 } from "@slack/bolt";
 
 import { app } from "./app";
@@ -18,7 +17,9 @@ const refreshPuzzleSubtypes = new Set([
 app.event("message", async ({ event, body }) => {
   let isBotMessage = event.subtype === "bot_message";
   if (event.subtype === "message_changed") {
-    isBotMessage = (event as MessageChangedEvent).message.subtype === "bot_message";
+    // This should be a cast to MessageChangedEvent, but @slack/bolt seems confused
+    // about the MessageEvent type.
+    isBotMessage = (event as any).message.subtype === "bot_message";
   }
   const isPuzzleChannel = await puzzles.isPuzzleChannel(event.channel);
   if (isPuzzleChannel) {

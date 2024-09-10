@@ -1,4 +1,4 @@
-import moment = require("moment");
+import * as moment from "moment";
 import { Request, Response } from "express";
 import expressHbs = require("express-hbs");
 import * as path from "path";
@@ -44,7 +44,7 @@ expressHbs.registerHelper("commaSeparatedSolvers", commaSeparatedSolvers);
 
 function timeAgo(timestamp: moment.Moment | undefined): string {
   if (timestamp !== undefined) {
-    const idleDuration = moment.duration(moment().utc().diff(timestamp));
+    const idleDuration = moment.duration(moment.utc().diff(timestamp));
     return Math.floor(idleDuration.asHours()) + "h"
       + String(idleDuration.minutes()).padStart(2, "0") + "m ago";
   }

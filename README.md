@@ -24,7 +24,7 @@ To set up this app, you'll need:
  * A Slack workspace
  * Your own new Slack app to configure and install in your workspace
  * A PostgreSQL database
- * A Javascript serving solution (I've successfully set this up with AWS Lambda and with Google App Engine)
+ * A Javascript serving solution (I've successfully set this up with Google App Engine)
  * A Google Cloud Platform service account for accessing the Google Drive and People APIs
 
 ## Environment variables
@@ -106,14 +106,8 @@ Everything is configured using environment variables, and they need to be set fo
 - **REFRESH_POLLING_MINUTES**: The frequency with which to internally poll for changes that
   aren't detected using events (e.g. spreadsheet edits). Alternatively, you can set up an
   external process to periodically GET /refresh, and leave this unset.
-- **AWS_SNS_TOPIC_REGION**: The AWS region containing the SNS topic for task queue notifications,
-  or unset to not use SNS.
-- **AWS_NOTIFY_TASK_QUEUE_SNS_TOPIC_ARN**: The AWS SNS topic for task queue notifications, or
-  unset to not use SNS.
 - **LOG_DATABASE_CLIENT_USAGE**: If set, logs debugging information about database client creation
   and reuse.
-- **LOG_MESSAGE_EVENTS**: If set, logs debugging information about incoming Slack requests and
-  event messages. Currently only implemented for the AWS handler.
 - **DISABLE_WEB_AUTH**: If set, the web interface won't check for user authentication at all. Only
   enable this for local testing.
 

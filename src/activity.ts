@@ -1,4 +1,4 @@
-import moment = require("moment");
+import * as moment from "moment";
 
 import * as db from "./db";
 
@@ -22,7 +22,7 @@ export async function recordActivity(
     return;
   }
 
-  const timestampToRecord = timestamp !== undefined ? timestamp.format() : moment().utc();
+  const timestampToRecord = timestamp !== undefined ? timestamp.format() : moment.utc();
 
   // We don't want to insert a new row every time a user sends a message in a puzzle
   // channel or edits a spreadsheet; that would be too many rows. Instead, we'll detect if a

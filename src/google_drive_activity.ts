@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import moment = require("moment");
+import * as moment from "moment";
 
 import { getFileIdSheetUrl, getSheetFolderFileId } from "./google_drive";
 
@@ -36,7 +36,7 @@ export async function getRecentPuzzleSheetEditors(): Promise<SheetEditsMap> {
       return sheetEditsMap;
     }
   }
-  const minTimestamp = moment().utc().subtract(moment.duration(10, "minute")).valueOf();
+  const minTimestamp = moment.utc().subtract(moment.duration(10, "minute")).valueOf();
   const response = await driveActivity.activity.query({
     requestBody: {
       ancestorName: "items/" + puzzleFolderFileId,

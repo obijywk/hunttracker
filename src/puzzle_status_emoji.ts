@@ -8,10 +8,18 @@ export interface PuzzleStatusEmoji {
   description: string;
 }
 
+const slackEmojiToNodeEmojiMap = new Map([
+  [":thinking_face:", ":thinking:"],
+]);
+
 function makePuzzleStatusEmoji(slackEmoji: string, description: string): PuzzleStatusEmoji {
+  let nodeEmojiName = slackEmojiToNodeEmojiMap.get(slackEmoji);
+  if (nodeEmojiName === undefined) {
+    nodeEmojiName = slackEmoji;
+  }
   return {
     slackEmoji,
-    unicodeEmoji: nodeEmoji.get(slackEmoji.substring(1, slackEmoji.length - 1)),
+    unicodeEmoji: nodeEmoji.get(nodeEmojiName),
     description,
   };
 }

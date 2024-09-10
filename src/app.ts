@@ -2,7 +2,7 @@ import * as bodyParser from "body-parser";
 import * as express from "express";
 import expressHbs = require("express-hbs");
 import expressSession from "express-session";
-import moment = require("moment");
+import * as moment from "moment";
 import passport from "passport";
 import { Strategy as SlackStrategy } from "passport-slack-oauth2";
 import { App, ExpressReceiver } from "@slack/bolt";

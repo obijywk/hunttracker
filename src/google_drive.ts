@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import moment = require("moment");
+import * as moment from "moment";
 
 const auth = new google.auth.JWT({
   email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
@@ -90,7 +90,7 @@ export interface DriveFileMetadata {
 
 export async function getFileMetadata(fileId: string): Promise<DriveFileMetadata | null> {
   if (rateLimitExceededTimestamp !== null &&
-      moment().diff(rateLimitExceededTimestamp) < rateLimitExceededCooldown.asMilliseconds()) {
+      moment.utc().diff(rateLimitExceededTimestamp) < rateLimitExceededCooldown.asMilliseconds()) {
     console.info("Skipping Drive file metadata request for", fileId);
     return null;
   } else {
@@ -101,14 +101,14 @@ export async function getFileMetadata(fileId: string): Promise<DriveFileMetadata
     const response = await drive.files.get({fileId, fields: "name,modifiedTime"});
     return {
       name: response.data.name,
-      modifiedTimestamp: moment(response.data.modifiedTime),
+      modifiedTimestamp: moment.utc(response.data.modifiedTime),
     };
   } catch (e) {
     console.error("getFileMetadata failed", e);
     if (e.response && e.response.errors) {
       for (const error of e.response.errors) {
         if (error.reason === "userRateLimitExceeded") {
-          rateLimitExceededTimestamp = moment();
+          rateLimitExceededTimestamp = moment.utc();
         }
       }
     }
@@ -139,7 +139,7 @@ export async function getSheetFolderFileId(url: string): Promise<string | null> 
     if (e.response && e.response.errors) {
       for (const error of e.response.errors) {
         if (error.reason === "userRateLimitExceeded") {
-          rateLimitExceededTimestamp = moment();
+          rateLimitExceededTimestamp = moment.utc();
         }
       }
     }

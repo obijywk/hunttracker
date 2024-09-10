@@ -1,4 +1,4 @@
-import moment = require("moment");
+import * as moment from "moment";
 import * as diacritics from "diacritics";
 import * as emoji from "node-emoji";
 import { PoolClient } from "pg";
@@ -62,7 +62,7 @@ export const newPuzzleMinutes =
     60;
 
 export function isNew(puzzle: Puzzle): boolean {
-  const now = moment().utc();
+  const now = moment.utc();
   return moment.duration(now.diff(puzzle.registrationTimestamp)).asMinutes() <=
       newPuzzleMinutes;
 }
@@ -92,14 +92,14 @@ export function getIdleDuration(puzzle: Puzzle): moment.Duration {
     puzzle.drawingModifiedTimestamp,
     puzzle.manualPokeTimestamp,
   );
-  return moment.duration(moment().utc().diff(latestTimestamp));
+  return moment.duration(moment.utc().diff(latestTimestamp));
 }
 
 export function getTopicIdleDuration(puzzle: Puzzle): moment.Duration {
   if (puzzle.complete) {
     return moment.duration(0);
   }
-  return moment.duration(moment().utc().diff(puzzle.channelTopicModifiedTimestamp));
+  return moment.duration(moment.utc().diff(puzzle.channelTopicModifiedTimestamp));
 }
 
 export function buildIdleStatus(puzzle: Puzzle): string {
@@ -341,7 +341,7 @@ export async function isIdlePuzzleChannel(channelId: string): Promise<boolean> {
     moment.utc(row.drawing_modified_timestamp),
     moment.utc(row.manual_poke_timestamp),
   );
-  return moment.duration(moment().utc().diff(latestTimestamp)).asMinutes() >= Number(process.env.MINIMUM_IDLE_MINUTES);
+  return moment.duration(moment.utc().diff(latestTimestamp)).asMinutes() >= Number(process.env.MINIMUM_IDLE_MINUTES);
 }
 
 export function buildPuzzleNameMrkdwn(puzzle: Puzzle) {
@@ -1153,10 +1153,8 @@ export async function refreshAll() {
       "refresh_puzzle",
       { id: row.id },
       undefined  /* client */,
-      false,  /* notify */
     );
   }
-  await taskQueue.notifyQueue();
 }
 
 export async function refreshStale() {
@@ -1169,11 +1167,9 @@ export async function refreshStale() {
         "refresh_puzzle",
         { id: puzzle.id },
         undefined  /* client */,
-        false,  /* notify */
       );
     }
   }
-  await taskQueue.notifyQueue();
 }
 
 async function syncBookmarks(puzzle: Puzzle): Promise<void> {
@@ -1250,7 +1246,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const sheetUrl = await sheetUrlPromise;
   const drawingUrl = await drawingUrlPromise;
 
-  const now = moment().utc();
+  const now = moment.utc();
   let puzzle: Puzzle = {
     id,
     name,
@@ -1435,7 +1431,7 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
   const latestMessageTimestampPromise = getLatestMessageTimestamp(id);
   const huddleParticipantUserIdsPromise = getHuddleParticipantUserIds(puzzle);
 
-  const now = moment().utc();
+  const now = moment.utc();
 
   let sheetMetadata = null;
   if (moment.duration(now.diff(puzzle.sheetModifiedTimestamp)).asMinutes() >=
@@ -1551,11 +1547,7 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
       "publish_home",
       { userId },
       client,
-      false,  /* notify */
     );
-  }
-  if (affectedUserIds.length > 0) {
-    await taskQueue.notifyQueue();
   }
 }
 

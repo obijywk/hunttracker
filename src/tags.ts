@@ -1,4 +1,4 @@
-import moment = require("moment");
+import * as moment from "moment";
 import { PoolClient } from "pg";
 import { ButtonAction } from "@slack/bolt";
 import { Block, KnownBlock, Option } from "@slack/types";
@@ -298,11 +298,7 @@ export async function addAndRemoveTags(
       "refresh_puzzle",
       { id: puzzleId },
       undefined  /* client */,
-      false,  /* notify */
     );
-  }
-  if (puzzleIds.length > 0) {
-    await taskQueue.notifyQueue();
   }
 }
 
@@ -533,7 +529,6 @@ app.view("tags_rename_view", async ({ack, body, view}) => {
       "refresh_puzzle",
       { id: row["puzzle_id"] },
       undefined  /* client */,
-      false,  /* notify */
     );
   }
 
@@ -541,10 +536,7 @@ app.view("tags_rename_view", async ({ack, body, view}) => {
     "publish_home",
     { userId: body.user.id },
     undefined  /* client */,
-    false,  /* notify */
   );
-
-  await taskQueue.notifyQueue();
 
   ack();
 });
@@ -662,7 +654,6 @@ app.view("tags_delete_view", async ({ack, body, view}) => {
       "refresh_puzzle",
       { id: row["puzzle_id"] },
       undefined  /* client */,
-      false,  /* notify */
     );
   }
 
@@ -670,10 +661,7 @@ app.view("tags_delete_view", async ({ack, body, view}) => {
     "publish_home",
     { userId: body.user.id },
     undefined  /* client */,
-    false,  /* notify */
   );
-
-  await taskQueue.notifyQueue();
 
   ack();
 });
