@@ -163,3 +163,84 @@ export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<P
 
   return puzzleLinkList;
 }
+
+export type PuzzleContentText = {
+  type: "text";
+  text: string;
+};
+
+export type PuzzleContentImage = {
+  type: "image";
+  source: {
+    type: "base64";
+    media_type: string;
+    data: string;
+  };
+};
+
+export type PuzzleContentItem = PuzzleContentText | PuzzleContentImage;
+
+export async function scrapePuzzleContent(
+    url: string,
+    options?: ScrapeOptions): Promise<Array<PuzzleContentItem>> {
+  const settings = options.settings ? options.settings : await loadSettings(options.client);
+  if (options.debugOutput) {
+    options.debugOutput.enableScraping = settings?.enableScraping;
+  }
+  if (settings === null || !settings.enableScraping || !settings.puzzleContentSelector) {
+    return [];
+  }
+
+  const fetchOptions = {
+    headers: {
+      "User-Agent": buildUserAgentString(),
+      ...settings.requestHeaders,
+    },
+  };
+  const request = new Request(url, fetchOptions);
+  const response = await fetch(request);
+  if (!response.ok) {
+    throw `Failed to fetch puzzle content for ${url} : ${response.statusText}`;
+  }
+
+  const responseText = await response.text();
+  if (options.debugOutput) {
+    options.debugOutput.responseText = responseText;
+  }
+  const dom = cheerio.load(responseText);
+  const elems = dom("body").find(settings.puzzleContentSelector).toArray();
+
+  const results: Array<PuzzleContentItem> = [];
+  for (const elem of elems) {
+    const text = dom(elem).text().trim().replaceAll("\n", " ").replaceAll(/\s\s+/g, " ");
+    if (text) {
+      results.push({ type: "text", text });
+    }
+
+    const imgs = dom(elem).find("img").toArray();
+    const imgResponses = imgs
+        .map(e => dom(e).attr("src"))
+        .filter(src => src !== undefined)
+        .map(src => fetch(new URL(src, url), fetchOptions));
+    for (const p of imgResponses) {
+      const imgResponse = await p;
+      if (!imgResponse.ok) {
+        continue;
+      }
+      const contentType = imgResponse.headers.get("Content-Type");
+      if (["image/jpeg", "image/png", "image/gif", "image/webp"].indexOf(contentType) === -1) {
+        continue;
+      }
+      results.push({
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: imgResponse.headers.get("Content-Type"),
+          data: Buffer.from(await imgResponse.arrayBuffer()).toString("base64"),
+        },
+      });
+    }
+  }
+
+  return results;
+}

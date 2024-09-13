@@ -614,6 +614,18 @@ receiver.app.post("/admin/huntsitescraper", async (req, res) => {
     return;
   }
 
+  if (req.body.test_puzzle_content !== undefined) {
+    const puzzleContent = await huntSiteScraper.scrapePuzzleContent(
+      req.body.puzzleContentScrapeTestUrl,
+      {
+        settings,
+      },
+    );
+    res.contentType("application/json");
+    res.end(JSON.stringify({ puzzleContent }, null, 2));
+    return;
+  }
+
   if (req.body.save !== undefined) {
     await huntSiteScraper.saveSettings(settings);
     res.redirect("/admin/huntsitescraper");

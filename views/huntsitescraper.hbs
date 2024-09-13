@@ -90,7 +90,7 @@
               value="{{puzzleNameDenyRegex}}"
             >
           </p>
-          <p></p>
+          <p>
             <label for="puzzleContentSelector">
               CSS selector for extracting puzzle content
             </label>
@@ -102,10 +102,27 @@
               value="{{puzzleContentSelector}}"
             >
           </p>
+          <p>
+            <label for="puzzleContentScrapeTestUrl">
+              Puzzle URL for testing puzzle content scrape
+            </label>
+            <input
+              type="text"
+              id="puzzleContentScrapeTestUrl"
+              name="puzzleContentScrapeTestUrl"
+              size="80"
+            >
+          </p>
           <input
             type="submit"
             name="test_puzzle_list"
             value="Test Puzzle List Scrape"
+            formtarget="_blank">
+          &nbsp;&nbsp;
+          <input
+            type="submit"
+            name="test_puzzle_content"
+            value="Test Puzzle Content Scrape"
             formtarget="_blank">
           &nbsp;&nbsp;
           <input type="submit" name="save" value="Update Settings">
