@@ -24,11 +24,13 @@
     "express-session": "^1.18.0",
     "googleapis": "^144.0.0",
     "hbs": "^4.2.0",
+    "html-to-text": "^9.0.5",
     "moment": "^2.30.1",
     "node-emoji": "^2.1.3",
     "passport": "^0.7.0",
     "passport-slack-oauth2": "^1.2.0",
     "pg": "^8.12.0",
+    "sharp": "^0.33.5",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
@@ -43,6 +45,7 @@
     "@types/express-serve-static-core": "^4.19.5",
     "@types/express-session": "^1.18.0",
     "@types/hbs": "^4.0.4",
+    "@types/html-to-text": "^9.0.4",
     "@types/moment": "^2.11.29",
     "@types/node": "^20.14.8",
     "@types/node-emoji": "^1.8.2",

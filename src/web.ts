@@ -605,24 +605,34 @@ receiver.app.post("/admin/huntsitescraper", async (req, res) => {
       matchedPuzzleLinks: [],
       matchedPuzzleNames: [],
     };
-    const puzzleList = await huntSiteScraper.scrapePuzzleList({
-      settings,
-      debugOutput,
-    });
-    res.contentType("application/json");
-    res.end(JSON.stringify({ puzzleList, debugOutput }, null, 2));
+    try {
+      const puzzleList = await huntSiteScraper.scrapePuzzleList({
+        settings,
+        debugOutput,
+      });
+      res.contentType("application/json");
+      res.end(JSON.stringify({ puzzleList, debugOutput }, null, 2));
+    } catch (e) {
+      res.contentType("application/json");
+      res.end(JSON.stringify(e, null, 2));
+    }
     return;
   }
 
   if (req.body.test_puzzle_content !== undefined) {
-    const puzzleContent = await huntSiteScraper.scrapePuzzleContent(
-      req.body.puzzleContentScrapeTestUrl,
-      {
-        settings,
-      },
-    );
-    res.contentType("application/json");
-    res.end(JSON.stringify({ puzzleContent }, null, 2));
+    try {
+      const puzzleContent = await huntSiteScraper.scrapePuzzleContent(
+        req.body.puzzleContentScrapeTestUrl,
+        {
+          settings,
+        },
+      );
+      res.contentType("application/json");
+      res.end(JSON.stringify({ puzzleContent }, null, 2));
+    } catch (e) {
+      res.contentType("application/json");
+      res.end(JSON.stringify(e, null, 2));
+    }
     return;
   }
 

@@ -1,6 +1,9 @@
 import * as cheerio from "cheerio";
-import * as db from "./db";
+import * as htmlToText from "html-to-text";
 import { PoolClient } from "pg";
+import sharp from "sharp";
+
+import * as db from "./db";
 
 export interface HuntSiteScraperSettings {
   enableScraping: boolean;
@@ -210,18 +213,26 @@ export async function scrapePuzzleContent(
   const dom = cheerio.load(responseText);
   const elems = dom("body").find(settings.puzzleContentSelector).toArray();
 
+  const imgSrcsSeen: Set<string> = new Set();
   const results: Array<PuzzleContentItem> = [];
   for (const elem of elems) {
-    const text = dom(elem).text().trim().replaceAll("\n", " ").replaceAll(/\s\s+/g, " ");
+    const text = htmlToText.convert(dom(elem).html());
     if (text) {
       results.push({ type: "text", text });
     }
 
     const imgs = dom(elem).find("img").toArray();
-    const imgResponses = imgs
-        .map(e => dom(e).attr("src"))
-        .filter(src => src !== undefined)
-        .map(src => fetch(new URL(src, url), fetchOptions));
+    const imgSrcs: Array<string> = [];
+    for (const img of imgs) {
+      const src = dom(img).attr("src");
+      if (src === undefined || imgSrcsSeen.has(src)) {
+        continue;
+      }
+      imgSrcsSeen.add(src);
+      imgSrcs.push(src);
+    }
+
+    const imgResponses = imgSrcs.map(src => fetch(new URL(src, url), fetchOptions));
     for (const p of imgResponses) {
       const imgResponse = await p;
       if (!imgResponse.ok) {
@@ -231,12 +242,25 @@ export async function scrapePuzzleContent(
       if (["image/jpeg", "image/png", "image/gif", "image/webp"].indexOf(contentType) === -1) {
         continue;
       }
+
+      let img = sharp(await imgResponse.arrayBuffer());
+      const metadata = await img.metadata();
+      if (metadata.width > 1568 ||
+          metadata.height > 1568 ||
+          (metadata.width * metadata.height) / 750 > 1600) {
+        if (metadata.width > metadata.height) {
+          img = img.resize({ width: 1000 });
+        } else {
+          img = img.resize({ height: 1000 });
+        }
+      }
+
       results.push({
         type: "image",
         source: {
           type: "base64",
           media_type: imgResponse.headers.get("Content-Type"),
-          data: Buffer.from(await imgResponse.arrayBuffer()).toString("base64"),
+          data: (await img.toBuffer()).toString("base64"),
         },
       });
     }
