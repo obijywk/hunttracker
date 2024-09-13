@@ -101,7 +101,11 @@ export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<P
   if (options.debugOutput) {
     options.debugOutput.enableScraping = settings?.enableScraping;
   }
-  if (settings === null || !settings.enableScraping) {
+  if (settings === null ||
+      !settings.enableScraping ||
+      !settings.puzzleListUrl ||
+      !settings.puzzleLinkSelector ||
+      !settings.puzzleNameSelector) {
     return [];
   }
 
@@ -152,7 +156,7 @@ export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<P
       continue;
     }
 
-    const name = dom(nameElem).text().trim().replaceAll("\n", " ").replaceAll(/\s\s+/g, " ");
+    const name = htmlToText.convert(dom(nameElem).html()).trim().replaceAll("\n", " ").replaceAll(/\s\s+/g, " ");
     if (!name ||
         (settings.puzzleNameDenyRegex && name.match(settings.puzzleNameDenyRegex))) {
       continue;
