@@ -5,6 +5,7 @@ import { PoolClient } from "pg";
 import { ButtonAction, PlainTextOption } from "@slack/bolt";
 
 import { ActivityType, recordActivity } from "./activity";
+import { scheduleSummarizePuzzleContent } from "./anthropic";
 import { app } from "./app";
 import { scheduleAutoRegisterPuzzles } from "./auto_register_puzzles";
 import * as db from "./db";
@@ -587,6 +588,15 @@ async function announceSolve(
   }
 }
 
+export async function setTopic(id: string, topic: string): Promise<void> {
+  await app.client.conversations.setTopic({
+    token: process.env.SLACK_USER_TOKEN,
+    channel: id,
+    topic,
+  });
+  await taskQueue.scheduleTask("refresh_puzzle", {id});
+}
+
 app.action("puzzle_open_spreadsheet", async ({ack}) => {
   ack();
 });
@@ -692,13 +702,7 @@ app.view("puzzle_update_topic_view", async ({ack, view, body}) => {
     return;
   }
 
-  await app.client.conversations.setTopic({
-    token: process.env.SLACK_USER_TOKEN,
-    channel: id,
-    topic,
-  });
-  await taskQueue.scheduleTask("refresh_puzzle", {id});
-
+  await setTopic(id, topic);
   ack();
 });
 
@@ -1597,14 +1601,17 @@ taskQueue.registerHandler("scrape_puzzle_content", async (client, payload) => {
     INSERT INTO puzzle_content (puzzle_id, content) VALUES ($1, $2)
     ON CONFLICT (puzzle_id) DO UPDATE SET content = EXCLUDED.content`,
     [puzzle.id, JSON.stringify(content)]);
+  if (!puzzle.channelTopic) {
+    await scheduleSummarizePuzzleContent(puzzle.id);
+  }
 });
 
-async function getPuzzleContent(id: string): Promise<Array<PuzzleContentItem>> {
+export async function getPuzzleContent(id: string): Promise<Array<PuzzleContentItem>> {
   const result = await db.query(
     "SELECT content FROM puzzle_content WHERE puzzle_id = $1",
     [id]);
   if (result.rowCount !== 1) {
     return [];
   }
-  return JSON.parse(result.rows[0].content);
+  return result.rows[0].content;
 }

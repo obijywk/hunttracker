@@ -218,11 +218,6 @@ export async function scrapePuzzleContent(
   const imgSrcsSeen: Set<string> = new Set();
   const results: Array<PuzzleContentItem> = [];
   for (const elem of elems) {
-    const text = htmlToText.convert(dom(elem).html());
-    if (text) {
-      results.push({ type: "text", text });
-    }
-
     const imgs = dom(elem).find("img").toArray();
     const imgSrcs: Array<string> = [];
     for (const img of imgs) {
@@ -266,6 +261,11 @@ export async function scrapePuzzleContent(
           data: (await img.toBuffer()).toString("base64"),
         },
       });
+    }
+
+    const text = htmlToText.convert(dom(elem).html());
+    if (text) {
+      results.push({ type: "text", text });
     }
   }
 

@@ -60,6 +60,8 @@ Everything is configured using environment variables, and they need to be set fo
   storing the spreadsheets should be shared with this account.
 - **GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY**: This is the private_key associated with the Google
   Cloud Platform service account. It should be downloaded when you create the service account.
+- **ANTHROPIC_API_KEY**: This is the API key for the Anthropic API to be used for
+  generating puzzle content summaries.
 - **PGHOST**: The PostgreSQL database hostname.
 - **PGPORT**: The PostgreSQL database port. The default is 5432.
 - **PGUSER**: The PostgreSQL database username.
@@ -98,6 +100,8 @@ Everything is configured using environment variables, and they need to be set fo
   automatically detect new puzzles and prompt for them to be registered.
 - **ENABLE_SCRAPE_PUZZLE_CONTENT**: If set, scrape each puzzle's content and cache it
   in the database for later use.
+- **ENABLE_AI_TOPICS**: If set, generate channel topics that contain summaries of
+  puzzle content.
 - **AUTO_ARCHIVE**: If set, then puzzle channels will be automatically archived as they become
   solved.
 - **ALLOW_RESET_DATABASE**: If set, then the admin page will have an option to reset the database.

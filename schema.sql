@@ -152,7 +152,8 @@ CREATE TYPE task_type AS ENUM (
   'check_sheet_editors',
   'sync_google_people',
   'auto_register_puzzles',
-  'scrape_puzzle_content'
+  'scrape_puzzle_content',
+  'summarize_puzzle_content'
 );
 
 CREATE TABLE task_queue (
