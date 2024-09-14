@@ -563,7 +563,10 @@ receiver.app.get("/admin/huntsitescraper", async (req, res) => {
     res.redirect("puzzles");
     return;
   }
-  const settings = await huntSiteScraper.loadSettings();
+  let settings = await huntSiteScraper.loadSettings();
+  if (!settings) {
+    settings = huntSiteScraper.defaultSettings();
+  }
   return res.render("huntsitescraper", {
     ...await commonRenderOptions(req),
     ...settings,

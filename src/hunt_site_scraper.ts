@@ -35,6 +35,19 @@ export async function loadSettings(client?: PoolClient): Promise<HuntSiteScraper
   };
 }
 
+export function defaultSettings(): HuntSiteScraperSettings {
+  return {
+    enableScraping: false,
+    requestHeaders: {},
+    puzzleListUrl: "",
+    puzzleLinkSelector: "",
+    puzzleNameSelector: "",
+    puzzleLinkDenyRegex: "",
+    puzzleNameDenyRegex: "",
+    puzzleContentSelector: "",
+  };
+}
+
 export async function saveSettings(settings: HuntSiteScraperSettings): Promise<void> {
   const client = await db.connect();
   try {
