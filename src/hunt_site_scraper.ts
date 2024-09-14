@@ -109,8 +109,6 @@ export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<P
     return [];
   }
 
-  const puzzleListUrl = new URL(settings.puzzleListUrl);
-  const baseUrl = puzzleListUrl.protocol + "//" + puzzleListUrl.host;
   const fetchOptions = {
     headers: {
       "User-Agent": buildUserAgentString(),
@@ -164,7 +162,7 @@ export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<P
 
     puzzleLinkList.push({
       name,
-      url: new URL(href, baseUrl).toString(),
+      url: new URL(href, response.url).toString(),
     });
   }
 
@@ -236,10 +234,11 @@ export async function scrapePuzzleContent(
       imgSrcs.push(src);
     }
 
-    const imgResponses = imgSrcs.map(src => fetch(new URL(src, url), fetchOptions));
+    const imgResponses = imgSrcs.map(src => fetch(new URL(src, response.url), fetchOptions));
     for (const p of imgResponses) {
       const imgResponse = await p;
       if (!imgResponse.ok) {
+        console.log(`Image scrape failure (${imgResponse.statusText}): ${imgResponse.url}`);
         continue;
       }
       const contentType = imgResponse.headers.get("Content-Type");

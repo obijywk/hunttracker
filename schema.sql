@@ -14,6 +14,7 @@ DROP INDEX IF EXISTS activity_user_index;
 DROP TABLE IF EXISTS activity CASCADE;
 DROP TYPE IF EXISTS activity_type;
 
+DROP TABLE IF EXISTS puzzle_content CASCADE;
 DROP TABLE IF EXISTS puzzle_tag CASCADE;
 DROP TABLE IF EXISTS puzzle_user CASCADE;
 DROP TABLE IF EXISTS puzzle_huddle_user CASCADE;
@@ -82,6 +83,12 @@ CREATE TABLE puzzle_former_user (
   PRIMARY KEY (puzzle_id, user_id)
 );
 
+CREATE TABLE puzzle_content (
+  puzzle_id text REFERENCES puzzles(id),
+  content jsonb,
+  PRIMARY KEY (puzzle_id)
+);
+
 CREATE TYPE activity_type AS ENUM (
   'join_channel',
   'message_channel',
@@ -144,7 +151,8 @@ CREATE TYPE task_type AS ENUM (
   'refresh_users',
   'check_sheet_editors',
   'sync_google_people',
-  'auto_register_puzzles'
+  'auto_register_puzzles',
+  'scrape_puzzle_content'
 );
 
 CREATE TABLE task_queue (

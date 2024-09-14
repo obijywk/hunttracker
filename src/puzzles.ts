@@ -9,6 +9,7 @@ import { app } from "./app";
 import { scheduleAutoRegisterPuzzles } from "./auto_register_puzzles";
 import * as db from "./db";
 import * as googleDrive from "./google_drive";
+import { PuzzleContentItem, scrapePuzzleContent } from "./hunt_site_scraper";
 import {
   ChatPostMessageResult,
   ConversationsCreateResult,
@@ -1322,6 +1323,10 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
       userId: creatorUserId,
     });
   }
+
+  if (url) {
+    await scheduleScrapePuzzleContent(puzzle.id);
+  }
 });
 
 taskQueue.registerHandler("edit_puzzle", async (client, payload) => {
@@ -1377,6 +1382,10 @@ taskQueue.registerHandler("edit_puzzle", async (client, payload) => {
       userId: creatorUserId,
     });
   }
+
+  if (url !== puzzle.url) {
+    await scheduleScrapePuzzleContent(id);
+  }
 });
 
 taskQueue.registerHandler("delete_puzzle", async (client, payload) => {
@@ -1401,6 +1410,7 @@ taskQueue.registerHandler("delete_puzzle", async (client, payload) => {
   await client.query("DELETE FROM puzzle_user WHERE puzzle_id = $1", [id]);
   await client.query("DELETE FROM puzzle_huddle_user WHERE puzzle_id = $1", [id]);
   await client.query("DELETE FROM puzzle_former_user WHERE puzzle_id = $1", [id]);
+  await client.query("DELETE FROM puzzle_content WHERE puzzle_id = $1", [id]);
   await client.query("DELETE FROM puzzles WHERE id = $1", [id]);
 
   if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
@@ -1569,4 +1579,32 @@ export async function getParticipantUserIds(id: string): Promise<Array<string>> 
     participantUserIds.add(message.user);
   }
   return Array.from(participantUserIds);
+}
+
+async function scheduleScrapePuzzleContent(id: string): Promise<void> {
+  if (process.env.ENABLE_SCRAPE_PUZZLE_CONTENT) {
+    await taskQueue.scheduleTask("scrape_puzzle_content", { id });
+  }
+}
+
+taskQueue.registerHandler("scrape_puzzle_content", async (client, payload) => {
+  const puzzle = await get(payload.id, client);
+  if (!puzzle.url) {
+    return;
+  }
+  const content = await scrapePuzzleContent(puzzle.url, { client });
+  await client.query(`
+    INSERT INTO puzzle_content (puzzle_id, content) VALUES ($1, $2)
+    ON CONFLICT (puzzle_id) DO UPDATE SET content = EXCLUDED.content`,
+    [puzzle.id, JSON.stringify(content)]);
+});
+
+async function getPuzzleContent(id: string): Promise<Array<PuzzleContentItem>> {
+  const result = await db.query(
+    "SELECT content FROM puzzle_content WHERE puzzle_id = $1",
+    [id]);
+  if (result.rowCount !== 1) {
+    return [];
+  }
+  return JSON.parse(result.rows[0].content);
 }
