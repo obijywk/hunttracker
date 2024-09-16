@@ -32,17 +32,17 @@ taskQueue.registerHandler("summarize_puzzle_content", async (client, payload) =>
 export async function summarizePuzzleContent(
     content: Array<PuzzleContentItem>): Promise<string> {
   const messageContent: (TextBlockParam | ImageBlockParam)[] = [
+    ...(content as (TextBlockParam | ImageBlockParam)[]),
     {
       "type": "text",
       "text": `
-        Summarize the puzzle content below.
+        Summarize the puzzle content above.
         Provide an objective description of the content.
         Do not say anything about how to solve the puzzle, or what the likely solving
         steps might be.
         This summary should be very short, no longer than 100 characters.
         Output within <summary></summary> tags.`,
     },
-    ...(content as (TextBlockParam | ImageBlockParam)[]),
   ];
 
   const response = await anthropic.messages.create({
