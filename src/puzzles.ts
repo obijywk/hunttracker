@@ -2,7 +2,7 @@ import * as moment from "moment";
 import * as diacritics from "diacritics";
 import * as emoji from "node-emoji";
 import { PoolClient } from "pg";
-import { ButtonAction, PlainTextOption } from "@slack/bolt";
+import { AnyBlock, ButtonAction, PlainTextOption } from "@slack/bolt";
 
 import { ActivityType, recordActivity } from "./activity";
 import { scheduleSummarizePuzzleContent } from "./anthropic";
@@ -638,6 +638,33 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
     topic = conversationInfoResult.channel.topic.value;
   }
 
+  let aiTopicsBlocks: Array<AnyBlock> = [];
+  if (process.env.ENABLE_AI_TOPICS) {
+    aiTopicsBlocks = [
+      {
+        type: "input",
+        "block_id": "puzzle_generate_ai_topic_input",
+        optional: true,
+        label: {
+          type: "plain_text",
+          text: "Topic generation options",
+        },
+        element: {
+          type: "checkboxes",
+          options: [
+            {
+              text: {
+                type: "plain_text",
+                text: "Ignore text above and instead create an AI-generated topic",
+              },
+              value: "puzzle_generate_ai_topic_input",
+            },
+          ],
+        },
+      },
+    ];
+  }
+
   await app.client.views.open({
     token: process.env.SLACK_BOT_TOKEN,
     "trigger_id": (body as any).trigger_id,
@@ -677,6 +704,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
             multiline: true,
           },
         },
+        ...aiTopicsBlocks,
       ],
       submit: {
         type: "plain_text",
@@ -690,19 +718,24 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
 app.view("puzzle_update_topic_view", async ({ack, view, body}) => {
   const id = JSON.parse(body.view.private_metadata)["id"] as string;
   const values = getViewStateValues(view);
-  const topic: string = values["puzzle_topic_input"] || "";
 
-  if (topic.length > 250) {
-    ack({
-      "response_action": "errors",
-      errors: {
-        "puzzle_topic_input": "A topic may only contain a maximum of 250 characters.",
-      },
-    } as any);
-    return;
+  if (values["puzzle_generate_ai_topic_input"].length > 0) {
+    await setTopic(id, "");
+    await scheduleScrapePuzzleContent(id);
+  } else {
+    const topic: string = values["puzzle_topic_input"] || "";
+    if (topic.length > 250) {
+      ack({
+        "response_action": "errors",
+        errors: {
+          "puzzle_topic_input": "A topic may only contain a maximum of 250 characters.",
+        },
+      } as any);
+      return;
+    }
+    await setTopic(id, topic);
   }
 
-  await setTopic(id, topic);
   ack();
 });
 
