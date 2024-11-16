@@ -62,6 +62,10 @@ Everything is configured using environment variables, and they need to be set fo
   Cloud Platform service account. It should be downloaded when you create the service account.
 - **ANTHROPIC_API_KEY**: This is the API key for the Anthropic API to be used for
   generating puzzle content summaries.
+- **ANTHROPIC_MODEL_NAME**: This is the Anthropic API model name to be used for
+  generating puzzle content summaries. See
+  [the model names list](https://docs.anthropic.com/en/docs/about-claude/models#model-names)
+  for options.
 - **PGHOST**: The PostgreSQL database hostname.
 - **PGPORT**: The PostgreSQL database port. The default is 5432.
 - **PGUSER**: The PostgreSQL database username.

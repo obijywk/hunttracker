@@ -46,7 +46,7 @@ export async function summarizePuzzleContent(
   ];
 
   const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20240620",
+    model: process.env.ANTHROPIC_MODEL_NAME ? process.env.ANTHROPIC_MODEL_NAME : "claude-3-5-sonnet-20241022",
     max_tokens: 50,
     stop_sequences: ["</summary>"],
     messages: [
