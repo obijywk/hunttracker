@@ -11,7 +11,6 @@
   </head>
   <body>
      <div class="dashboard">
-      <div class="dashboard-column">
         <div class="stats">
           <div class="stat-box">
             <span class="stat">{{activeUserCount}}</span>
@@ -35,9 +34,7 @@
           {{#each notices}}
           <p>{{this}}</p>
           {{/each}}
-        </div>
-      </div>
-      <div class="dashboard-column">
+        </div>  
         <div class="puzzles">
           {{#each unsolvedPuzzles}}
           <div class="puzzle">
@@ -46,14 +43,16 @@
                 {{unicodeEmoji}}
               {{/with}}
             </div>
-            <div class="puzzle-title-and-topic">
-              <span class="puzzle-title">{{name}}</span>
+            <div class="puzzle-details">
+              <div class="puzzle-header">
+                <span class="puzzle-title">{{name}}</span>
+                <span class="puzzle-tags">
+                  {{#each tags}}
+                  <span class="tag {{name}}">{{name}}</span>
+                  {{/each}}
+                </span>
+              </div>
               <span class="puzzle-topic">{{channelTopic}}</span>
-            </div>
-            <div class="puzzle-tags">
-              {{#each tags}}
-              <span class="tag {{name}}">{{name}}</span>
-              {{/each}}
             </div>
             <div class="puzzle-people">
               {{#each users}}
