@@ -43,7 +43,9 @@
           <div class="puzzle">
             <div class="puzzle-status-emoji">
               {{#with (puzzleStatusEmoji this)}}
-                {{unicodeEmoji}}
+                <div title="{{description}}" class="emoji">
+                  {{unicodeEmoji}}
+                </div>
               {{/with}}
             </div>
             <div class="puzzle-title-and-topic">
@@ -67,5 +69,8 @@
         </div>
       </div>
     </div>
+    <script type="text/javascript">
+      twemoji.parse(document.body);
+    </script>
   </body>
 </html>
