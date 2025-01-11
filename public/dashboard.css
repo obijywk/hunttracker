@@ -89,7 +89,7 @@ div.puzzles {
   border: 16px solid #1976d2;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(10, 1fr);
+  grid-template-rows: repeat(12, 1fr);
   grid-gap: var(--dashboard-radius);
 }
 
@@ -107,7 +107,7 @@ div.puzzle {
   border: 2px solid #e1e1e1;
 }
 
-div.pinned {
+div.puzzle:has(span.pin) {
   background-color: #ffecb3;
   color: #880e4f;
   font-weight: bold;
