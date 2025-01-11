@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Dashboard - {{appName}}</title>
+    {{> favicon }}
+    <link rel="stylesheet" type="text/css" href="{{staticUrl "dashboard.css"}}">
+    <script type="text/javascript" charset="utf8" src="{{staticUrl "twemoji.min.js"}}" crossorigin="anonymous"></script>
+    {{#if refresh}}
+    <meta http-equiv="refresh" content="{{refresh}}">
+    {{/if}}
+  </head>
+  <body>
+     <div class="dashboard">
+      <div class="dashboard-column">
+        <div class="stats">
+          <div class="stat-box">
+            <span class="stat">{{activeUserCount}}</span>
+            <span class="stat-label">active users</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat">{{solvedPuzzleCount}} / {{totalPuzzleCount}}</span>
+            <span class="stat-label">solved / total puzzles</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat">{{solvedMetaCount}} / {{totalMetaCount}}</span>
+            <span class="stat-label">solved / total metas</span>
+          </div>
+        </div>
+        <div class="events">
+          {{#each eventChannelTopics}}
+          <span class="event">{{this}}</span>
+          {{/each}}
+        </div>
+        <div class="notices">
+          {{#each notices}}
+          <p>{{this}}</p>
+          {{/each}}
+        </div>
+      </div>
+      <div class="dashboard-column">
+        <div class="puzzles">
+          {{#each unsolvedPuzzles}}
+          <div class="puzzle">
+            <div class="puzzle-status-emoji">
+              {{#with (puzzleStatusEmoji this)}}
+                {{unicodeEmoji}}
+              {{/with}}
+            </div>
+            <div class="puzzle-title-and-topic">
+              <span class="puzzle-title">{{name}}</span>
+              <span class="puzzle-topic">{{channelTopic}}</span>
+            </div>
+            <div class="puzzle-tags">
+              {{#each tags}}
+              <span class="tag {{name}}">{{name}}</span>
+              {{/each}}
+            </div>
+            <div class="puzzle-people">
+              {{#each users}}
+              {{#if imageUrl}}
+              <img src="{{imageUrl}}">
+              {{/if}}
+              {{/each}}
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

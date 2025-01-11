@@ -810,3 +810,125 @@ receiver.app.post("/locations/remove", async (req, res) => {
 
   return res.redirect("../locations");
 });
+
+function replaceUserLinksWithUserNames(s: string, userMap: Map<string, users.User>): string {
+  while (true) {
+    const m = s.match(/\<@([^>]+)\>/);
+    if (!m) {
+      return s;
+    }
+    const user = userMap.get(m[1]);
+    if (user) {
+      s = s.replace(`<@${user.id}>`, `@${user.name}`);
+    }
+  }
+}
+
+receiver.app.get("/dashboard", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+
+  const allPuzzlesPromise = puzzles.list();
+  const allUsersPromise = users.list();
+  const latestActivityPromise = listLatestActivity();
+
+  let noticesInfoPromise = null;
+  let noticesPinsListPromise = null;
+  if (process.env.SLACK_DASHBOARD_NOTICES_CHANNEL_ID) {
+    noticesInfoPromise = app.client.conversations.info({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: process.env.SLACK_DASHBOARD_NOTICES_CHANNEL_ID,
+    });
+    noticesPinsListPromise = app.client.pins.list({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: process.env.SLACK_DASHBOARD_NOTICES_CHANNEL_ID,
+    });
+  }
+
+  const allPuzzles = await allPuzzlesPromise;
+  const userIdToUser = new Map((await allUsersPromise).map(u => [u.id, u]));
+  const latestActivity = await latestActivityPromise;
+  const noticesInfo = await noticesInfoPromise;
+  const noticesPinsList = await noticesPinsListPromise;
+
+  let activeUserCount = 0;
+  const now = moment.utc();
+  for (const activity of latestActivity) {
+    if (moment.duration(now.diff(activity.timestamp)).asHours() < 1) {
+      activeUserCount++;
+    }
+  }
+
+  let solvedPuzzleCount = 0;
+  const totalPuzzleCount = allPuzzles.length;
+  let solvedMetaCount = 0;
+  let totalMetaCount = 0;
+  const eventChannelTopics = [];
+  const metaPrefix = "meta/";
+  const eventTagName = "event";
+  for (const puzzle of allPuzzles) {
+    if (puzzle.complete) {
+      solvedPuzzleCount++;
+    }
+    for (const tag of puzzle.tags) {
+      if (tag.name.startsWith(metaPrefix)) {
+        totalMetaCount++;
+        if (puzzle.complete) {
+          solvedMetaCount++;
+        }
+        break;
+      }
+      if (tag.name.startsWith(eventTagName) && !puzzle.complete && puzzle.channelTopic) {
+        eventChannelTopics.push(replaceUserLinksWithUserNames(puzzle.channelTopic, userIdToUser));
+      }
+    }
+  }
+  eventChannelTopics.sort();
+
+  const notices = [];
+  if (noticesInfo && noticesInfo.channel.topic) {
+    for (const line of noticesInfo.channel.topic.value.split("\n")) {
+      notices.push(replaceUserLinksWithUserNames(line, userIdToUser));
+    }
+  }
+  if (noticesPinsList) {
+    for (const item of noticesPinsList.items) {
+      if (item.type === "message") {
+        notices.push(replaceUserLinksWithUserNames((item as any).message.text, userIdToUser));
+      }
+    }
+  }
+
+  const unsolvedPuzzles = allPuzzles.filter(puzzle => !puzzle.complete);
+  const pinTagName = "pin;";
+  unsolvedPuzzles.sort((a: puzzles.Puzzle, b: puzzles.Puzzle) => {
+    const aPinned = a.tags.filter(t => t.name === pinTagName).length > 0;
+    const bPinned = b.tags.filter(t => t.name === pinTagName).length > 0;
+    if (aPinned && !bPinned) {
+      return -1;
+    }
+    if (bPinned && !aPinned) {
+      return 1;
+    }
+    const aIdleDuration = puzzles.getIdleDuration(a);
+    const bIdleDuration = puzzles.getIdleDuration(b);
+    if (aIdleDuration < bIdleDuration) {
+      return -1;
+    }
+    return 1;
+  });
+
+  res.render("dashboard", {
+    ...await commonRenderOptions(req),
+    refresh: req.query.refresh,
+    activeUserCount,
+    solvedPuzzleCount,
+    totalPuzzleCount,
+    solvedMetaCount,
+    totalMetaCount,
+    eventChannelTopics,
+    notices,
+    unsolvedPuzzles,
+  });
+});

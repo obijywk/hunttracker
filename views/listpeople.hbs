@@ -25,7 +25,7 @@
         <thead>
           <tr>
             <td colspan="3">Google People API</td>
-            <td colspan="6">Passport DB</td>
+            <td colspan="7">Passport DB</td>
           </tr>
           <tr>
             <td>Resource name</td>
@@ -33,6 +33,7 @@
             <td>E-mail</td>
             <td>Slack ID</td>
             <td>Name</td>
+            <td>Image</td>
             <td>E-mail</td>
             <td>Google People API<br>resource name</td>
             <td>Google Drive Activity API<br>resource name</td>
@@ -46,6 +47,7 @@
           <td>{{person.email}}</td>
           <td>{{user.id}}</td>
           <td>{{user.name}}</td>
+          <td><img src="{{user.imageUrl}}"></td>
           <td>{{user.email}}</td>
           <td>{{user.googlePeopleResourceName}}</td>
           <td>{{user.googleActivityPersonName}}</td>

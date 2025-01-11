@@ -16,6 +16,7 @@ export interface User {
   googlePeopleResourceName: string;
   googleActivityPersonName: string;
   googleEmail: string;
+  imageUrl: string;
 }
 
 const ignoredUserIds = new Set(process.env.SLACK_IGNORED_USER_IDS.split(","));
@@ -29,6 +30,7 @@ export function rowToUser(row: any): User {
     googlePeopleResourceName: row.google_people_resource_name || "",
     googleActivityPersonName: row.google_activity_person_name || "",
     googleEmail: row.google_email || "",
+    imageUrl: row.image_url || "",
   };
 }
 
@@ -97,11 +99,12 @@ async function refreshAllInternal(client: PoolClient) {
     const memberName = getMemberName(member);
     const dbUser = idToDbUser[member.id];
     const isAdminUser = adminUserIds !== null ? adminUserIds.has(member.id) : true;
+    const imageUrl = member.profile.image_48;
     if (dbUser === undefined) {
       if (!acceptMember) continue;
       await client.query(
-        "INSERT INTO users(id, name, email, admin) VALUES ($1, $2, $3, $4)",
-        [member.id, memberName, member.profile.email, isAdminUser]);
+        "INSERT INTO users(id, name, email, admin, image_url) VALUES ($1, $2, $3, $4, $5)",
+        [member.id, memberName, member.profile.email, isAdminUser, imageUrl]);
     } else {
       if (!acceptMember) {
         await client.query("DELETE FROM users WHERE id = $1", [dbUser.id]);
@@ -422,11 +425,12 @@ app.event("user_change", async ({ event, body }) => {
     const dbUserResult = await db.query("SELECT * FROM users WHERE id = $1", [member.id]);
     const adminUserIds = await getAdminUserIds();
     const isAdminUser = adminUserIds !== null ? adminUserIds.has(member.id) : true;
+    const imageUrl = member.profile.image_48;
     let shouldSyncGooglePeople = false;
     if (dbUserResult.rowCount === 0) {
       await db.query(
-        "INSERT INTO users(id, name, email, admin) VALUES ($1, $2, $3, $4)",
-        [member.id, memberName, member.profile.email, isAdminUser]);
+        "INSERT INTO users(id, name, email, admin, image_url) VALUES ($1, $2, $3, $4, $5)",
+        [member.id, memberName, member.profile.email, isAdminUser, imageUrl]);
       shouldSyncGooglePeople = true;
     } else {
       const dbUser = rowToUser(dbUserResult.rows[0]);
@@ -446,6 +450,11 @@ app.event("user_change", async ({ event, body }) => {
           "UPDATE users SET email = $2 WHERE id = $1",
           [dbUser.id, member.profile.email]);
         shouldSyncGooglePeople = true;
+      }
+      if (dbUser.imageUrl != imageUrl) {
+        await db.query(
+          "UPDATE users SET image_url = $2 WHERE id = $1",
+          [dbUser.id, imageUrl]);
       }
     }
     if (shouldSyncGooglePeople && (process.env.ENABLE_SHEET_EDITOR_INVITES || process.env.ENABLE_RECORD_ACTIVITY)) {
