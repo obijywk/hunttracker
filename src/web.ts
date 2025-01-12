@@ -821,16 +821,13 @@ receiver.app.post("/locations/remove", async (req, res) => {
 });
 
 function replaceUserLinksWithUserNames(s: string, userMap: Map<string, users.User>): string {
-  while (true) {
-    const m = s.match(/\<@([^>]+)\>/);
-    if (!m) {
-      return s;
-    }
+  for (const m of s.matchAll(/\<@([^>]+)\>/g)) {
     const user = userMap.get(m[1]);
     if (user) {
       s = s.replace(`<@${user.id}>`, `@${user.name}`);
     }
   }
+  return s;
 }
 
 receiver.app.get("/dashboard", async (req, res) => {
