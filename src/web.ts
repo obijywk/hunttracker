@@ -901,7 +901,7 @@ receiver.app.get("/dashboard", async (req, res) => {
   }
 
   const unsolvedPuzzles = allPuzzles.filter(puzzle => !puzzle.complete);
-  const pinTagName = "pin;";
+  const pinTagName = "pin";
   unsolvedPuzzles.sort((a: puzzles.Puzzle, b: puzzles.Puzzle) => {
     const aPinned = a.tags.filter(t => t.name === pinTagName).length > 0;
     const bPinned = b.tags.filter(t => t.name === pinTagName).length > 0;
