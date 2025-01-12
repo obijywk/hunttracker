@@ -1,21 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Mono:wght@500&display=swap');
 
 html {
-  --dashboard-radius: 8px;
+  --dashboard-radius: 0.6vh;
 }
 
 body {
   font-family: 'Roboto', sans-serif;
-  font-size: 16px;
+  font-size: 1.25vh;
   background-color: #111;
   margin: 0;
   height: 100vh;
 }
 
 h2 {
-  font-size: 1.5rem;
+  font-size: 2.25vh;
   width: 100%;
-  height: 2rem;
+  height: 2.75vh;
   border-radius: 0;
   margin: 0 auto;
   font-weight: bold;
@@ -26,7 +26,7 @@ div.dashboard {
   height: calc(100vh - (2 * var(--dashboard-radius)));
   padding: var(--dashboard-radius);
   display: grid;
-  grid-template-rows: repeat(6, 1fr);
+  grid-template-rows: repeat(24, 1fr);
   grid-template-columns: 1fr 1fr;
   grid-gap: var(--dashboard-radius);
 }
@@ -41,7 +41,7 @@ div.dashboard > div {
 }
 
 div.stats {
-  grid-row: 4;
+  grid-row: 13 / 16;
   grid-column: 1;
   height: 100%;
   border: var(--dashboard-radius) solid #21a0a0;
@@ -55,7 +55,7 @@ div.stats h2 {
 div.stats-container {
   display: flex;
   justify-content: space-evenly;
-  height: calc(100% - 3rem);
+  height: 100%;
 }
 
 div.stat-box {
@@ -66,16 +66,16 @@ div.stat-box {
 }
 
 span.stat {
-  font-size: 3rem;
+  font-size: 5vh;
   font-weight: bold;
 }
 
 span.stat-label {
-  font-size: 1.3rem;
+  font-size: 2.5vh;
 }
 
 div.events {
-  grid-row: 5 / 7;
+  grid-row: 16 / 25;
   grid-column: 1;
   border: var(--dashboard-radius) solid #616161;
   display: flex;
@@ -89,12 +89,12 @@ div.events h2 {
 }
 
 div.events > span {
-  font-size: 2em;
-  padding: calc(var(--dashboard-radius)*2);
+  font-size: 2.5vh;
+  padding: var(--dashboard-radius);
 }
 
 div.notices {
-  grid-row: 1 / 4;
+  grid-row: 1 / 13;
   grid-column: 1;
   border: var(--dashboard-radius) solid #ffd54f;
   overflow: hidden;
@@ -105,18 +105,18 @@ div.notices h2 {
 }
 
 div.notices > p {
-  font-size: 2em;
-  margin: calc(var(--dashboard-radius)*4) calc(var(--dashboard-radius)*2);
+  font-size: 2.5vh;
+  margin: calc(var(--dashboard-radius)*2) var(--dashboard-radius);
 }
 
 div.puzzles {
-  grid-row: 1 / 7;
+  grid-row: 1 / 25;
   grid-column: 2;
   border: var(--dashboard-radius) solid #1976d2;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 2rem repeat(11, 1fr);
-  grid-gap: 2px;
+  grid-template-rows: 2.75vh repeat(11, 1fr);
+  grid-gap: 0.2vh;
 }
 
 div.puzzles h2 {
@@ -125,25 +125,22 @@ div.puzzles h2 {
 }
 
 div.puzzle {
-  font-size: 30px;
   display: grid;
   grid-gap: var(--dashboard-radius);
-  grid-template-columns: 68px 1fr min-content;
+  grid-template-columns: 3vw 1fr min-content;
   width: calc(100% - (2 * var(--dashboard-radius)));
   margin: 0 auto;
-  padding: 2px;
+  padding: 0.2vh;
   justify-self: center;
   align-self: center;
   align-items: center;
-  border: 2px solid #e1e1e1;
-  height: calc(100% - 8px);
 }
 
 div.puzzle:has(span.pin) {
   background-color: #ffecb3;
   color: #880e4f;
   font-weight: bold;
-  border: 2px solid #880e4f;
+  border: 0.25vh solid #880e4f;
   margin: 0 auto;
 }
 
@@ -158,7 +155,7 @@ div.emoji {
 }
 
 img.emoji {
-  width: 45px;
+  width: 3vw;
   margin: 0 auto;
 }
 
@@ -167,7 +164,8 @@ div.puzzle-details {
   overflow: hidden;
   text-overflow: ellipsis;
   display: grid;
-  grid-gap: 2px;
+  grid-gap: 0.1vh;
+  height: 100%;
 }
 
 div.puzzle-header{
@@ -179,20 +177,21 @@ span.puzzle-title {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 2rem;
+  font-size: 2.5vh;
   margin-top: 0;
   padding-top: 0;
 }
 
 span.puzzle-tags {
-  font-size: 0.8rem;
+  height: 2vh;
+  font-size: 1.35vh;
 }
 
 span.tag {
   font-weight: normal;
   white-space: nowrap;
-  padding: 1px 6px;
-  margin-right: 4px;
+  padding: 0.1vh 0.3vw;
+  margin-right: 0.1vw;
   background-color: #004d40;
   color: white;
   border-radius: var(--dashboard-radius);
@@ -211,7 +210,7 @@ span.tag[class*="priority/"] {
 }
 
 span.puzzle-topic {
-  font-size: 1rem;
+  font-size: 1.75vh;
   font-weight: normal;
   max-width: 100%;
   white-space: nowrap;
@@ -232,25 +231,25 @@ div.puzzle-people {
 }
 
 div.puzzle-people img {
-  width: 32px;
+  height: 3.2vh;
   aspect-ratio: 1 / 1;
-  font-size: 0.45em;
   border-radius: calc(var(--dashboard-radius) * 0.5);
-  padding: 1px;
-  margin: 1px;
+  padding: 0.1vh;
+  margin: 0.1vh;
   background-color: black;
 }
 
 div.puzzle-people-count {
   direction: ltr;
-  width: 32px;
-  font-size: 0.45em;
+  height: 6.5vh;
+  aspect-ratio: 1 / 2;
+  font-size: 2vh;
   background-color: #616161;
   color: white;
-  border: 1px solid black;
+  border: 0.1vh solid black;
   border-radius: calc(var(--dashboard-radius) * 0.5);
-  padding: 1px;
-  margin: 1px;
+  padding: 0.1vh;
+  margin: 0.1vh;
   align-content: center;
   text-align: center;
   grid-column: 1;
