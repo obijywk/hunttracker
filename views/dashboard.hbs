@@ -28,19 +28,19 @@
         </div>
       </div>
       <div class="events">
-        <h2>Event puzzle channel topics</h2>
+        <h2>Events (unsolved event-tagged puzzle topics)</h2>
         {{#each eventChannelTopics}}
         <span class="event">{{this}}</span>
         {{/each}}
       </div>
       <div class="notices">
-        <h2>#lobby topic and pinned messages</h2>
+        <h2>Hunt info (#lobby topic and #lobby pinned messages)</h2>
         {{#each notices}}
         <p>{{this}}</p>
         {{/each}}
       </div>
       <div class="puzzles">
-        <h2>Unsolved puzzles (in order of recency of activity)</h2>
+        <h2>Puzzles (unsolved, ordered by recency of activity)</h2>
         {{#each unsolvedPuzzles}}
         <div class="puzzle">
           <div class="puzzle-status-emoji">
