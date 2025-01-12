@@ -12,30 +12,36 @@
   <body>
      <div class="dashboard">
         <div class="stats">
-          <div class="stat-box">
-            <span class="stat">{{activeUserCount}}</span>
-            <span class="stat-label">active users</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat">{{solvedPuzzleCount}} / {{totalPuzzleCount}}</span>
-            <span class="stat-label">solved / total puzzles</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat">{{solvedMetaCount}} / {{totalMetaCount}}</span>
-            <span class="stat-label">solved / total metas</span>
+          <h2>Stats</h2>
+          <div class="stats-container">
+            <div class="stat-box">
+              <span class="stat">{{activeUserCount}}</span>
+              <span class="stat-label">active users</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat">{{solvedPuzzleCount}} / {{totalPuzzleCount}}</span>
+              <span class="stat-label">solved / total puzzles</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat">{{solvedMetaCount}} / {{totalMetaCount}}</span>
+              <span class="stat-label">solved / total metas</span>
+            </div>
           </div>
         </div>
         <div class="events">
+          <h2>Events</h2>
           {{#each eventChannelTopics}}
           <span class="event">{{this}}</span>
           {{/each}}
         </div>
         <div class="notices">
+          <h2>Notices</h2>
           {{#each notices}}
           <p>{{this}}</p>
           {{/each}}
         </div>  
         <div class="puzzles">
+          <h2>Puzzles</h2>
           {{#each unsolvedPuzzles}}
           <div class="puzzle">
             <div class="puzzle-status-emoji">

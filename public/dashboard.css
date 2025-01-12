@@ -12,6 +12,16 @@ body {
   height: 100vh;
 }
 
+h2 {
+  font-size: 1.5rem;
+  width: 100%;
+  height: 2rem;
+  border-radius: 0;
+  margin: 0 auto;
+  padding: var(--dashboard-radius);
+  font-weight: bold;
+}
+
 div.dashboard {
   width: calc(100vw - (2 * var(--dashboard-radius)));
   height: calc(100vh - (2 * var(--dashboard-radius)));
@@ -25,8 +35,8 @@ div.dashboard {
 div.dashboard > div {
   background-color: #e1e1e1;
   color: black;
-  width: calc(100% - 32px);
-  height: calc(100% - 32px);
+  width: calc(100% - (2 * var(--dashboard-radius)));
+  height: calc(100% - (2 * var(--dashboard-radius)));
   border-radius: var(--dashboard-radius);
   overflow: hidden;
 }
@@ -34,10 +44,19 @@ div.dashboard > div {
 div.stats {
   grid-row: 4;
   grid-column: 1;
-  border: 16px solid #21a0a0;
+  height: 100%;
+  border: var(--dashboard-radius) solid #21a0a0;
+}
+
+div.stats h2 {
+  background-color: #21a0a0;
+  color: white;
+}
+
+div.stats-container {
   display: flex;
   justify-content: space-evenly;
-  height: 100%;
+  height: calc(100% - 3rem);
 }
 
 div.stat-box {
@@ -48,25 +67,29 @@ div.stat-box {
 }
 
 span.stat {
-  font-family: 'Roboto Mono', monospace;
-  font-size: 4rem;
+  font-size: 3rem;
+  font-weight: bold;
 }
 
 span.stat-label {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
 }
 
 div.events {
   grid-row: 5 / 7;
   grid-column: 1;
-  border: 16px solid #616161;
+  border: var(--dashboard-radius) solid #616161;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
   overflow: hidden;
 }
 
-div.events > * {
+div.events h2 {
+  background-color: #616161;
+  color: white;
+}
+
+div.events > span {
   font-size: 2em;
   padding: calc(var(--dashboard-radius)*2);
 }
@@ -74,11 +97,15 @@ div.events > * {
 div.notices {
   grid-row: 1 / 4;
   grid-column: 1;
-  border: 16px solid #ffd54f;
+  border: var(--dashboard-radius) solid #ffd54f;
   overflow: hidden;
 }
 
-div.notices > * {
+div.notices h2 {
+  background-color: #ffd54f;
+}
+
+div.notices > p {
   font-size: 2em;
   margin: calc(var(--dashboard-radius)*4) calc(var(--dashboard-radius)*2);
 }
@@ -86,11 +113,16 @@ div.notices > * {
 div.puzzles {
   grid-row: 1 / 7;
   grid-column: 2;
-  border: 16px solid #1976d2;
+  border: var(--dashboard-radius) solid #1976d2;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(12, 1fr);
+  grid-template-rows: 3rem repeat(13, 1fr);
   grid-gap: var(--dashboard-radius);
+}
+
+div.puzzles h2 {
+  background-color: #1976d2;
+  color: white;
 }
 
 div.puzzle {
@@ -116,7 +148,12 @@ div.puzzle:has(span.pin) {
 div.puzzle-status-emoji {
   display: block;
   aspect-ratio: 1 / 1;
-  font-size: 56px;
+  width: 48px;
+  margin: 0 auto;  
+}
+
+img.emoji {
+  width: 90%;
 }
 
 div.puzzle-details {
