@@ -235,11 +235,15 @@ div.puzzle-people img {
 div.puzzle-people-count {
   direction: ltr;
   width: 32px;
-  aspect-ratio: 1 / 1;
   font-size: 0.45em;
+  background-color: #616161;
+  color: white;
   border: 1px solid black;
   border-radius: calc(var(--dashboard-radius) * 0.5);
   padding: 1px;
   margin: 1px;
+  align-content: center;
   text-align: center;
+  grid-column: 1;
+  grid-row: 1 / 3;
 }
