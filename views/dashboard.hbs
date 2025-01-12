@@ -63,7 +63,7 @@
               <span class="puzzle-topic">{{channelTopic}}</span>
             </div>
             <div class="puzzle-people">
-              {{#each (cappedUsers users 2)}}
+              {{#each (cappedUsers users 10)}}
               {{#if imageUrl}}
               <img src="{{imageUrl}}">
               {{/if}}
