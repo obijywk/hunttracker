@@ -52,15 +52,13 @@
               {{/with}}
             </div>
             <div class="puzzle-details">
-              <div class="puzzle-header">
-                <span class="puzzle-title">{{name}}</span>
-                <span class="puzzle-tags">
-                  {{#each tags}}
-                  <span class="tag {{name}}">{{name}}</span>
-                  {{/each}}
-                </span>
-              </div>
+              <span class="puzzle-title">{{name}}</span>
               <span class="puzzle-topic">{{channelTopic}}</span>
+              <span class="puzzle-tags">
+                {{#each tags}}
+                <span class="tag {{name}}">{{name}}</span>
+                {{/each}}
+              </span>
             </div>
             <div class="puzzle-people">
               {{#each (cappedUsers users 10)}}
