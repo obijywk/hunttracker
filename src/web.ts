@@ -4,6 +4,7 @@ import expressHbs = require("express-hbs");
 import * as path from "path";
 import * as fs from "fs";
 import * as url from "url";
+import * as pinsListResponseApi from "@slack/web-api/dist/response/PinsListResponse";
 
 import { app, receiver } from "./app";
 import * as db from "./db";
@@ -42,6 +43,15 @@ function commaSeparatedSolvers(puzzle: puzzles.Puzzle, limit: number): string {
   return s;
 }
 expressHbs.registerHelper("commaSeparatedSolvers", commaSeparatedSolvers);
+
+function cappedUsers(users: Array<users.User>, limit: number): Array<any> {
+  const limitedUsers: any = users.slice(0, limit);
+  if (users.length > limit) {
+    limitedUsers.push({ additionalUserCount: users.length - limit });
+  }
+  return limitedUsers;
+}
+expressHbs.registerHelper("cappedUsers", cappedUsers);
 
 function timeAgo(timestamp: moment.Moment | undefined): string {
   if (timestamp !== undefined) {
@@ -811,11 +821,15 @@ receiver.app.post("/locations/remove", async (req, res) => {
   return res.redirect("../locations");
 });
 
-function replaceUserLinksWithUserNames(s: string, userMap: Map<string, users.User>): string {
-  for (const m of s.matchAll(/\<@([^>]+)\>/g)) {
-    const user = userMap.get(m[1]);
-    if (user) {
-      s = s.replace(`<@${user.id}>`, `@${user.name}`);
+function replaceLinksForDashboard(s: string, userMap: Map<string, users.User>): string {
+  for (const m of s.matchAll(/\<(@?)([^>]+)\>/g)) {
+    if (m[1] == "@") {
+      const user = userMap.get(m[2]);
+      if (user) {
+        s = s.replace(`<@${user.id}>`, `@${user.name}`);
+      }
+    } else if (m[2].length > 50) {
+      s = s.replace(`<${m[2]}>`, "<long link>");
     }
   }
   return s;
@@ -877,7 +891,7 @@ receiver.app.get("/dashboard", async (req, res) => {
         break;
       }
       if (tag.name.startsWith(eventTagName) && !puzzle.complete && puzzle.channelTopic) {
-        eventChannelTopics.push(replaceUserLinksWithUserNames(puzzle.channelTopic, userIdToUser));
+        eventChannelTopics.push(replaceLinksForDashboard(puzzle.channelTopic, userIdToUser));
       }
     }
   }
@@ -886,13 +900,19 @@ receiver.app.get("/dashboard", async (req, res) => {
   const notices = [];
   if (noticesInfo && noticesInfo.channel.topic) {
     for (const line of noticesInfo.channel.topic.value.split("\n")) {
-      notices.push(replaceUserLinksWithUserNames(line, userIdToUser));
+      notices.push(replaceLinksForDashboard(line, userIdToUser));
     }
   }
   if (noticesPinsList) {
+    noticesPinsList.items.sort((a: pinsListResponseApi.Item, b: pinsListResponseApi.Item) => {
+      if (a.created < b.created) {
+        return 1;
+      }
+      return -1;
+    });
     for (const item of noticesPinsList.items) {
       if (item.type === "message") {
-        notices.push(replaceUserLinksWithUserNames((item as any).message.text, userIdToUser));
+        notices.push(replaceLinksForDashboard((item as any).message.text, userIdToUser));
       }
     }
   }

@@ -10,9 +10,9 @@
     {{/if}}
   </head>
   <body>
-     <div class="dashboard">
-      <div class="dashboard-column">
-        <div class="stats">
+    <div class="dashboard">
+      <div class="stats">
+        <div class="stats-container">
           <div class="stat-box">
             <span class="stat">{{activeUserCount}}</span>
             <span class="stat-label">active users</span>
@@ -26,48 +26,55 @@
             <span class="stat-label">solved / total metas</span>
           </div>
         </div>
-        <div class="events">
-          {{#each eventChannelTopics}}
-          <span class="event">{{this}}</span>
-          {{/each}}
-        </div>
-        <div class="notices">
-          {{#each notices}}
-          <p>{{this}}</p>
-          {{/each}}
-        </div>
       </div>
-      <div class="dashboard-column">
-        <div class="puzzles">
-          {{#each unsolvedPuzzles}}
-          <div class="puzzle">
-            <div class="puzzle-status-emoji">
-              {{#with (puzzleStatusEmoji this)}}
-                <div title="{{description}}" class="emoji">
-                  {{unicodeEmoji}}
-                </div>
-              {{/with}}
+      <div class="events">
+        <h2>Events (unsolved event-tagged puzzle topics)</h2>
+        {{#each eventChannelTopics}}
+        <span class="event">{{this}}</span>
+        {{/each}}
+      </div>
+      <div class="notices">
+        <h2>Hunt info (#lobby topic and #lobby pinned messages)</h2>
+        {{#each notices}}
+        <p>{{this}}</p>
+        {{/each}}
+      </div>
+      <div class="puzzles">
+        <h2>Puzzles (unsolved, ordered by recency of activity)</h2>
+        {{#each unsolvedPuzzles}}
+        <div class="puzzle">
+          <div class="puzzle-status-emoji">
+            {{#with (puzzleStatusEmoji this)}}
+            <div title="{{description}}" class="emoji">
+              {{unicodeEmoji}}
             </div>
-            <div class="puzzle-title-and-topic">
-              <span class="puzzle-title">{{name}}</span>
-              <span class="puzzle-topic">{{channelTopic}}</span>
-            </div>
-            <div class="puzzle-tags">
+            {{/with}}
+          </div>
+          <div class="puzzle-details">
+            <span class="puzzle-title">{{name}}</span>
+            <span class="puzzle-topic">{{channelTopic}}</span>
+            <span class="puzzle-tags">
               {{#each tags}}
               <span class="tag {{name}}">{{name}}</span>
               {{/each}}
-            </div>
-            <div class="puzzle-people">
-              {{#each users}}
-              {{#if imageUrl}}
-              <img src="{{imageUrl}}">
-              {{/if}}
-              {{/each}}
-            </div>
+            </span>
           </div>
-          {{/each}}
+          <div class="puzzle-people">
+            {{#each (cappedUsers users 10)}}
+            {{#if imageUrl}}
+            <img src="{{imageUrl}}">
+            {{/if}}
+            {{#if additionalUserCount}}
+            <div class="puzzle-people-count">
+              + {{additionalUserCount}}
+            </div>
+            {{/if}}
+            {{/each}}
+          </div>
         </div>
+        {{/each}}
       </div>
+    </div>
     </div>
     <script type="text/javascript">
       twemoji.parse(document.body);
