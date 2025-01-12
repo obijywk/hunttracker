@@ -43,6 +43,15 @@ function commaSeparatedSolvers(puzzle: puzzles.Puzzle, limit: number): string {
 }
 expressHbs.registerHelper("commaSeparatedSolvers", commaSeparatedSolvers);
 
+function cappedUsers(users: Array<users.User>, limit: number): Array<any> {
+  const limitedUsers: any = users.slice(0, limit);
+  if (users.length > limit) {
+    limitedUsers.push({ additionalUserCount: users.length - limit });
+  }
+  return limitedUsers;
+}
+expressHbs.registerHelper("cappedUsers", cappedUsers);
+
 function timeAgo(timestamp: moment.Moment | undefined): string {
   if (timestamp !== undefined) {
     const idleDuration = moment.duration(moment.utc().diff(timestamp));

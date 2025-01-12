@@ -63,9 +63,14 @@
               <span class="puzzle-topic">{{channelTopic}}</span>
             </div>
             <div class="puzzle-people">
-              {{#each users}}
+              {{#each (cappedUsers users 2)}}
               {{#if imageUrl}}
               <img src="{{imageUrl}}">
+              {{/if}}
+              {{#if additionalUserCount}}
+              <div class="puzzle-people-count">
+                +{{additionalUserCount}}
+              </div>
               {{/if}}
               {{/each}}
             </div>

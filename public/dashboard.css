@@ -231,3 +231,15 @@ div.puzzle-people img {
   margin: 1px;
   background-color: black;
 }
+
+div.puzzle-people-count {
+  direction: ltr;
+  width: 32px;
+  aspect-ratio: 1 / 1;
+  font-size: 0.45em;
+  border: 1px solid black;
+  border-radius: calc(var(--dashboard-radius) * 0.5);
+  padding: 1px;
+  margin: 1px;
+  text-align: center;
+}
