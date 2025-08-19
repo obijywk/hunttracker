@@ -26,6 +26,7 @@
     "googleapis": "^144.0.0",
     "hbs": "^4.2.0",
     "html-to-text": "^9.0.5",
+    "jsonpath-rfc9535": "^1.3.0",
     "moment": "^2.30.1",
     "node-emoji": "^2.1.3",
     "passport": "^0.7.0",

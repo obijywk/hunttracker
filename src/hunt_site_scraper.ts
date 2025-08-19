@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import * as htmlToText from "html-to-text";
+import * as jsonpath from "jsonpath-rfc9535";
 import { PoolClient } from "pg";
 import sharp from "sharp";
 
@@ -11,6 +12,9 @@ export interface HuntSiteScraperSettings {
   puzzleListUrl: string;
   puzzleLinkSelector: string;
   puzzleNameSelector: string;
+  puzzleLinkJSONPathQuery: string;
+  puzzleNameJSONPathQuery: string;
+  puzzleLinkRootUrl: string,
   puzzleLinkDenyRegex: string;
   puzzleNameDenyRegex: string;
   puzzleContentSelector: string;
@@ -29,6 +33,9 @@ export async function loadSettings(client?: PoolClient): Promise<HuntSiteScraper
     puzzleListUrl: row.puzzle_list_url,
     puzzleLinkSelector: row.puzzle_link_selector,
     puzzleNameSelector: row.puzzle_name_selector,
+    puzzleLinkJSONPathQuery: row.puzzle_link_json_path_query,
+    puzzleNameJSONPathQuery: row.puzzle_name_json_path_query,
+    puzzleLinkRootUrl: row.puzzle_link_root_url,
     puzzleLinkDenyRegex: row.puzzle_link_deny_regex,
     puzzleNameDenyRegex: row.puzzle_name_deny_regex,
     puzzleContentSelector: row.puzzle_content_selector,
@@ -42,6 +49,9 @@ export function defaultSettings(): HuntSiteScraperSettings {
     puzzleListUrl: "",
     puzzleLinkSelector: "",
     puzzleNameSelector: "",
+    puzzleLinkJSONPathQuery: "",
+    puzzleNameJSONPathQuery: "",
+    puzzleLinkRootUrl: "",
     puzzleLinkDenyRegex: "",
     puzzleNameDenyRegex: "",
     puzzleContentSelector: "",
@@ -60,16 +70,22 @@ export async function saveSettings(settings: HuntSiteScraperSettings): Promise<v
         puzzle_list_url,
         puzzle_link_selector,
         puzzle_name_selector,
+        puzzle_link_json_path_query,
+        puzzle_name_json_path_query,
+        puzzle_link_root_url,
         puzzle_link_deny_regex,
         puzzle_name_deny_regex,
         puzzle_content_selector
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         settings.enableScraping,
         settings.requestHeaders,
         settings.puzzleListUrl,
         settings.puzzleLinkSelector,
         settings.puzzleNameSelector,
+        settings.puzzleLinkJSONPathQuery,
+        settings.puzzleNameJSONPathQuery,
+        settings.puzzleLinkRootUrl,
         settings.puzzleLinkDenyRegex,
         settings.puzzleNameDenyRegex,
         settings.puzzleContentSelector,
@@ -114,11 +130,12 @@ export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<P
   if (options.debugOutput) {
     options.debugOutput.enableScraping = settings?.enableScraping;
   }
+  const hasPuzzleSelectors = settings !== null && settings.puzzleLinkSelector && settings.puzzleNameSelector;
+  const hasPuzzleJSONPathQueries = settings !== null && settings.puzzleLinkJSONPathQuery && settings.puzzleNameJSONPathQuery;
   if (settings === null ||
       !settings.enableScraping ||
       !settings.puzzleListUrl ||
-      !settings.puzzleLinkSelector ||
-      !settings.puzzleNameSelector) {
+      !(hasPuzzleSelectors || hasPuzzleJSONPathQueries)) {
     return [];
   }
 
@@ -134,49 +151,81 @@ export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<P
     throw `Failed to fetch puzzle list: ${response.statusText}`;
   }
 
-  const responseText = await response.text();
-  if (options.debugOutput) {
-    options.debugOutput.responseText = responseText;
-  }
-  const dom = cheerio.load(responseText);
-
-  const puzzleLinkElems = dom("body").find(settings.puzzleLinkSelector).toArray();
-  if (options.debugOutput?.matchedPuzzleLinks) {
-    options.debugOutput.matchedPuzzleLinks.push(
-      ...puzzleLinkElems.map(e => dom("<div></div>").append(dom(e).clone()).html()));
-  }
-
-  const puzzleNameElems = dom("body").find(settings.puzzleNameSelector).toArray();
-  if (options.debugOutput?.matchedPuzzleNames) {
-    options.debugOutput.matchedPuzzleNames.push(
-      ...puzzleNameElems.map(e => dom("<div></div>").append(dom(e).clone()).html()));
-  }
-
-  if (puzzleLinkElems.length !== puzzleNameElems.length) {
-    return [];
-  }
-
   const puzzleLinkList: Array<PuzzleLink> = [];
-  for (let i = 0; i < puzzleLinkElems.length; i++) {
-    const linkElem = puzzleLinkElems[i];
-    const nameElem = puzzleNameElems[i];
 
-    const href = dom(linkElem).attr("href");
-    if (!href ||
-        (settings.puzzleLinkDenyRegex && href.match(settings.puzzleLinkDenyRegex))) {
-      continue;
+  if (settings.puzzleLinkSelector && settings.puzzleNameSelector) {
+    const responseText = await response.text();
+    if (options.debugOutput) {
+      options.debugOutput.responseText = responseText;
     }
-
-    const name = htmlToText.convert(dom(nameElem).html()).trim().replaceAll("\n", " ").replaceAll(/\s\s+/g, " ");
-    if (!name ||
-        (settings.puzzleNameDenyRegex && name.match(settings.puzzleNameDenyRegex))) {
-      continue;
+    const dom = cheerio.load(responseText);
+    const puzzleLinkElems = dom("body").find(settings.puzzleLinkSelector).toArray();
+    const puzzleNameElems = dom("body").find(settings.puzzleNameSelector).toArray();
+    if (options.debugOutput?.matchedPuzzleLinks) {
+      options.debugOutput.matchedPuzzleLinks.push(
+        ...puzzleLinkElems.map(e => dom("<div></div>").append(dom(e).clone()).html()));
     }
+    if (options.debugOutput?.matchedPuzzleNames) {
+      options.debugOutput.matchedPuzzleNames.push(
+        ...puzzleNameElems.map(e => dom("<div></div>").append(dom(e).clone()).html()));
+    }
+    if (puzzleLinkElems.length !== puzzleNameElems.length) {
+      return [];
+    }
+    const baseUrl = settings.puzzleLinkRootUrl || response.url;
+    for (let i = 0; i < puzzleLinkElems.length; i++) {
+      const linkElem = puzzleLinkElems[i];
+      const nameElem = puzzleNameElems[i];
+      const href = dom(linkElem).attr("href");
+      if (!href ||
+          (settings.puzzleLinkDenyRegex && href.match(settings.puzzleLinkDenyRegex))) {
+        continue;
+      }
+      const name = htmlToText.convert(dom(nameElem).html()).trim().replaceAll("\n", " ").replaceAll(/\s\s+/g, " ");
+      if (!name ||
+          (settings.puzzleNameDenyRegex && name.match(settings.puzzleNameDenyRegex))) {
+        continue;
+      }
+      puzzleLinkList.push({
+        name,
+        url: new URL(href, baseUrl).toString(),
+      });
+    }
+  }
 
-    puzzleLinkList.push({
-      name,
-      url: new URL(href, response.url).toString(),
-    });
+  if (settings.puzzleLinkJSONPathQuery && settings.puzzleNameJSONPathQuery) {
+    const responseJson = await response.json() as jsonpath.JsonValue;
+    if (options.debugOutput) {
+      options.debugOutput.responseText = JSON.stringify(responseJson);
+    }
+    const puzzleLinks = jsonpath.query(responseJson, settings.puzzleLinkJSONPathQuery);
+    const puzzleNames = jsonpath.query(responseJson, settings.puzzleNameJSONPathQuery);
+    if (options.debugOutput?.matchedPuzzleLinks) {
+      options.debugOutput.matchedPuzzleLinks.push(...puzzleLinks.map(l => String(l)));
+    }
+    if (options.debugOutput?.matchedPuzzleNames) {
+      options.debugOutput.matchedPuzzleNames.push(...puzzleNames.map(l => String(l)));
+    }
+    if (puzzleLinks.length !== puzzleNames.length) {
+      return [];
+    }
+    const baseUrl = settings.puzzleLinkRootUrl || response.url;
+    for (let i = 0; i < puzzleLinks.length; i++) {
+      const link = String(puzzleLinks[i]);
+      const name = String(puzzleNames[i]);
+      if (!link ||
+          (settings.puzzleLinkDenyRegex && link.match(settings.puzzleLinkDenyRegex))) {
+        continue;
+      }
+      if (!name ||
+          (settings.puzzleNameDenyRegex && name.match(settings.puzzleNameDenyRegex))) {
+        continue;
+      }
+      puzzleLinkList.push({
+        name,
+        url: new URL(link, baseUrl).toString(),
+      });
+    }
   }
 
   return puzzleLinkList;

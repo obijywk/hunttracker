@@ -135,6 +135,9 @@ CREATE TABLE hunt_site_scraper_settings (
   puzzle_list_url text,
   puzzle_link_selector text,
   puzzle_name_selector text,
+  puzzle_link_json_path_query text,
+  puzzle_name_json_path_query text,
+  puzzle_link_root_url text,
   puzzle_link_deny_regex text,
   puzzle_name_deny_regex text,
   puzzle_content_selector text
