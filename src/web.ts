@@ -598,6 +598,7 @@ receiver.app.post("/admin/huntsitescraper", async (req, res) => {
     settings = {
       enableScraping: req.body.enableScraping !== undefined,
       requestHeaders: req.body.requestHeaders ? JSON.parse(req.body.requestHeaders) : {},
+      jwtUrl: req.body.jwtUrl,
       puzzleListUrl: req.body.puzzleListUrl,
       puzzleLinkSelector: req.body.puzzleLinkSelector,
       puzzleNameSelector: req.body.puzzleNameSelector,

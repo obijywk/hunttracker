@@ -9,6 +9,7 @@ import * as db from "./db";
 export interface HuntSiteScraperSettings {
   enableScraping: boolean;
   requestHeaders: { [key: string]: string };
+  jwtUrl: string;
   puzzleListUrl: string;
   puzzleLinkSelector: string;
   puzzleNameSelector: string;
@@ -30,6 +31,7 @@ export async function loadSettings(client?: PoolClient): Promise<HuntSiteScraper
   return {
     enableScraping: row.enable_scraping,
     requestHeaders: row.request_headers,
+    jwtUrl: row.jwt_url,
     puzzleListUrl: row.puzzle_list_url,
     puzzleLinkSelector: row.puzzle_link_selector,
     puzzleNameSelector: row.puzzle_name_selector,
@@ -46,6 +48,7 @@ export function defaultSettings(): HuntSiteScraperSettings {
   return {
     enableScraping: false,
     requestHeaders: {},
+    jwtUrl: "",
     puzzleListUrl: "",
     puzzleLinkSelector: "",
     puzzleNameSelector: "",
@@ -67,6 +70,7 @@ export async function saveSettings(settings: HuntSiteScraperSettings): Promise<v
       INSERT INTO hunt_site_scraper_settings(
         enable_scraping,
         request_headers,
+        jwt_url,
         puzzle_list_url,
         puzzle_link_selector,
         puzzle_name_selector,
@@ -76,10 +80,11 @@ export async function saveSettings(settings: HuntSiteScraperSettings): Promise<v
         puzzle_link_deny_regex,
         puzzle_name_deny_regex,
         puzzle_content_selector
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
         settings.enableScraping,
         settings.requestHeaders,
+        settings.jwtUrl,
         settings.puzzleListUrl,
         settings.puzzleLinkSelector,
         settings.puzzleNameSelector,
@@ -125,11 +130,113 @@ export interface PuzzleLink {
   url: string;
 }
 
+function scrapePuzzleListViaWebsocket(settings: HuntSiteScraperSettings): Promise<Array<PuzzleLink>> {
+  return new Promise<Array<PuzzleLink>>((resolve, reject) => {
+    let resolved = false;
+    const fetchOptions = {
+      headers: {
+        "User-Agent": buildUserAgentString(),
+        ...settings.requestHeaders,
+      },
+    };
+    const request = new Request(settings.jwtUrl, fetchOptions);
+    fetch(request).then(response => {
+      if (!response.ok) {
+        resolved = true;
+        reject(`Failed to fetch JWT: ${response.statusText}`);
+        return;
+      }
+      return response.text();
+    }).then(jwt => {
+      const socket = new WebSocket(settings.puzzleListUrl);
+      setTimeout(() => {
+        if (resolved) {
+          socket.close();
+          return;
+        }
+        resolved = true;
+        socket.close();
+        reject("timeout");
+      }, 15000);
+      socket.addEventListener("open", event => {
+        if (resolved) {
+          socket.close();
+          return;
+        }
+        socket.send(JSON.stringify({
+          "type": "auth",
+          "jwt": jwt,
+        }));
+      });
+      socket.addEventListener("message", event => {
+        if (resolved) {
+          socket.close();
+          return;
+        }
+        try {
+          const message = JSON.parse(event.data);
+          if (message["type"].startsWith("auth_fail")) {
+            resolved = true;
+            socket.close();
+            reject(message);
+            return;
+          }
+          if (message["type"] == "auth_success") {
+            socket.send(JSON.stringify({
+              "type": "update_subscriptions",
+              "upds": [
+                {
+                  "type": "add",
+                  "scope": {
+                    "type": "team",
+                    "teamId": message["result"]["teamId"],
+                  },
+                },
+              ],
+            }));
+          }
+          if (message["type"] == "scope_assign" && message["assign"]["state"]) {
+            const state = message["assign"]["state"];
+            if (state["puzzles"]) {
+              const puzzleLinks: Array<PuzzleLink> = [];
+              Object.values(state["puzzles"]).forEach((p: any) => {
+                if (p["type"] == "puzzle") {
+                  puzzleLinks.push({
+                    name: p["displayName"],
+                    url: new URL(p["slug"], settings.puzzleLinkRootUrl).toString(),
+                  });
+                }
+              });
+              resolved = true;
+              socket.close();
+              resolve(puzzleLinks);
+            }
+          }
+        } catch (error) {
+          console.error("Error handling websocket message:", error);
+          console.log("Received data was:", event.data);
+          resolved = true;
+          socket.close();
+          reject(error);
+        }
+      });
+    });
+  });
+}
+
 export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<PuzzleLink>> {
   const settings = options.settings ? options.settings : await loadSettings(options.client);
   if (options.debugOutput) {
     options.debugOutput.enableScraping = settings?.enableScraping;
   }
+
+  if (settings !== null &&
+      settings.enableScraping &&
+      settings.puzzleListUrl.startsWith("ws") &&
+      settings.jwtUrl) {
+    return scrapePuzzleListViaWebsocket(settings);
+  }
+
   const hasPuzzleSelectors = settings !== null && settings.puzzleLinkSelector && settings.puzzleNameSelector;
   const hasPuzzleJSONPathQueries = settings !== null && settings.puzzleLinkJSONPathQuery && settings.puzzleNameJSONPathQuery;
   if (settings === null ||

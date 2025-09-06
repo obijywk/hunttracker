@@ -31,6 +31,18 @@
               rows="4" cols="50">{{requestHeaders}}</textarea>
           </p>
           <p>
+            <label for="jwtUrl">
+              URL to fetch JWT (for websocket puzzle list)
+            </label>
+            <input
+              type="text"
+              id="jwtUrl"
+              name="jwtUrl"
+              size="80"
+              value="{{jwtUrl}}"
+            >
+          </p>
+          <p>
             <label for="puzzleListUrl">
               URL of puzzle list page
             </label>

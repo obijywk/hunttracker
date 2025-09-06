@@ -132,6 +132,7 @@ GROUP BY
 CREATE TABLE hunt_site_scraper_settings (
   enable_scraping boolean,
   request_headers jsonb,
+  jwt_url text,
   puzzle_list_url text,
   puzzle_link_selector text,
   puzzle_name_selector text,

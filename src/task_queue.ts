@@ -34,7 +34,7 @@ export async function scheduleTask(taskType: string, payload: any, client?: Pool
 
 let processTaskQueueRunning = false;
 
-const maxProcessTaskQueueExecutionTime = moment.duration(5, "seconds");
+const maxProcessTaskQueueExecutionTime = moment.duration(10, "seconds");
 
 export async function processTaskQueue() {
   if (processTaskQueueRunning) {
