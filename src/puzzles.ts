@@ -1036,6 +1036,10 @@ async function validatePuzzleName(name: string): Promise<string | null> {
   if (name.length > MAX_OPTION_LENGTH) {
     return "A puzzle name may only contain a maximum of 75 characters.";
   }
+  const normalizedName = normalizeStringForChannelName(name);
+  if (normalizedName.length === 0) {
+    return "A puzzle name must contain at least one alphanumeric character.";
+  }
   const channelName = buildChannelName(name);
   const existsResult = await db.query(`
     SELECT EXISTS (
