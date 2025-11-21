@@ -876,21 +876,27 @@ receiver.app.get("/dashboard", async (req, res) => {
   }
 
   let solvedPuzzleCount = 0;
-  const totalPuzzleCount = allPuzzles.length;
+  let totalPuzzleCount = 0;
   let solvedMetaCount = 0;
   let totalMetaCount = 0;
   const eventChannelTopics = [];
   const metaPrefix = "meta/";
   const eventTagName = "event";
   for (const puzzle of allPuzzles) {
-    if (puzzle.complete) {
-      solvedPuzzleCount++;
+    const noCount = puzzle.tags.filter(t => t.name === "no-count").length > 0;
+    if (!noCount) {
+      totalPuzzleCount++;
+      if (puzzle.complete) {
+        solvedPuzzleCount++;
+      }
     }
     for (const tag of puzzle.tags) {
       if (tag.name.startsWith(metaPrefix)) {
-        totalMetaCount++;
-        if (puzzle.complete) {
-          solvedMetaCount++;
+        if (!noCount) {
+          totalMetaCount++;
+          if (puzzle.complete) {
+            solvedMetaCount++;
+          }
         }
         break;
       }
