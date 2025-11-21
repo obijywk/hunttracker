@@ -28,11 +28,11 @@
     "html-to-text": "^9.0.5",
     "jsonpath-rfc9535": "^1.3.0",
     "moment": "^2.30.1",
-    "node-emoji": "^2.1.3",
     "passport": "^0.7.0",
     "passport-slack-oauth2": "^1.2.0",
     "pg": "^8.12.0",
     "sharp": "^0.33.5",
+    "unicode-emoji-json": "^0.8.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
@@ -50,7 +50,6 @@
     "@types/html-to-text": "^9.0.4",
     "@types/moment": "^2.11.29",
     "@types/node": "^20.14.8",
-    "@types/node-emoji": "^1.8.2",
     "@types/passport": "^1.0.16",
     "@types/pg": "^8.11.8",
     "@types/serve-static": "^1.15.7",

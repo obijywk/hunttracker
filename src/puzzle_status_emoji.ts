@@ -1,4 +1,4 @@
-import * as nodeEmoji from "node-emoji";
+import * as emojiUtil from "./emoji_util";
 
 import * as puzzles from "./puzzles";
 
@@ -19,7 +19,7 @@ function makePuzzleStatusEmoji(slackEmoji: string, description: string): PuzzleS
   }
   return {
     slackEmoji,
-    unicodeEmoji: nodeEmoji.get(nodeEmojiName),
+    unicodeEmoji: emojiUtil.get(nodeEmojiName) || "",
     description,
   };
 }

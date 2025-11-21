@@ -2,7 +2,7 @@ import { app } from "./app";
 import * as diacritics from "diacritics";
 import * as db from "./db";
 import * as huntSiteScraper from "./hunt_site_scraper";
-import * as nodeEmoji from "node-emoji";
+import * as emojiUtil from "./emoji_util";
 import * as puzzles from "./puzzles";
 import { openRegisterPuzzleDialog } from "./register_puzzle";
 import { getSlackActionValue } from "./slack_util";
@@ -22,7 +22,7 @@ function getRegistrationConfirmationChannel(): string | null {
 }
 
 function normalizeStringForBlockId(s: string): string {
-  s = nodeEmoji.unemojify(s);
+  s = emojiUtil.unemojify(s);
   return diacritics.remove(s)
     .toLowerCase()
     .replace(/\s+/g, "-")

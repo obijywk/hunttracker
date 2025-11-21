@@ -1,6 +1,6 @@
 import * as moment from "moment";
 import * as diacritics from "diacritics";
-import * as emoji from "node-emoji";
+import * as emojiUtil from "./emoji_util";
 import { PoolClient } from "pg";
 import { AnyBlock, ButtonAction, PlainTextOption } from "@slack/bolt";
 
@@ -365,7 +365,7 @@ function buildPuzzleDocName(name: string, complete: boolean): string {
 }
 
 function normalizeStringForChannelName(s: string): string {
-  s = emoji.unemojify(s);
+  s = emojiUtil.unemojify(s);
   return diacritics.remove(s)
     .toLowerCase()
     .replace(/\s+/g, "-")
