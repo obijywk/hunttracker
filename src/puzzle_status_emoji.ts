@@ -8,8 +8,8 @@ export interface PuzzleStatusEmoji {
   description: string;
 }
 
-const slackEmojiToNodeEmojiMap = new Map([
-  [":thinking_face:", ":thinking:"],
+const slackEmojiToNodeEmojiMap: Map<string, string> = new Map([
+  [":new:", ":new_button:"],
 ]);
 
 function makePuzzleStatusEmoji(slackEmoji: string, description: string): PuzzleStatusEmoji {
