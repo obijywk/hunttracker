@@ -57,6 +57,41 @@
         You're an admin. Check out the <a href="admin">admin</a> page, but be careful!
       </p>
       {{/if}}
+      <br>
+      <h3>Tag and Tag Prefix Formats</h3>
+      <p>
+        The following tags and tag prefixes have specific meanings and behaviors:
+      </p>
+      <table class="tag-documentation">
+        <tr>
+          <th>Tag Format</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td><code>meta/NAME</code></td>
+          <td>Marks a puzzle as a metapuzzle.</td>
+        </tr>
+        <tr>
+          <td><code>in/NAME</code></td>
+          <td>Associates a puzzle with a metapuzzle (where <code>NAME</code> matches the meta's tag suffix).</td>
+        </tr>
+        <tr>
+          <td><code>priority/NUMBER</code></td>
+          <td>
+            Sets the sort order of the puzzle.
+            Higher numbers appear higher in the list.
+            Use 5 as the highest priority, and negative numbers to indicate that a puzzle should be ignored.
+          </td>
+        </tr>
+        <tr>
+          <td><code>no-count</code></td>
+          <td>Excludes the puzzle from the solved and total puzzle counts on the dashboard.</td>
+        </tr>
+        <tr>
+          <td><code>event</code></td>
+          <td>Puzzles tagged as events will appear in the events section of the dashboard.</td>
+        </tr>
+      </table>
     </div>
   </body>
 </html>

@@ -615,3 +615,18 @@ table.solver-activity td {
     align-self: center;
   }
 }
+
+table.tag-documentation th {
+  text-align: left;
+  padding: 0.5rem;
+}
+
+table.tag-documentation td {
+  padding: 0.5rem;
+  vertical-align: top;
+}
+
+table.tag-documentation td:nth-child(2) {
+  width: 30rem;
+  white-space: normal;
+}
