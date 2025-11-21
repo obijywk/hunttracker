@@ -231,18 +231,18 @@ export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<P
   }
 
   if (settings !== null &&
-      settings.enableScraping &&
-      settings.puzzleListUrl.startsWith("ws") &&
-      settings.jwtUrl) {
+    settings.enableScraping &&
+    settings.puzzleListUrl.startsWith("ws") &&
+    settings.jwtUrl) {
     return scrapePuzzleListViaWebsocket(settings);
   }
 
   const hasPuzzleSelectors = settings !== null && settings.puzzleLinkSelector && settings.puzzleNameSelector;
   const hasPuzzleJSONPathQueries = settings !== null && settings.puzzleLinkJSONPathQuery && settings.puzzleNameJSONPathQuery;
   if (settings === null ||
-      !settings.enableScraping ||
-      !settings.puzzleListUrl ||
-      !(hasPuzzleSelectors || hasPuzzleJSONPathQueries)) {
+    !settings.enableScraping ||
+    !settings.puzzleListUrl ||
+    !(hasPuzzleSelectors || hasPuzzleJSONPathQueries)) {
     return [];
   }
 
@@ -285,12 +285,12 @@ export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<P
       const nameElem = puzzleNameElems[i];
       const href = dom(linkElem).attr("href");
       if (!href ||
-          (settings.puzzleLinkDenyRegex && href.match(settings.puzzleLinkDenyRegex))) {
+        (settings.puzzleLinkDenyRegex && href.match(settings.puzzleLinkDenyRegex))) {
         continue;
       }
       const name = htmlToText.convert(dom(nameElem).html()).trim().replaceAll("\n", " ").replaceAll(/\s\s+/g, " ");
       if (!name ||
-          (settings.puzzleNameDenyRegex && name.match(settings.puzzleNameDenyRegex))) {
+        (settings.puzzleNameDenyRegex && name.match(settings.puzzleNameDenyRegex))) {
         continue;
       }
       puzzleLinkList.push({
@@ -321,11 +321,11 @@ export async function scrapePuzzleList(options?: ScrapeOptions): Promise<Array<P
       const link = String(puzzleLinks[i]);
       const name = String(puzzleNames[i]);
       if (!link ||
-          (settings.puzzleLinkDenyRegex && link.match(settings.puzzleLinkDenyRegex))) {
+        (settings.puzzleLinkDenyRegex && link.match(settings.puzzleLinkDenyRegex))) {
         continue;
       }
       if (!name ||
-          (settings.puzzleNameDenyRegex && name.match(settings.puzzleNameDenyRegex))) {
+        (settings.puzzleNameDenyRegex && name.match(settings.puzzleNameDenyRegex))) {
         continue;
       }
       puzzleLinkList.push({
@@ -355,8 +355,8 @@ export type PuzzleContentImage = {
 export type PuzzleContentItem = PuzzleContentText | PuzzleContentImage;
 
 export async function scrapePuzzleContent(
-    url: string,
-    options?: ScrapeOptions): Promise<Array<PuzzleContentItem>> {
+  url: string,
+  options?: ScrapeOptions): Promise<Array<PuzzleContentItem>> {
   const settings = options.settings ? options.settings : await loadSettings(options.client);
   if (options.debugOutput) {
     options.debugOutput.enableScraping = settings?.enableScraping;
@@ -413,8 +413,8 @@ export async function scrapePuzzleContent(
       let img = sharp(await imgResponse.arrayBuffer());
       const metadata = await img.metadata();
       if (metadata.width > 1568 ||
-          metadata.height > 1568 ||
-          (metadata.width * metadata.height) / 750 > 1600) {
+        metadata.height > 1568 ||
+        (metadata.width * metadata.height) / 750 > 1600) {
         if (metadata.width > metadata.height) {
           img = img.resize({ width: 1000 });
         } else {

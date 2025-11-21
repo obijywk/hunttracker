@@ -11,7 +11,7 @@ const auth = new google.auth.JWT({
   ],
 });
 
-const driveActivity = google.driveactivity({version: "v2", auth: auth});
+const driveActivity = google.driveactivity({ version: "v2", auth: auth });
 
 const ITEM_NAME_FILE_ID_REGEX = RegExp("^items/([^/]+).*$");
 function getItemNameSheetUrl(itemName: string): string {

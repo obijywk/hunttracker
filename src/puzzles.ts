@@ -60,14 +60,14 @@ export function chooseConsistentlyForPuzzle<T>(puzzle: Puzzle, choices: Array<T>
 }
 
 export const newPuzzleMinutes =
-    process.env.NEW_PUZZLE_MINUTES ?
+  process.env.NEW_PUZZLE_MINUTES ?
     Number(process.env.NEW_PUZZLE_MINUTES) :
     60;
 
 export function isNew(puzzle: Puzzle): boolean {
   const now = moment.utc();
   return moment.duration(now.diff(puzzle.registrationTimestamp)).asMinutes() <=
-      newPuzzleMinutes;
+    newPuzzleMinutes;
 }
 
 export function getPriority(puzzle: Puzzle): number {
@@ -572,7 +572,7 @@ async function updateStatusMessage(puzzle: Puzzle) {
 }
 
 async function announceSolve(
-    channelName: string, text: string, spoilerText: string) {
+  channelName: string, text: string, spoilerText: string) {
   const postMessageResult = await app.client.chat.postMessage({
     token: process.env.SLACK_USER_TOKEN,
     channel: `#${channelName}`,
@@ -594,22 +594,22 @@ export async function setTopic(id: string, topic: string): Promise<void> {
     channel: id,
     topic,
   });
-  await taskQueue.scheduleTask("refresh_puzzle", {id});
+  await taskQueue.scheduleTask("refresh_puzzle", { id });
 }
 
-app.action("puzzle_open_spreadsheet", async ({ack}) => {
+app.action("puzzle_open_spreadsheet", async ({ ack }) => {
   ack();
 });
 
-app.action("puzzle_open_drawing", async ({ack}) => {
+app.action("puzzle_open_drawing", async ({ ack }) => {
   ack();
 });
 
-app.action("puzzle_open_activity", async ({ack}) => {
+app.action("puzzle_open_activity", async ({ ack }) => {
   ack();
 });
 
-app.action("puzzle_manual_poke", async ({ack, payload}) => {
+app.action("puzzle_manual_poke", async ({ ack, payload }) => {
   const buttonAction = payload as ButtonAction;
   const id = buttonAction.value;
   await db.query(`
@@ -618,7 +618,7 @@ app.action("puzzle_manual_poke", async ({ack, payload}) => {
       manual_poke_timestamp = NOW()
     WHERE id = $1`,
     [id]);
-  await taskQueue.scheduleTask("refresh_puzzle", {id});
+  await taskQueue.scheduleTask("refresh_puzzle", { id });
   ack();
 });
 
@@ -671,7 +671,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
     view: {
       type: "modal",
       "callback_id": "puzzle_update_topic_view",
-      "private_metadata": JSON.stringify({id}),
+      "private_metadata": JSON.stringify({ id }),
       title: {
         type: "plain_text",
         text: "Update topic",
@@ -715,7 +715,7 @@ app.action("puzzle_update_topic", async ({ ack, body, payload }) => {
   ack();
 });
 
-app.view("puzzle_update_topic_view", async ({ack, view, body}) => {
+app.view("puzzle_update_topic_view", async ({ ack, view, body }) => {
   const id = JSON.parse(body.view.private_metadata)["id"] as string;
   const values = getViewStateValues(view);
 
@@ -843,7 +843,7 @@ app.action("puzzle_record_confirmed_answer", async ({ ack, body, payload }) => {
   ack();
 });
 
-app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
+app.view("puzzle_record_confirmed_answer_view", async ({ ack, view, body }) => {
   const privateMetadata = JSON.parse(body.view.private_metadata);
   const id = privateMetadata.id as string;
   const channelName = privateMetadata.channelName as string;
@@ -927,7 +927,7 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
     }
     await scheduleAutoRegisterPuzzles();
   } else {
-    await taskQueue.scheduleTask("refresh_puzzle", {id});
+    await taskQueue.scheduleTask("refresh_puzzle", { id });
   }
 
   for (const p of renamePromises) {
@@ -938,7 +938,7 @@ app.view("puzzle_record_confirmed_answer_view", async ({ack, view, body}) => {
   ack();
 });
 
-app.action("puzzle_archive_channel", async ({ack, payload}) => {
+app.action("puzzle_archive_channel", async ({ ack, payload }) => {
   const buttonAction = payload as ButtonAction;
   const id = buttonAction.value;
   await app.client.conversations.archive({
@@ -1187,7 +1187,7 @@ export async function updateHuddleThreadMessageTs(id: string, eventTs: string) {
     SET
       huddle_thread_message_ts = $2
     WHERE id = $1`,
-    [ id, eventTs ]);
+    [id, eventTs]);
 }
 
 export async function refreshAll() {
@@ -1283,7 +1283,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   const sheetUrlPromise = googleDrive.copySheet(process.env.PUZZLE_SHEET_TEMPLATE_URL, docName);
 
   const drawingUrlPromise =
-      process.env.PUZZLE_DRAWING_TEMPLATE_URL ?
+    process.env.PUZZLE_DRAWING_TEMPLATE_URL ?
       googleDrive.copyDrawing(process.env.PUZZLE_DRAWING_TEMPLATE_URL, docName) :
       Promise.resolve("");
 
@@ -1337,7 +1337,7 @@ taskQueue.registerHandler("create_puzzle", async (client, payload) => {
   }).then(() => syncBookmarks(puzzle));
 
   const appendPuzzleRowToTrackingSheetPromise =
-      googleDrive.appendPuzzleRowToTrackingSheet(name);
+    googleDrive.appendPuzzleRowToTrackingSheet(name);
 
   await insert(puzzle, client);
   await tags.updateTags(id, selectedTagIds, newTagNames, client);
@@ -1415,7 +1415,7 @@ taskQueue.registerHandler("edit_puzzle", async (client, payload) => {
         url,
         channelName,
       ]);
-    await taskQueue.scheduleTask("refresh_puzzle", {id});
+    await taskQueue.scheduleTask("refresh_puzzle", { id });
   }
 
   if (creatorUserId) {
@@ -1488,13 +1488,13 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
 
   let sheetMetadata = null;
   if (moment.duration(now.diff(puzzle.sheetModifiedTimestamp)).asMinutes() >=
-      Number(process.env.MINIMUM_IDLE_MINUTES)) {
+    Number(process.env.MINIMUM_IDLE_MINUTES)) {
     sheetMetadata = await googleDrive.getSheetMetadata(puzzle.sheetUrl);
   }
 
   let drawingMetadata = null;
   if (moment.duration(now.diff(puzzle.drawingModifiedTimestamp)).asMinutes() >=
-      Number(process.env.MINIMUM_IDLE_MINUTES)) {
+    Number(process.env.MINIMUM_IDLE_MINUTES)) {
     drawingMetadata = await googleDrive.getDrawingMetadata(puzzle.drawingUrl);
   }
 
@@ -1533,24 +1533,24 @@ export async function refreshPuzzle(id: string, client: PoolClient) {
     }
   }
   if (latestMessageTimestamp !== null &&
-      puzzle.chatModifiedTimestamp.isBefore(latestMessageTimestamp)) {
+    puzzle.chatModifiedTimestamp.isBefore(latestMessageTimestamp)) {
     dirty = true;
     puzzle.chatModifiedTimestamp = latestMessageTimestamp;
   }
   if (sheetMetadata !== null &&
-      puzzle.sheetModifiedTimestamp.isBefore(sheetMetadata.modifiedTimestamp)) {
+    puzzle.sheetModifiedTimestamp.isBefore(sheetMetadata.modifiedTimestamp)) {
     dirty = true;
     puzzle.sheetModifiedTimestamp = sheetMetadata.modifiedTimestamp;
   }
   if (drawingMetadata !== null &&
-      puzzle.drawingModifiedTimestamp.isBefore(drawingMetadata.modifiedTimestamp)) {
+    puzzle.drawingModifiedTimestamp.isBefore(drawingMetadata.modifiedTimestamp)) {
     dirty = true;
     puzzle.drawingModifiedTimestamp = drawingMetadata.modifiedTimestamp;
   }
 
   const huddleParticipantUserIds = await huddleParticipantUserIdsPromise;
   if (huddleParticipantUserIds.length === 0 && (
-      puzzle.huddleThreadMessageTs && puzzle.huddleThreadMessageTs.length > 0)) {
+    puzzle.huddleThreadMessageTs && puzzle.huddleThreadMessageTs.length > 0)) {
     const huddleThreadMessageMoment = moment.utc(moment.unix(Number(puzzle.huddleThreadMessageTs)));
     const huddleThreadMessageAgeSeconds = now.diff(huddleThreadMessageMoment, "seconds");
     if (huddleThreadMessageAgeSeconds > 30) {

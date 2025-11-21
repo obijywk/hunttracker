@@ -24,7 +24,7 @@ expressHbs.registerPartial(
   "favicon",
   fs.readFileSync("views/favicon.hbs", "utf-8"));
 
-  expressHbs.registerPartial(
+expressHbs.registerPartial(
   "menuheader",
   fs.readFileSync("views/menuheader.hbs", "utf-8"));
 
@@ -183,10 +183,10 @@ receiver.app.get("/puzzles/data", async (req, res) => {
   const allPuzzles = await puzzles.list();
   const data = allPuzzles.map(p => Object.assign(
     {}, p, {
-      idleDurationMilliseconds: puzzles.getIdleDuration(p).asMilliseconds(),
-      puzzleStatusEmoji: getPuzzleStatusEmoji(p),
-      location: puzzles.getLocation(p),
-    }));
+    idleDurationMilliseconds: puzzles.getIdleDuration(p).asMilliseconds(),
+    puzzleStatusEmoji: getPuzzleStatusEmoji(p),
+    location: puzzles.getLocation(p),
+  }));
   const getTagOrder = (t: tags.Tag) => {
     if (t.name.startsWith("in/")) {
       return -3;
@@ -216,7 +216,7 @@ receiver.app.get("/puzzles/data", async (req, res) => {
   }));
 });
 
-receiver.app.get("/metas", async(req, res) => {
+receiver.app.get("/metas", async (req, res) => {
   if (!checkAuth(req, res)) {
     return;
   }
@@ -786,7 +786,7 @@ receiver.app.get("/locations", async (req, res) => {
     return;
   }
 
-  const allPuzzles = await puzzles.list({excludeComplete: true});
+  const allPuzzles = await puzzles.list({ excludeComplete: true });
 
   const locations: any = [];
   for (const puzzle of allPuzzles) {

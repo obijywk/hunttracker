@@ -52,7 +52,7 @@ export function buildTagLinks(tags: Array<Tag>): string {
   return tagLinks.join("   ");
 }
 
-app.action(/tags_click_.*/, async({ ack, payload, say }) => {
+app.action(/tags_click_.*/, async ({ ack, payload, say }) => {
   ack();
 });
 
@@ -342,7 +342,7 @@ export function getUpdateTagsViewStateValues(viewStateValues: any): UpdateTagsVi
   };
 }
 
-app.view("tags_update_view", async ({ack, view, body}) => {
+app.view("tags_update_view", async ({ ack, view, body }) => {
   const puzzleId = JSON.parse(body.view.private_metadata)["puzzleId"] as string;
   const viewStateValues = getViewStateValues(view);
   const selectedTags = getUpdateTagsViewStateValues(viewStateValues);
@@ -468,7 +468,7 @@ app.action("tags_rename", async ({ ack, body }) => {
   ack();
 });
 
-app.view("tags_rename_view", async ({ack, body, view}) => {
+app.view("tags_rename_view", async ({ ack, body, view }) => {
   const values = getViewStateValues(view);
 
   if (values["tag_input"] === undefined) {
@@ -633,7 +633,7 @@ app.action("tags_delete", async ({ ack, body }) => {
   ack();
 });
 
-app.view("tags_delete_view", async ({ack, body, view}) => {
+app.view("tags_delete_view", async ({ ack, body, view }) => {
   const values = getViewStateValues(view);
 
   if (values["tags_input"] === undefined) {

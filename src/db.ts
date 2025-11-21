@@ -73,8 +73,8 @@ export const sessionStore = new (connectPgSimple(expressSession))({
     query: (text: string, params: Array<any>, cb?: (err: string, res?: QueryResult<any>) => void) => {
       if (cb) {
         query(text, params)
-        .then(res => cb(null, res))
-        .catch(err => cb(err));
+          .then(res => cb(null, res))
+          .catch(err => cb(err));
       } else {
         return query(text, params);
       }

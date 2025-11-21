@@ -466,7 +466,7 @@ async function getPuzzleIdFromPuzzleSelectionForm(values: any): Promise<string |
   return puzzleId;
 }
 
-app.view("home_edit_puzzle_view", async ({ack, body, view}) => {
+app.view("home_edit_puzzle_view", async ({ ack, body, view }) => {
   const values = getViewStateValues(view);
   const puzzleIdResult = await getPuzzleIdFromPuzzleSelectionForm(values);
   if (typeof puzzleIdResult !== "string") {
@@ -557,7 +557,7 @@ app.action("home_delete_puzzle", async ({ ack, body }) => {
   ack();
 });
 
-app.view("home_delete_puzzle_view", async ({ack, body, view}) => {
+app.view("home_delete_puzzle_view", async ({ ack, body, view }) => {
   const values = getViewStateValues(view);
   const puzzleIdResult = await getPuzzleIdFromPuzzleSelectionForm(values);
   if (typeof puzzleIdResult !== "string") {

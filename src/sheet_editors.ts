@@ -25,9 +25,9 @@ taskQueue.registerHandler("check_sheet_editors", async (client, _) => {
     }
   }
   const knownUsers = await findUsersByGoogleActivityPersonName(
-      Array.from(googleActivityPersonNames.values()), client);
+    Array.from(googleActivityPersonNames.values()), client);
   const googleActivityPersonNameToUser: { [key: string]: User } = {};
-  const emailToUser: { [key: string]: User} = {};
+  const emailToUser: { [key: string]: User } = {};
   for (const user of knownUsers) {
     if (user.googleActivityPersonName) {
       googleActivityPersonNameToUser[user.googleActivityPersonName] = user;

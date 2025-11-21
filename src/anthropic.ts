@@ -9,7 +9,7 @@ const anthropic = new Anthropic();
 
 export async function scheduleSummarizePuzzleContent(id: string): Promise<void> {
   if (process.env.ANTHROPIC_API_KEY && process.env.ENABLE_AI_TOPICS) {
-    await taskQueue.scheduleTask("summarize_puzzle_content", {id});
+    await taskQueue.scheduleTask("summarize_puzzle_content", { id });
   }
 }
 
@@ -30,7 +30,7 @@ taskQueue.registerHandler("summarize_puzzle_content", async (client, payload) =>
 });
 
 export async function summarizePuzzleContent(
-    content: Array<PuzzleContentItem>): Promise<string> {
+  content: Array<PuzzleContentItem>): Promise<string> {
   const messageContent: (TextBlockParam | ImageBlockParam)[] = [
     ...(content as (TextBlockParam | ImageBlockParam)[]),
     {

@@ -29,7 +29,7 @@ export function buildAllowDuplicatePuzzleURLBlock() {
 }
 
 export async function openRegisterPuzzleDialog(
-    triggerId: string, name?: string, url?: string) {
+  triggerId: string, name?: string, url?: string) {
   await app.client.views.open({
     token: process.env.SLACK_BOT_TOKEN,
     "trigger_id": triggerId,
@@ -106,7 +106,7 @@ export async function openRegisterPuzzleDialog(
   });
 }
 
-app.view("register_puzzle_view", async ({ack, body, view}) => {
+app.view("register_puzzle_view", async ({ ack, body, view }) => {
   const values = getViewStateValues(view);
   const selectedTags = tags.getUpdateTagsViewStateValues(values);
 

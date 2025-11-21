@@ -5,7 +5,7 @@ import { app } from "./app";
 import * as db from "./db";
 import { ChatPostMessageResult } from "./slack_results";
 
-const handlers: { [key: string]: (client: PoolClient, payload: any) => Promise<void>} = {};
+const handlers: { [key: string]: (client: PoolClient, payload: any) => Promise<void> } = {};
 export function registerHandler(
   taskType: string,
   handler: (client: PoolClient, payload: any) => Promise<void>,

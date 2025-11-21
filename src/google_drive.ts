@@ -9,8 +9,8 @@ const auth = new google.auth.JWT({
   ],
 });
 
-const drive = google.drive({version: "v3", auth: auth});
-const sheets = google.sheets({version: "v4", auth: auth});
+const drive = google.drive({ version: "v3", auth: auth });
+const sheets = google.sheets({ version: "v4", auth: auth });
 
 const SHEET_URL_PREFIX = "https://docs.google.com/spreadsheets/d/";
 const SHEET_URL_FILE_ID_REGEX = RegExp("^" + SHEET_URL_PREFIX + "([^/]+).*$");
@@ -44,7 +44,7 @@ function getDrawingUrlFileId(url: string): string {
 export async function copySheet(url: string, name: string): Promise<string> {
   const fileId = getSheetUrlFileId(url);
   try {
-    const response = await drive.files.copy({fileId, requestBody: {name}});
+    const response = await drive.files.copy({ fileId, requestBody: { name } });
     return SHEET_URL_PREFIX + response.data.id;
   } catch (e) {
     console.error("copySheet failed", e);
@@ -55,7 +55,7 @@ export async function copySheet(url: string, name: string): Promise<string> {
 export async function copyDrawing(url: string, name: string): Promise<string> {
   const fileId = getDrawingUrlFileId(url);
   try {
-    const response = await drive.files.copy({fileId, requestBody: {name}});
+    const response = await drive.files.copy({ fileId, requestBody: { name } });
     return DRAWING_URL_PREFIX + response.data.id;
   } catch (e) {
     console.error("copyDrawing failed", e);
@@ -65,22 +65,22 @@ export async function copyDrawing(url: string, name: string): Promise<string> {
 
 export async function renameSheet(url: string, name: string) {
   const fileId = getSheetUrlFileId(url);
-  await drive.files.update({fileId, requestBody: {name}});
+  await drive.files.update({ fileId, requestBody: { name } });
 }
 
 export async function renameDrawing(url: string, name: string) {
   const fileId = getDrawingUrlFileId(url);
-  await drive.files.update({fileId, requestBody: {name}});
+  await drive.files.update({ fileId, requestBody: { name } });
 }
 
 export async function deleteSheet(url: string) {
   const fileId = getSheetUrlFileId(url);
-  await drive.files.delete({fileId});
+  await drive.files.delete({ fileId });
 }
 
 export async function deleteDrawing(url: string) {
   const fileId = getDrawingUrlFileId(url);
-  await drive.files.delete({fileId});
+  await drive.files.delete({ fileId });
 }
 
 export interface DriveFileMetadata {
@@ -90,7 +90,7 @@ export interface DriveFileMetadata {
 
 export async function getFileMetadata(fileId: string): Promise<DriveFileMetadata | null> {
   if (rateLimitExceededTimestamp !== null &&
-      moment.utc().diff(rateLimitExceededTimestamp) < rateLimitExceededCooldown.asMilliseconds()) {
+    moment.utc().diff(rateLimitExceededTimestamp) < rateLimitExceededCooldown.asMilliseconds()) {
     console.info("Skipping Drive file metadata request for", fileId);
     return null;
   } else {
@@ -98,7 +98,7 @@ export async function getFileMetadata(fileId: string): Promise<DriveFileMetadata
   }
 
   try {
-    const response = await drive.files.get({fileId, fields: "name,modifiedTime"});
+    const response = await drive.files.get({ fileId, fields: "name,modifiedTime" });
     return {
       name: response.data.name,
       modifiedTimestamp: moment.utc(response.data.modifiedTime),
@@ -129,7 +129,7 @@ export async function getDrawingMetadata(url: string): Promise<DriveFileMetadata
 export async function getSheetFolderFileId(url: string): Promise<string | null> {
   const fileId = getSheetUrlFileId(url);
   try {
-    const response = await drive.files.get({fileId, fields: "parents"});
+    const response = await drive.files.get({ fileId, fields: "parents" });
     if (response.data.parents.length > 0) {
       return response.data.parents[0];
     }

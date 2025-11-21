@@ -9,7 +9,7 @@ const auth = new google.auth.JWT({
   ],
 });
 
-const people = google.people({version: "v1", auth: auth});
+const people = google.people({ version: "v1", auth: auth });
 
 export interface GooglePerson {
   resourceName?: string;
@@ -54,7 +54,7 @@ export async function getAllPeople(): Promise<Array<GooglePerson>> {
     if (response.data.connections) {
       for (const connection of response.data.connections) {
         if (!connection.names || connection.names.length === 0 ||
-            !connection.emailAddresses || connection.emailAddresses.length === 0) {
+          !connection.emailAddresses || connection.emailAddresses.length === 0) {
           continue;
         }
         results.push({

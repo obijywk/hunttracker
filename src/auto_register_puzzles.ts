@@ -100,14 +100,14 @@ taskQueue.registerHandler("auto_register_puzzles", async (client, _) => {
   const puzzleLinksPromise = huntSiteScraper.scrapePuzzleList({ client });
   const autoRegisterNotifiedPuzzlesPromise = db.query(
     "SELECT url FROM auto_register_notified_puzzles", [], client);
-  const registeredPuzzleUrls = new Set((await puzzles.list({client})).map(p => p.url));
+  const registeredPuzzleUrls = new Set((await puzzles.list({ client })).map(p => p.url));
   const autoRegisterNotifiedUrls = new Set<string>(
     (await autoRegisterNotifiedPuzzlesPromise).rows.map(r => r.url));
   const puzzleLinks = await puzzleLinksPromise;
 
   for (const puzzleLink of puzzleLinks) {
     if (!registeredPuzzleUrls.has(puzzleLink.url) &&
-        !autoRegisterNotifiedUrls.has(puzzleLink.url)) {
+      !autoRegisterNotifiedUrls.has(puzzleLink.url)) {
       await db.query(
         "INSERT INTO auto_register_notified_puzzles (url) VALUES ($1)",
         [puzzleLink.url],

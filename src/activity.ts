@@ -50,7 +50,7 @@ export async function recordActivity(
           AND user_id = $3
           AND activity_type = $4
           AND timestamp = $5`,
-      [timestampToRecord, puzzleId, userId, activityType, result.rows[0].timestamp]);
+        [timestampToRecord, puzzleId, userId, activityType, result.rows[0].timestamp]);
       return;
     }
   }
