@@ -20,6 +20,9 @@ h2 {
   margin: 0 auto;
   font-weight: bold;
   padding: 0 0.6vh;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 div.dashboard {
