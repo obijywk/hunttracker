@@ -1056,7 +1056,16 @@ async function validatePuzzleName(name: string): Promise<string | null> {
   return null;
 }
 
-async function validatePuzzleUrl(url: string): Promise<string | null> {
+function validatePuzzleUrlFormat(url: string): string | null {
+  try {
+    new URL(url);
+    return null;
+  } catch (_) {
+    return "The puzzle URL is not a valid URL.";
+  }
+}
+
+async function validatePuzzleUrlDuplicate(url: string): Promise<string | null> {
   const existsResult = await db.query(`
     SELECT EXISTS (
       SELECT 1
@@ -1091,9 +1100,14 @@ export async function create(
 ): Promise<PuzzleMetadataError | null> {
   const validateName = validatePuzzleName(name);
 
-  let validateUrl = null;
+  let validateUrlFormat = null;
+  if (url && url.length > 0) {
+    validateUrlFormat = validatePuzzleUrlFormat(url);
+  }
+
+  let validateUrlDuplicate = null;
   if (url && url.length > 0 && !allowDuplicatePuzzleUrl) {
-    validateUrl = validatePuzzleUrl(url);
+    validateUrlDuplicate = validatePuzzleUrlDuplicate(url);
   }
 
   const validateNameResult = await validateName;
@@ -1104,13 +1118,20 @@ export async function create(
     };
   }
 
-  let validateUrlResult = null;
-  if (validateUrl !== null) {
-    validateUrlResult = await validateUrl;
-    if (validateUrlResult !== null) {
+  if (validateUrlFormat !== null) {
+    return {
+      field: PuzzleMetadataErrorField.Url,
+      message: validateUrlFormat,
+    };
+  }
+
+  let validateUrlDuplicateResult = null;
+  if (validateUrlDuplicate !== null) {
+    validateUrlDuplicateResult = await validateUrlDuplicate;
+    if (validateUrlDuplicateResult !== null) {
       return {
         field: PuzzleMetadataErrorField.Url,
-        message: validateUrlResult,
+        message: validateUrlDuplicateResult,
       };
     }
   }
@@ -1138,9 +1159,14 @@ export async function edit(
     validateName = validatePuzzleName(name);
   }
 
-  let validateUrl = null;
+  let validateUrlFormat = null;
+  if (url && url.length > 0) {
+    validateUrlFormat = validatePuzzleUrlFormat(url);
+  }
+
+  let validateUrlDuplicate = null;
   if (url && url.length > 0 && !allowDuplicatePuzzleUrl) {
-    validateUrl = validatePuzzleUrl(url);
+    validateUrlDuplicate = validatePuzzleUrlDuplicate(url);
   }
 
   let validateNameResult = null;
@@ -1154,13 +1180,20 @@ export async function edit(
     }
   }
 
-  let validateUrlResult = null;
-  if (validateUrl !== null) {
-    validateUrlResult = await validateUrl;
-    if (validateUrlResult !== null) {
+  if (validateUrlFormat !== null) {
+    return {
+      field: PuzzleMetadataErrorField.Url,
+      message: validateUrlFormat,
+    };
+  }
+
+  let validateUrlDuplicateResult = null;
+  if (validateUrlDuplicate !== null) {
+    validateUrlDuplicateResult = await validateUrlDuplicate;
+    if (validateUrlDuplicateResult !== null) {
       return {
         field: PuzzleMetadataErrorField.Url,
-        message: validateUrlResult,
+        message: validateUrlDuplicateResult,
       };
     }
   }
