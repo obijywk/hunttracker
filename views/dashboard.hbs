@@ -33,6 +33,10 @@
         <span class="event">{{this}}</span>
         {{/each}}
       </div>
+      <div class="time-info">
+        <span id="current-time"></span>
+        <span id="last-refreshed"></span>
+      </div>
       <div class="notices">
         <h2>Hunt info (#lobby topic and #lobby pinned messages)</h2>
         {{#each notices}}
@@ -78,6 +82,17 @@
     </div>
     <script type="text/javascript">
       twemoji.parse(document.body);
+
+      function updateTime() {
+        const now = new Date();
+        document.getElementById('current-time').textContent = now.toLocaleTimeString();
+      }
+
+      const refreshTime = new Date();
+      document.getElementById('last-refreshed').textContent = 'Last updated ' + refreshTime.toLocaleTimeString();
+
+      updateTime();
+      setInterval(updateTime, 1000);
     </script>
   </body>
 </html>
