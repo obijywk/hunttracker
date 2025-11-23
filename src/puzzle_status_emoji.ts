@@ -10,6 +10,9 @@ export interface PuzzleStatusEmoji {
 
 const slackEmojiToNodeEmojiMap: Map<string, string> = new Map([
   [":new:", ":new_button:"],
+  [":white_check_mark:", ":check_mark_button:"],
+  [":exclamation:", ":red_exclamation_mark:"],
+  [":question:", ":red_question_mark:"],
 ]);
 
 function makePuzzleStatusEmoji(slackEmoji: string, description: string): PuzzleStatusEmoji {
