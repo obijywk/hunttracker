@@ -868,23 +868,20 @@ app.view("puzzle_record_confirmed_answer_view", async ({ ack, view, body }) => {
     return;
   }
 
-  const renamePromises: Array<Promise<any>> = [];
+  const promises: Array<Promise<any>> = [];
   if (puzzle.complete !== complete) {
     const docName = buildPuzzleDocName(puzzle.name, complete);
-    renamePromises.push(googleDrive.renameSheet(puzzle.sheetUrl, docName));
+    promises.push(googleDrive.renameSheet(puzzle.sheetUrl, docName));
     if (puzzle.drawingUrl) {
-      renamePromises.push(googleDrive.renameDrawing(puzzle.drawingUrl, docName));
+      promises.push(googleDrive.renameDrawing(puzzle.drawingUrl, docName));
     }
   }
 
-  const recordActivityPromise = recordActivity(
-    id,
-    body.user.id,
-    ActivityType.RecordAnswer);
+  promises.push(recordActivity(id, body.user.id, ActivityType.RecordAnswer));
 
-  await db.query(
+  promises.push(db.query(
     "UPDATE puzzles SET answer = $2, complete = $3 WHERE id = $1",
-    [id, answer, complete]);
+    [id, answer, complete]));
   puzzle.answer = answer;
   puzzle.complete = complete;
 
@@ -899,41 +896,37 @@ app.view("puzzle_record_confirmed_answer_view", async ({ ack, view, body }) => {
       text = `${buildPuzzleNameMrkdwn(puzzle)} completed.${tagText}`;
       spoilerText = text;
     }
-    const announcementPromises: Array<Promise<any>> = [
+    promises.push(
       app.client.chat.postMessage({
         token: process.env.SLACK_USER_TOKEN,
         channel: `#${channelName}`,
         text: spoilerText,
-      }),
-    ];
+      }));
     if (process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME) {
-      announcementPromises.push(announceSolve(
+      promises.push(announceSolve(
         process.env.SLACK_ACTIVITY_LOG_CHANNEL_NAME, text, spoilerText));
     }
     if (process.env.SLACK_SOLVE_ANNOUNCEMENT_CHANNEL_NAME) {
-      announcementPromises.push(announceSolve(
+      promises.push(announceSolve(
         process.env.SLACK_SOLVE_ANNOUNCEMENT_CHANNEL_NAME, text, spoilerText));
     }
-    for (const p of announcementPromises) {
-      await p;
-    }
-    await clearLocation(puzzle);
-    await updateStatusMessage(puzzle);
-    if (process.env.AUTO_ARCHIVE) {
-      await app.client.conversations.archive({
-        token: process.env.SLACK_USER_TOKEN,
-        channel: id,
-      });
-    }
+    promises.push(clearLocation(puzzle));
+    promises.push(updateStatusMessage(puzzle));
     await scheduleAutoRegisterPuzzles();
   } else {
     await taskQueue.scheduleTask("refresh_puzzle", { id });
   }
 
-  for (const p of renamePromises) {
+  for (const p of promises) {
     await p;
   }
-  await recordActivityPromise;
+
+  if (complete && process.env.AUTO_ARCHIVE) {
+    promises.push(app.client.conversations.archive({
+      token: process.env.SLACK_USER_TOKEN,
+      channel: id,
+    }));
+  }
 
   ack();
 });
