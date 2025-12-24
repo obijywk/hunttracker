@@ -949,6 +949,7 @@ receiver.app.get("/dashboard", async (req, res) => {
   res.render("dashboard", {
     ...await commonRenderOptions(req),
     refresh: req.query.refresh,
+    nextS: req.query.s === "events" ? "activity" : "events",
     activeUserCount,
     solvedPuzzleCount,
     totalPuzzleCount,
@@ -957,5 +958,34 @@ receiver.app.get("/dashboard", async (req, res) => {
     eventChannelTopics,
     notices,
     unsolvedPuzzles,
+    showEvents: eventChannelTopics.length > 0 && req.query.s === "events",
+    recentActivity: latestActivity.map(a => {
+      const user = userIdToUser.get(a.userId);
+      const puzzle = allPuzzles.find(p => p.id === a.puzzleId);
+      let activityText = "";
+      switch (a.activityType) {
+        case ActivityType.JoinChannel:
+          activityText = "joined";
+          break;
+        case ActivityType.MessageChannel:
+          activityText = "messaged";
+          break;
+        case ActivityType.EditSheet:
+          activityText = "worked on";
+          break;
+        case ActivityType.RecordAnswer:
+          activityText = "solved";
+          break;
+        case ActivityType.JoinHuddle:
+          activityText = "huddlejoined";
+          break;
+      }
+      return {
+        user,
+        puzzle,
+        activityText,
+        timestamp: a.timestamp,
+      };
+    }).sort((a, b) => b.timestamp.valueOf() - a.timestamp.valueOf()),
   });
 });

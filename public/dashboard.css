@@ -13,7 +13,7 @@ body {
 }
 
 h2 {
-  font-size: 2.25vh;
+  font-size: 2vh;
   width: 100%;
   height: 2.75vh;
   border-radius: 0;
@@ -92,6 +92,20 @@ div.events h2 {
 div.events > span {
   font-size: 2.5vh;
   padding: var(--dashboard-radius);
+}
+
+div.activity {
+  grid-row: 16 / 25;
+  grid-column: 1;
+  border: var(--dashboard-radius) solid #616161;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+div.activity h2 {
+  background-color: #616161;
+  color: white;
 }
 
 div.notices {
@@ -269,4 +283,51 @@ div.puzzle-people-count {
   text-align: center;
   grid-column: 1;
   grid-row: 1 / 3;
+}
+
+div.activity-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5vh var(--dashboard-radius);
+  border-bottom: 1px solid #ccc;
+  font-size: 2vh;
+}
+
+div.activity-item:last-child {
+  border-bottom: none;
+}
+
+div.activity-user {
+  display: flex;
+  align-items: center;
+  width: 12vw;
+  flex-shrink: 0;
+}
+
+img.activity-avatar {
+  height: 3.2vh;
+  border-radius: calc(var(--dashboard-radius) * 0.5);
+  padding: 0.1vh;
+  margin: 0.1vh;
+  margin-right: 0.5vw;
+  background-color: black;
+}
+
+span.activity-user-name {
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+div.activity-details {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+span.activity-time {
+  color: #666;
+  font-size: 0.85em;
 }

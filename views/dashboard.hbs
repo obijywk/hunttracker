@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" href="{{staticUrl "dashboard.css"}}">
     <script type="text/javascript" charset="utf8" src="{{staticUrl "twemoji.min.js"}}" crossorigin="anonymous"></script>
     {{#if refresh}}
-    <meta http-equiv="refresh" content="{{refresh}}">
+    <meta http-equiv="refresh" content="{{refresh}}; url=/dashboard?refresh={{refresh}}&s={{nextS}}">
     {{/if}}
   </head>
   <body>
@@ -27,12 +27,32 @@
           </div>
         </div>
       </div>
+      {{#if showEvents}}
       <div class="events">
         <h2>Events (unsolved event-tagged puzzle topics)</h2>
         {{#each eventChannelTopics}}
         <span class="event">{{this}}</span>
         {{/each}}
       </div>
+      {{else}}
+        <div class="activity">
+          <h2>Recent activity (latest action per user)</h2>
+          {{#each recentActivity}}
+            <div class="activity-item">
+                <div class="activity-user">
+                  {{#if user.imageUrl}}
+                    <img src="{{user.imageUrl}}" class="activity-avatar">
+                  {{/if}}
+                  <span class="activity-user-name">{{user.name}}</span>
+                </div>
+                <div class="activity-details">
+                  <span class="activity-time">{{timeAgo timestamp}}</span>
+                  {{activityText}} <b>{{puzzle.name}}</b>
+                </div>
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
       <div class="time-info">
         <span id="current-time"></span>
         <span id="last-refreshed"></span>
