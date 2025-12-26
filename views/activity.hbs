@@ -3,7 +3,14 @@
   <head>
     <title>Activity - {{appName}}</title>
     {{> favicon }}
+    <link rel="stylesheet" type="text/css" href="{{staticUrl "dataTables.css"}}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.6.1/css/buttons.dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="{{staticUrl "style.css"}}">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script type="text/javascript" charset="utf8" src="{{staticUrl "twemoji.min.js"}}" crossorigin="anonymous"></script>
   </head>
   <body>
@@ -14,7 +21,7 @@
         based on what is technologically observable. Keep in mind that offline solving
         activity is not represented here, and some online activity may be missed as well.
       </p>
-      <table class="location">
+      <table id="activity-table" class="location display" style="width: 100%">
         <thead>
           <th>Solver</th>
           <th>Latest activity time</th>
@@ -25,7 +32,7 @@
         {{#each users}}
         <tr>
           <td><a href="/useractivity/{{id}}">{{name}}</a></td>
-          <td>{{{timeAgo latestActivity.timestamp}}}</td>
+          <td data-order="{{latestActivity.timestamp}}">{{{timeAgo latestActivity.timestamp}}}</td>
           <td>
             {{#if latestActivityPuzzle}}
             <a href="/puzzleactivity/{{latestActivityPuzzle.id}}">
@@ -46,6 +53,17 @@
     </div>
     <script type="text/javascript">
       twemoji.parse(document.body);
+      $(document).ready(function() {
+        $("#activity-table").DataTable({
+          paging: true,
+          dom: "Bfrtip",
+          autoWidth: false,
+          buttons: [
+            "copy", "csv"
+          ],
+          order: [[1, "desc"]], // Sort by Latest activity time desc by default
+        });
+      });
     </script>
   </body>
 </html>
