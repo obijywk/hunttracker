@@ -946,20 +946,7 @@ receiver.app.get("/dashboard", async (req, res) => {
     return 1;
   });
 
-  res.render("dashboard", {
-    ...await commonRenderOptions(req),
-    refresh: req.query.refresh,
-    nextS: req.query.s === "events" ? "activity" : "events",
-    activeUserCount,
-    solvedPuzzleCount,
-    totalPuzzleCount,
-    solvedMetaCount,
-    totalMetaCount,
-    eventChannelTopics,
-    notices,
-    unsolvedPuzzles,
-    showEvents: eventChannelTopics.length > 0 && req.query.s === "events",
-    recentActivity: latestActivity.map(a => {
+  const recentActivity = latestActivity.map(a => {
       const user = userIdToUser.get(a.userId);
       const puzzle = allPuzzles.find(p => p.id === a.puzzleId);
       let activityText = "";
@@ -986,6 +973,21 @@ receiver.app.get("/dashboard", async (req, res) => {
         activityText,
         timestamp: a.timestamp,
       };
-    }).sort((a, b) => b.timestamp.valueOf() - a.timestamp.valueOf()),
+    }).sort((a, b) => b.timestamp.valueOf() - a.timestamp.valueOf());
+
+  res.render("dashboard", {
+    ...await commonRenderOptions(req),
+    refresh: req.query.refresh,
+    nextS: req.query.s === "events" ? "activity" : "events",
+    showEvents: eventChannelTopics.length > 0 && req.query.s === "events",
+    activeUserCount,
+    solvedPuzzleCount,
+    totalPuzzleCount,
+    solvedMetaCount,
+    totalMetaCount,
+    eventChannelTopics,
+    notices,
+    unsolvedPuzzles,
+    recentActivity,
   });
 });
