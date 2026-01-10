@@ -75,6 +75,8 @@ function renderActivityType(activityType: ActivityType | undefined): string {
       return "Working in spreadsheet";
     case ActivityType.RecordAnswer:
       return "Record confirmed answer";
+    case ActivityType.SetTopic:
+      return "Set topic";
     default:
       return "";
   }
@@ -965,6 +967,9 @@ receiver.app.get("/dashboard", async (req, res) => {
           break;
         case ActivityType.JoinHuddle:
           activityText = "huddlejoined";
+          break;
+        case ActivityType.SetTopic:
+          activityText = "updated topic of";
           break;
       }
       return {

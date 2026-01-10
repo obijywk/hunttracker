@@ -734,6 +734,7 @@ app.view("puzzle_update_topic_view", async ({ ack, view, body }) => {
       return;
     }
     await setTopic(id, topic);
+    await recordActivity(id, body.user.id, ActivityType.SetTopic);
   }
 
   ack();

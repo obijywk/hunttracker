@@ -96,7 +96,8 @@ CREATE TYPE activity_type AS ENUM (
   'message_channel',
   'join_huddle',
   'edit_sheet',
-  'record_answer'
+  'record_answer',
+  'set_topic'
 );
 
 CREATE TABLE activity (

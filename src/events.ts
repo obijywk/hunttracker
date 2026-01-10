@@ -28,10 +28,6 @@ app.event("message", async ({ event, body }) => {
       await taskQueue.scheduleTask("refresh_puzzle", {
         id: event.channel,
       });
-    } else if (refreshPuzzleSubtypes.has(event.subtype)) {
-      await taskQueue.scheduleTask("refresh_puzzle", {
-        id: event.channel,
-      });
     } else if (!isBotMessage) {
       const user = (event as GenericMessageEvent).user;
       const userExistsPromise = users.exists(user);
@@ -39,13 +35,15 @@ app.event("message", async ({ event, body }) => {
       const userExists = await userExistsPromise;
       const isIdlePuzzleChannel = await isIdlePuzzleChannelPromise;
       if (userExists) {
-        if (isIdlePuzzleChannel) {
+        if (isIdlePuzzleChannel || refreshPuzzleSubtypes.has(event.subtype)) {
           await taskQueue.scheduleTask("refresh_puzzle", {
             id: event.channel,
           });
         }
         if (event.subtype === undefined) {
           await recordActivity(event.channel, user, ActivityType.MessageChannel);
+        } else if (event.subtype === "channel_topic") {
+          await recordActivity(event.channel, user, ActivityType.SetTopic);
         }
       }
     }

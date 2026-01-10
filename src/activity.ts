@@ -7,7 +7,8 @@ export enum ActivityType {
   MessageChannel = "message_channel",
   JoinHuddle = "join_huddle",
   EditSheet = "edit_sheet",
-  RecordAnswer = "record_answer"
+  RecordAnswer = "record_answer",
+  SetTopic = "set_topic"
 }
 const activityTypeLookup: Map<string, ActivityType> = new Map(
   Object.values(ActivityType).map((v) => [`${v}`, v] as const));
