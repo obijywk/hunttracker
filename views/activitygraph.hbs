@@ -1,0 +1,97 @@
+<!doctype html>
+<html data-theme="{{#if enableDarkMode}}dark{{else}}light{{/if}}">
+  <head>
+    <title>Activity Graph - {{appName}}</title>
+    {{> favicon }}
+    <link rel="stylesheet" type="text/css" href="{{staticUrl "style.css"}}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@0.1.1"></script>
+  </head>
+  <body>
+    {{> menuheader activity=true }}
+    <div class="body-wrapper">
+      <h2>Solving Activity Graph</h2>
+      <div style="position: relative; height:60vh; width:90vw">
+        <canvas id="activityChart"></canvas>
+      </div>
+    </div>
+    <script>
+      const graphData = {{{ graphData }}};
+      
+      const ctx = document.getElementById('activityChart').getContext('2d');
+      const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+              datasets: [
+                  {
+                      label: 'Total Solves',
+                      data: graphData.solves,
+                      borderColor: 'rgb(75, 192, 192)',
+                      backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                      yAxisID: 'y',
+                      stepped: true
+                  },
+                  {
+                      label: 'Total Unlocks',
+                      data: graphData.unlocks,
+                      borderColor: 'rgb(255, 99, 132)',
+                      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                      yAxisID: 'y',
+                      stepped: true
+                  },
+                  {
+                      label: 'Active Users (1h)',
+                      data: graphData.activeUsers,
+                      borderColor: 'rgb(54, 162, 235)',
+                      backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                      yAxisID: 'y1',
+                      pointRadius: 0,
+                      borderWidth: 1
+                  }
+              ]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                  x: {
+                      type: 'time',
+                      time: {
+                          unit: 'hour',
+                          displayFormats: {
+                            hour: 'ddd hA'
+                          }
+                      },
+                      min: graphData.minTime,
+                      max: graphData.maxTime
+                  },
+                  y: {
+                      type: 'linear',
+                      display: true,
+                      position: 'left',
+                      beginAtZero: true,
+                      title: {
+                        display: true,
+                        text: 'Puzzles'
+                      }
+                  },
+                  y1: {
+                      type: 'linear',
+                      display: true,
+                      position: 'right',
+                      beginAtZero: true,
+                      grid: {
+                          drawOnChartArea: false
+                      },
+                      title: {
+                        display: true,
+                        text: 'Users'
+                      }
+                  }
+              }
+          }
+      });
+    </script>
+  </body>
+</html>

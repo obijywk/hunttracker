@@ -18,7 +18,7 @@ import { makeSlackChannelUrlPrefix, makeSlackHuddleUrlPrefix } from "./slack_uti
 import * as tags from "./tags";
 import * as taskQueue from "./task_queue";
 import * as users from "./users";
-import { ActivityType, getPuzzleActivity, getUserActivity, listLatestActivity } from "./activity";
+import { ActivityType, getPuzzleActivity, getUserActivity, listLatestActivity, getActivityTypeTimestamps, getHourlyActiveUserCounts } from "./activity";
 
 expressHbs.registerPartial(
   "favicon",
@@ -404,6 +404,97 @@ receiver.app.get("/puzzleactivity/:puzzleId", async (req, res) => {
     ...await commonRenderOptions(req),
     puzzle,
     activities,
+  });
+});
+
+receiver.app.get("/activitygraph", async (req, res) => {
+  if (!checkAuth(req, res)) {
+    return;
+  }
+
+  const solvesResultPromise = getActivityTypeTimestamps(ActivityType.RecordAnswer);
+  const allPuzzlesPromise = puzzles.list();
+  const activeUsersResultPromise = getHourlyActiveUserCounts();
+
+  const solvesResult = await solvesResultPromise;
+  const allPuzzles = await allPuzzlesPromise;
+  const activeUsersResult = await activeUsersResultPromise;
+
+  const solves = solvesResult.map((t, i) => ({
+    x: t.toISOString(),
+    y: i + 1,
+  }));
+
+  allPuzzles.sort((a, b) => a.registrationTimestamp.valueOf() - b.registrationTimestamp.valueOf());
+  const unlocks = allPuzzles.map((p, i) => ({
+    x: p.registrationTimestamp.toISOString(),
+    y: i + 1,
+  }));
+
+  // Calculate min/max time bounds
+  let minTime = moment.utc().add(1, "year");
+  let maxTime = moment.utc(0); // Epoch
+
+  const updateMinMax = (t: moment.Moment) => {
+    if (t.isBefore(minTime)) {
+      minTime = t;
+    }
+    if (t.isAfter(maxTime)) {
+      maxTime = t;
+    }
+  };
+
+  if (solvesResult.length > 0) {
+    updateMinMax(solvesResult[0]);
+    updateMinMax(solvesResult[solvesResult.length - 1]);
+  }
+
+  if (allPuzzles.length > 0) {
+    updateMinMax(allPuzzles[0].registrationTimestamp);
+    updateMinMax(allPuzzles[allPuzzles.length - 1].registrationTimestamp);
+  }
+
+  if (activeUsersResult.length > 0) {
+    updateMinMax(activeUsersResult[0].timestamp);
+    updateMinMax(activeUsersResult[activeUsersResult.length - 1].timestamp);
+  }
+
+  // Default to now if no data
+  if (minTime.isAfter(maxTime)) {
+    minTime = moment.utc().subtract(1, "day");
+    maxTime = moment.utc();
+  }
+
+  // Fill in missing hours with 0 for activeUsers
+  const activeUsersMap = new Map<string, number>();
+  for (const r of activeUsersResult) {
+    activeUsersMap.set(r.timestamp.toISOString(), r.count);
+  }
+
+  const activeUsers = [];
+  const current = minTime.clone().startOf("hour");
+  const end = maxTime.clone().endOf("hour");
+
+  while (current.isBefore(end)) {
+    const key = current.toISOString();
+    activeUsers.push({
+      x: key,
+      y: activeUsersMap.get(key) || 0,
+    });
+    current.add(1, "hour");
+  }
+
+  const graphData = {
+    solves,
+    unlocks,
+    activeUsers,
+    minTime: minTime.toISOString(),
+    maxTime: maxTime.toISOString(),
+  };
+
+  return res.render("activitygraph", {
+    ...await commonRenderOptions(req),
+    graphData: JSON.stringify(graphData),
   });
 });
 

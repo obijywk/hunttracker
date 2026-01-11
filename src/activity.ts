@@ -137,3 +137,25 @@ export async function getPuzzleActivity(puzzleId: string): Promise<Activity[]> {
     timestamp: moment.utc(r.timestamp),
   }));
 }
+
+export async function getActivityTypeTimestamps(activityType: ActivityType): Promise<moment.Moment[]> {
+  const result = await db.query(`
+    SELECT timestamp
+    FROM activity
+    WHERE activity_type = $1
+    ORDER BY timestamp ASC`,
+    [activityType]);
+  return result.rows.map(r => moment.utc(r.timestamp));
+}
+
+export async function getHourlyActiveUserCounts(): Promise<Array<{timestamp: moment.Moment, count: number}>> {
+  const result = await db.query(`
+    SELECT date_trunc('hour', timestamp) as hour_bucket, COUNT(DISTINCT user_id) as count
+    FROM activity
+    GROUP BY 1
+    ORDER BY 1 ASC`);
+  return result.rows.map(r => ({
+    timestamp: moment.utc(r.hour_bucket),
+    count: Number(r.count),
+  }));
+}
