@@ -132,7 +132,7 @@ span#last-refreshed {
 }
 
 span#last-refreshed::before {
-	content: '♻️';
+	content: '↻';
 }
 
 div.notices h2 {

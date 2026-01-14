@@ -19,38 +19,38 @@
         {{/each}}
       </div>
       {{else}}
-        <div class="activity">
-          <h2>Recent activity (latest action per user)</h2>
-          {{#each recentActivity}}
-            <div class="activity-item">
-                <div class="activity-user">
-                  {{#if user.imageUrl}}
-                    <img src="{{user.imageUrl}}" class="activity-avatar">
-                  {{/if}}
-                  <span class="activity-user-name">{{user.name}}</span>
-                </div>
-                <div class="activity-details">
-                  <span class="activity-time">{{timeAgo timestamp}}</span>
-                  {{activityText}} <b>{{puzzle.name}}</b>
-                </div>
-            </div>
-          {{/each}}
+      <div class="activity">
+        <h2>Recent activity (latest action per user)</h2>
+        {{#each recentActivity}}
+        <div class="activity-item">
+          <div class="activity-user">
+            {{#if user.imageUrl}}
+            <img src="{{user.imageUrl}}" class="activity-avatar">
+            {{/if}}
+            <span class="activity-user-name">{{user.name}}</span>
+          </div>
+          <div class="activity-details">
+            <span class="activity-time">{{timeAgo timestamp}}</span>
+            {{activityText}} <b>{{puzzle.name}}</b>
+          </div>
         </div>
+        {{/each}}
+      </div>
       {{/if}}
       <div class="time-info">
         <span id="current-time"></span>
-		<div class="stat-box">
-			<span class="stat-label">👥</span>
-			<span class="stat">{{activeUserCount}}</span>
-		  </div>
-		  <div class="stat-box">
-			<span class="stat-label">🧩</span>
-			<span class="stat">{{solvedPuzzleCount}} / {{totalPuzzleCount}}</span>
-		  </div>
-		  <div class="stat-box">
-			<span class="stat-label">🗃️</span>		  
-			<span class="stat">{{solvedMetaCount}} / {{totalMetaCount}}</span>
-		  </div>
+        <div class="stat-box">
+          <span class="stat-label">👥</span>
+          <span class="stat">{{activeUserCount}}</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">🧩</span>
+          <span class="stat">{{solvedPuzzleCount}} / {{totalPuzzleCount}}</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">🤘🏽</span>
+          <span class="stat">{{solvedMetaCount}} / {{totalMetaCount}}</span>
+        </div>
         <span id="last-refreshed"></span>
       </div>
       <div class="notices">
@@ -94,7 +94,6 @@
         </div>
         {{/each}}
       </div>
-    </div>
     </div>
     <script type="text/javascript">
       twemoji.parse(document.body);
