@@ -98,14 +98,14 @@ div.activity h2 {
 }
 
 div.notices {
-  grid-row: 2 / 13;
+  grid-row: 3 / 13;
   grid-column: 1;
   border: var(--dashboard-radius) solid #ffd54f;
   overflow: hidden;
 }
 
 div.time-info {
-  grid-row: 1 / 2;
+  grid-row: 1 / 3;
   grid-column: 1;
   display: flex;
   justify-content: space-between;
@@ -115,15 +115,24 @@ div.time-info {
   color: black;
   border-radius: var(--dashboard-radius);
   font-size: 2.5vh;
+  border: var(--dashboard-radius) solid #21a0a0;
 }
 
 span#current-time {
   font-weight: bold;
 }
 
+span#current-time::before {
+	content: '⌚';
+}
+
 span#last-refreshed {
   opacity: 0.6;
   font-size: 0.8em;
+}
+
+span#last-refreshed::before {
+	content: '♻️';
 }
 
 div.notices h2 {
