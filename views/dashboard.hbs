@@ -11,22 +11,6 @@
   </head>
   <body>
     <div class="dashboard">
-      <div class="stats">
-        <div class="stats-container">
-          <div class="stat-box">
-            <span class="stat">{{activeUserCount}}</span>
-            <span class="stat-label">active users</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat">{{solvedPuzzleCount}} / {{totalPuzzleCount}}</span>
-            <span class="stat-label">solved / total puzzles</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat">{{solvedMetaCount}} / {{totalMetaCount}}</span>
-            <span class="stat-label">solved / total metas</span>
-          </div>
-        </div>
-      </div>
       {{#if showEvents}}
       <div class="events">
         <h2>Events (unsolved event-tagged puzzle topics)</h2>
@@ -55,6 +39,18 @@
       {{/if}}
       <div class="time-info">
         <span id="current-time"></span>
+		<div class="stat-box">
+			<span class="stat-label">👥</span>
+			<span class="stat">{{activeUserCount}}</span>
+		  </div>
+		  <div class="stat-box">
+			<span class="stat-label">🧩</span>
+			<span class="stat">{{solvedPuzzleCount}} / {{totalPuzzleCount}}</span>
+		  </div>
+		  <div class="stat-box">
+			<span class="stat-label">🗃️</span>		  
+			<span class="stat">{{solvedMetaCount}} / {{totalMetaCount}}</span>
+		  </div>
         <span id="last-refreshed"></span>
       </div>
       <div class="notices">
@@ -109,7 +105,7 @@
       }
 
       const refreshTime = new Date();
-      document.getElementById('last-refreshed').textContent = 'Last updated ' + refreshTime.toLocaleTimeString();
+      document.getElementById('last-refreshed').textContent = refreshTime.toLocaleTimeString();
 
       updateTime();
       setInterval(updateTime, 1000);

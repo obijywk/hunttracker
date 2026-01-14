@@ -42,17 +42,6 @@ div.dashboard > div {
   overflow: hidden;
 }
 
-div.stats {
-  grid-row: 13 / 16;
-  grid-column: 1;
-  border: var(--dashboard-radius) solid #21a0a0;
-}
-
-div.stats h2 {
-  background-color: #21a0a0;
-  color: white;
-}
-
 div.stats-container {
   display: flex;
   justify-content: space-evenly;
@@ -61,14 +50,14 @@ div.stats-container {
 
 div.stat-box {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
 span.stat {
-  font-size: 5vh;
+  font-size: 3vh;
   font-weight: bold;
+  margin: 0 1vh;
 }
 
 span.stat-label {
@@ -76,7 +65,7 @@ span.stat-label {
 }
 
 div.events {
-  grid-row: 16 / 25;
+  grid-row: 13 / 25;
   grid-column: 1;
   border: var(--dashboard-radius) solid #616161;
   display: flex;
@@ -95,7 +84,7 @@ div.events > span {
 }
 
 div.activity {
-  grid-row: 16 / 25;
+  grid-row: 13 / 25;
   grid-column: 1;
   border: var(--dashboard-radius) solid #616161;
   display: flex;
@@ -126,7 +115,15 @@ div.time-info {
   color: black;
   border-radius: var(--dashboard-radius);
   font-size: 2.5vh;
+}
+
+span#current-time {
   font-weight: bold;
+}
+
+span#last-refreshed {
+  opacity: 0.6;
+  font-size: 0.8em;
 }
 
 div.notices h2 {
@@ -260,7 +257,7 @@ div.puzzle-people {
 }
 
 div.puzzle-people img {
-  height: 3.2vh;
+  height: 3vh;
   aspect-ratio: 1 / 1;
   border-radius: calc(var(--dashboard-radius) * 0.5);
   padding: 0.1vh;
@@ -270,7 +267,7 @@ div.puzzle-people img {
 
 div.puzzle-people-count {
   direction: ltr;
-  height: 6.5vh;
+  height: 6vh;
   aspect-ratio: 1 / 2;
   font-size: 2vh;
   background-color: #616161;
@@ -289,23 +286,18 @@ div.activity-item {
   display: flex;
   align-items: center;
   padding: 0.5vh var(--dashboard-radius);
-  border-bottom: 1px solid #ccc;
   font-size: 2vh;
-}
-
-div.activity-item:last-child {
-  border-bottom: none;
 }
 
 div.activity-user {
   display: flex;
   align-items: center;
-  width: 12vw;
+  width: 10vw;
   flex-shrink: 0;
 }
 
 img.activity-avatar {
-  height: 3.2vh;
+  height: 3vh;
   border-radius: calc(var(--dashboard-radius) * 0.5);
   padding: 0.1vh;
   margin: 0.1vh;
@@ -330,4 +322,5 @@ div.activity-details {
 span.activity-time {
   color: #666;
   font-size: 0.85em;
+  float: right;
 }
